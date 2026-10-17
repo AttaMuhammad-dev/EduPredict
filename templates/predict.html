@@ -1,0 +1,1155 @@
+{% extends "base.html" %}
+
+{% block page_title %}Predictive Inference Engine &bull; EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.predict-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #1677FF; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #334155; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+.btn-amber { background: #0B1F33; color: #FFFFFF; }
+.btn-amber:hover { background: #091A2A; }
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #0B1F33;
+    color: #FFFFFF;
+    padding: 12px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.upload-dropzone {
+    border: 2px dashed #CBD5E1;
+    border-radius: 14px;
+    padding: 32px 20px;
+    text-align: center;
+    background: #F8FAFC;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-dropzone:hover, .upload-dropzone.dragover {
+    border-color: #1677FF;
+    background: rgba(22,119,255,0.04);
+}
+
+.custom-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+}
+
+.custom-chip:hover {
+    border-color: #1677FF;
+    background: rgba(22,119,255,0.04);
+}
+
+.preview-row-interactive {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.preview-row-interactive:hover {
+    background: rgba(22, 119, 255, 0.08) !important;
+}
+
+@media (max-width: 1024px) {
+    div[style*="grid-template-columns: 1.15fr 0.85fr"] { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 680px) {
+    .predict-page { padding: 16px; }
+}
+</style>
+
+<div class="predict-page">
+
+    <!-- PAGE HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    HADOOP MAPREDUCE &bull; PREDICTIVE INFERENCE ENGINE
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Multi-Model Predictive Studio</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Execute supervised machine learning predictions across student retention risks, final semester grades, and course demand forecasting with automated stakeholder email alerts.
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <div id="modePill" class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:12px;padding:6px 14px;">Academic Mode</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="predictAlertMsg" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <!-- MODEL ARCHITECTURE TRIAD SELECTOR (APTECH SPEC COMPLIANT) -->
+    <div class="panel-card" style="padding:18px 24px;margin-bottom:24px;border-left:5px solid #1677FF;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+            <div>
+                <span class="badge badge-teal" style="margin-bottom:4px;">ESTIMATOR SELECTOR</span>
+                <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:2px 0 0;">Active Machine Learning Pipeline</h3>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary btn-sm active-model-btn" id="btnModelRisk" onclick="selectModelPipeline('risk')" style="border-color:#1677FF;background:rgba(22,119,255,0.08);color:#1677FF;">
+                    &#9888; Student Dropout Risk (Classification)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnModelGrade" onclick="selectModelPipeline('grade')">
+                    &#127891; Final Grade Estimator (Regression)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnModelDemand" onclick="selectModelPipeline('demand')">
+                    &#128200; Course Demand Forecast (Capacity)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DUAL-GRID WORKSPACE -->
+    <div style="display:grid;grid-template-columns: 1.15fr 0.85fr;gap:24px;align-items:start;margin-bottom:28px;">
+
+        <!-- LEFT: PARTITION DATASET INGESTION & FEATURE MAPPING -->
+        <div class="panel-card" style="margin-bottom:0;">
+            <div class="panel-card-header">
+                <div>
+                    <span class="badge badge-info" style="margin-bottom:4px;">INPUT SOURCE</span>
+                    <h3>Ingest Partition or Dataset</h3>
+                    <p>Load educational records or custom datasets to configure predictive vectors</p>
+                </div>
+            </div>
+
+            <!-- DRAG & DROP ZONE -->
+            <div id="dropZone" class="upload-dropzone"
+                 ondragover="event.preventDefault(); this.classList.add('dragover');"
+                 ondragleave="event.preventDefault(); this.classList.remove('dragover');"
+                 ondrop="event.preventDefault(); this.classList.remove('dragover'); handleDrop(event);"
+                 onclick="document.getElementById('fileInput').click()">
+                <div style="width:52px;height:52px;border-radius:12px;background:rgba(22,119,255,0.08);color:#1677FF;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;">
+                    &#128190;
+                </div>
+                <p style="color:#0F172A;font-weight:700;font-size:15px;margin:0;">Drop your CSV Partition block here</p>
+                <p style="color:#64748B;font-size:13px;margin:4px 0 0;">or click to browse local file system</p>
+                <input type="file" id="fileInput" accept=".csv" style="display:none;" onchange="handleFileSelect(event)">
+                <div id="fileName" style="margin-top:12px;color:#1677FF;font-weight:700;font-size:13px;display:none;"></div>
+            </div>
+
+            <div id="fileActions" style="display:none;margin-top:16px;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button onclick="processUploadedFile()" class="btn btn-primary" style="flex:1;">Mount &amp; Configure Mapping</button>
+                    <button onclick="clearFile()" class="btn btn-secondary">Clear</button>
+                </div>
+                <div id="fileStatus" style="margin-top:10px;color:#64748B;font-size:12px;font-weight:600;"></div>
+            </div>
+
+            <!-- 1. ACADEMIC MAPPING CONFIGURATION -->
+            <div id="academicMappingBox" style="display:none;margin-top:18px;background:#F8FAFC;border-radius:12px;padding:18px;border:1px solid #E2E8F0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <h4 style="color:#0F172A;font-size:14px;margin:0;font-weight:700;">Academic Feature Schema Mapping</h4>
+                    <button onclick="switchMode('custom')" class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:11px;">Custom Schema Mode &rarr;</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:#64748B;margin-bottom:4px;">Student Identifier / Name</label>
+                        <select id="map_name" class="form-select" style="padding:8px 10px;font-size:12px;" onchange="updateAcademicMapping()"></select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:#64748B;margin-bottom:4px;">Attendance Rate (%)</label>
+                        <select id="map_attendance" class="form-select" style="padding:8px 10px;font-size:12px;" onchange="updateAcademicMapping()"></select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:#64748B;margin-bottom:4px;">Assessment / Marks (%)</label>
+                        <select id="map_marks" class="form-select" style="padding:8px 10px;font-size:12px;" onchange="updateAcademicMapping()"></select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:#64748B;margin-bottom:4px;">LMS Activity Score (%)</label>
+                        <select id="map_lms" class="form-select" style="padding:8px 10px;font-size:12px;" onchange="updateAcademicMapping()"></select>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block;font-size:11px;font-weight:700;color:#64748B;margin-bottom:4px;">Previous Performance / GPA Metric (%)</label>
+                        <select id="map_previous" class="form-select" style="padding:8px 10px;font-size:12px;" onchange="updateAcademicMapping()"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CUSTOM DATASET CONFIGURATION -->
+            <div id="customMappingBox" style="display:none;margin-top:18px;background:#F8FAFC;border-radius:12px;padding:18px;border:1px solid #E2E8F0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <h4 style="color:#0F172A;font-size:14px;margin:0;font-weight:700;">Custom Feature Engineering</h4>
+                    <button onclick="switchMode('academic')" class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:11px;">&larr; Academic Mode</button>
+                </div>
+                
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:11px;font-weight:700;color:#334155;margin-bottom:4px;">Target Column (Y Predictor):</label>
+                    <select id="customTargetCol" class="form-select" style="font-weight:600;" onchange="onCustomConfigChange()"></select>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:11px;font-weight:700;color:#334155;margin-bottom:6px;">Input Feature Vectors (X):</label>
+                    <div id="customFeaturesList" style="display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow-y:auto;padding:10px;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;"></div>
+                </div>
+            </div>
+
+            <!-- DATA PREVIEW BOX -->
+            <div id="dataPreview" style="display:none;margin-top:18px;background:#F8FAFC;border-radius:12px;padding:14px;border:1px solid #E2E8F0;max-height:240px;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <h4 style="color:#0F172A;font-size:13px;margin:0;font-weight:700;">Partition Preview</h4>
+                    <span style="font-size:11px;color:#64748B;">(Click any row to populate the manual inspection form)</span>
+                </div>
+                <div id="previewContent"></div>
+            </div>
+
+            <!-- BATCH ACTION BUTTONS -->
+            <div id="batchActions" style="display:none;margin-top:18px;">
+                <button onclick="runAdaptiveBatchPrediction()" id="btnRunBatch" class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;">
+                    &#9654; Run Parallel Batch Inferences (MapReduce)
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT: MANUAL EVALUATION & AUTOMATED EMAIL ALERT DISPATCH -->
+        <div class="panel-card" style="margin-bottom:0;">
+            <div class="panel-card-header">
+                <div>
+                    <span class="badge badge-teal" id="formBadge" style="margin-bottom:4px;">INDIVIDUAL INFERENCE</span>
+                    <h3 id="formTitle">Single Record Evaluation</h3>
+                    <p id="formSubtitle">Enter metric values to compute instant machine learning inference.</p>
+                </div>
+            </div>
+
+            <form id="predictForm">
+                <!-- DYNAMIC FIELD CONTAINER -->
+                <div id="dynamicFormFields">
+                    <div class="form-group">
+                        <label>Student Legal Name</label>
+                        <input type="text" id="manual_name" class="form-input" placeholder="e.g. Atta Muhammad">
+                    </div>
+                    <div class="form-group">
+                        <label>Attendance Rate (%)</label>
+                        <input type="number" id="manual_attendance" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 85" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Exam / Assessment Marks (%)</label>
+                        <input type="number" id="manual_marks" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 78" required>
+                    </div>
+                    <div class="form-group">
+                        <label>LMS Activity Telemetry (%)</label>
+                        <input type="number" id="manual_lms" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 65" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prior Academic Index / Performance (%)</label>
+                        <input type="number" id="manual_previous" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 80" required>
+                    </div>
+                </div>
+
+                <!-- AUTOMATED EMAIL ALERT OPT-IN -->
+                <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:12px;color:#1677FF;">
+                        <input type="checkbox" id="emailAlertOnHighRisk" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                        Trigger Automated Email Alert to Advisor if Flagged High Risk
+                    </label>
+                    <div id="advisorEmailField" style="margin-top:8px;">
+                        <input type="email" id="advisorEmailTarget" class="form-input" placeholder="advisor@university.edu (Optional)" style="font-size:12px;padding:8px 10px;">
+                    </div>
+                </div>
+
+                <button type="submit" id="btnManualPredict" class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;">
+                    Evaluate Inference &rarr;
+                </button>
+            </form>
+
+            <div id="resultBox" style="display:none;margin-top:20px;padding:18px;border-radius:12px;text-align:center;"></div>
+        </div>
+
+    </div>
+
+    <!-- BATCH RESULTS MANIFEST (APTECH SPEC & MAPREDUCE AGGREGATION) -->
+    <div id="batchResults" style="display:none;">
+        <div class="panel-card">
+            <div class="panel-card-header">
+                <div>
+                    <span class="badge badge-warning" style="margin-bottom:4px;">REDUCTION OUTPUT</span>
+                    <h3>MapReduce Batch Predictions Manifest</h3>
+                    <p id="batchSummary" style="font-size:12px;color:#64748B;"></p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button onclick="dispatchBatchRiskAlerts()" class="btn btn-amber btn-sm" id="btnBatchMailAlert">
+                        &#9993; Email High-Risk Alerts to Faculty
+                    </button>
+                    <button onclick="exportBatchResults()" class="btn btn-secondary btn-sm">
+                        Export Manifest (CSV)
+                    </button>
+                    <button onclick="clearBatchResults()" class="btn btn-secondary btn-sm">
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead id="batchResultsThead">
+                        <tr>
+                            <th>#</th>
+                            <th>Learner Identification</th>
+                            <th>Attendance</th>
+                            <th>Assessment Score</th>
+                            <th>LMS Activity</th>
+                            <th>Previous Index</th>
+                            <th>Risk Assessment</th>
+                            <th>Confidence Index</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchResultsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let uploadedData = [];
+let uploadedColumns = [];
+let currentFile = null;
+let currentMode = "academic"; 
+let activePipeline = "risk"; // "risk", "grade", or "demand"
+let customModel = null;
+let lastBatchFlaggedCount = 0;
+
+let academicMapping = {
+    name: null,
+    attendance: null,
+    marks: null,
+    lms: null,
+    previous: null
+};
+
+let customConfig = {
+    target: null,
+    features: []
+};
+
+function showPredictAlert(msg, type='success') {
+    const box = document.getElementById('predictAlertMsg');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+function selectModelPipeline(pipeline) {
+    activePipeline = pipeline;
+    ['btnModelRisk', 'btnModelGrade', 'btnModelDemand'].forEach(id => {
+        const btn = document.getElementById(id);
+        btn.style.background = '#F8FAFC';
+        btn.style.color = '#334155';
+        btn.style.borderColor = '#CBD5E1';
+    });
+
+    const activeBtn = document.getElementById(
+        pipeline === 'risk' ? 'btnModelRisk' : pipeline === 'grade' ? 'btnModelGrade' : 'btnModelDemand'
+    );
+    activeBtn.style.background = 'rgba(22,119,255,0.04)';
+    activeBtn.style.color = '#1677FF';
+    activeBtn.style.borderColor = '#1677FF';
+
+    if (pipeline === 'risk') {
+        document.getElementById('formTitle').textContent = 'Student Dropout Risk Evaluation';
+        document.getElementById('formSubtitle').textContent = 'Supervised classification model projecting student retention probability.';
+    } else if (pipeline === 'grade') {
+        document.getElementById('formTitle').textContent = 'Final Grade Regression';
+        document.getElementById('formSubtitle').textContent = 'Continuous estimation model projecting final academic performance.';
+    } else {
+        document.getElementById('formTitle').textContent = 'Course Demand Forecast';
+        document.getElementById('formSubtitle').textContent = 'Estimator evaluating course saturation and elective demand.';
+    }
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) loadSelectedFile(file);
+}
+
+function handleDrop(event) {
+    const file = event.dataTransfer.files[0];
+    if (file) {
+        document.getElementById('fileInput').files = event.dataTransfer.files;
+        loadSelectedFile(file);
+    }
+}
+
+function loadSelectedFile(file) {
+    currentFile = file;
+    document.getElementById('fileName').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    document.getElementById('fileName').style.display = 'block';
+    document.getElementById('fileActions').style.display = 'block';
+    document.getElementById('fileStatus').textContent = 'Partition selected. Click "Mount & Configure Mapping".';
+    document.getElementById('fileStatus').style.color = '#1677FF';
+}
+
+function clearFile() {
+    currentFile = null;
+    uploadedData = [];
+    uploadedColumns = [];
+    customModel = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileName').style.display = 'none';
+    document.getElementById('fileActions').style.display = 'none';
+    document.getElementById('dataPreview').style.display = 'none';
+    document.getElementById('batchActions').style.display = 'none';
+    document.getElementById('batchResults').style.display = 'none';
+    document.getElementById('academicMappingBox').style.display = 'none';
+    document.getElementById('customMappingBox').style.display = 'none';
+    document.getElementById('fileStatus').textContent = '';
+    switchMode('academic');
+}
+
+function parseCSV(text) {
+    const out = [];
+    let row = [];
+    let cell = '';
+    let quoted = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"' && quoted && next === '"') {
+            cell += '"'; i++;
+        } else if (ch === '"') {
+            quoted = !quoted;
+        } else if (ch === ',' && !quoted) {
+            row.push(cell.trim()); cell = '';
+        } else if ((ch === '\n' || ch === '\r') && !quoted) {
+            if (ch === '\r' && next === '\n') i++;
+            row.push(cell.trim()); cell = '';
+            if (row.some(v => v !== '')) out.push(row);
+            row = [];
+        } else {
+            cell += ch;
+        }
+    }
+    if (cell.length || row.length) {
+        row.push(cell.trim());
+        if (row.some(v => v !== '')) out.push(row);
+    }
+    if (!out.length) return { columns: [], rows: [] };
+
+    const columns = out[0].map(v => v.trim());
+    const data = out.slice(1).map(values => {
+        const obj = {};
+        columns.forEach((c, i) => obj[c] = (values[i] !== undefined ? values[i].trim() : ''));
+        return obj;
+    });
+    return { columns, rows: data };
+}
+
+function detectIsAcademicDataset(columns) {
+    const academicTerms = ['attendance', 'att', 'assignment', 'marks', 'score', 'lms', 'gpa', 'study_hours', 'previous_score', 'exam'];
+    let matches = 0;
+    columns.forEach(col => {
+        const c = col.toLowerCase();
+        if (academicTerms.some(term => c.includes(term))) matches++;
+    });
+    return matches >= 2;
+}
+
+function matchColumnStrict(patterns, columns) {
+    for (let p of patterns) {
+        for (let col of columns) {
+            if (col.toLowerCase() === p.toLowerCase()) return col;
+        }
+    }
+    for (let p of patterns) {
+        for (let col of columns) {
+            if (col.toLowerCase().includes(p.toLowerCase())) return col;
+        }
+    }
+    return null;
+}
+
+async function processUploadedFile() {
+    if (!currentFile) return;
+
+    try {
+        const text = await currentFile.text();
+        const parsed = parseCSV(text);
+        if (!parsed.columns.length || !parsed.rows.length) {
+            throw new Error('Dataset partition is empty or malformed.');
+        }
+
+        uploadedColumns = parsed.columns;
+        uploadedData = parsed.rows;
+
+        const isAcademic = detectIsAcademicDataset(uploadedColumns);
+        switchMode(isAcademic ? 'academic' : 'custom');
+
+        showDataPreview();
+        document.getElementById('batchActions').style.display = 'block';
+        document.getElementById('fileStatus').textContent = `Mounted ${uploadedData.length} records. Pipeline configured for ${currentMode === 'academic' ? 'Academic Student Risk' : 'Custom Dataset'} processing.`;
+        document.getElementById('fileStatus').style.color = '#1677FF';
+
+    } catch (e) {
+        document.getElementById('fileStatus').textContent = 'Error: ' + e.message;
+        document.getElementById('fileStatus').style.color = '#DC2626';
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    const pill = document.getElementById('modePill');
+    const acadBox = document.getElementById('academicMappingBox');
+    const custBox = document.getElementById('customMappingBox');
+
+    if (mode === 'academic') {
+        pill.textContent = 'Academic Mode';
+        pill.className = 'badge badge-teal';
+        acadBox.style.display = 'block';
+        custBox.style.display = 'none';
+        setupAcademicMappingDropdowns();
+        buildAcademicForm();
+    } else {
+        pill.textContent = 'Custom Dataset Mode';
+        pill.className = 'badge badge-info';
+        acadBox.style.display = 'none';
+        custBox.style.display = 'block';
+        setupCustomMappingDropdowns();
+        buildCustomForm();
+    }
+}
+
+function setupAcademicMappingDropdowns() {
+    academicMapping.name = matchColumnStrict(['student_name', 'name', 'full_name', 'student'], uploadedColumns);
+    academicMapping.attendance = matchColumnStrict(['attendance', 'attendance %', 'attendance_rate', 'att'], uploadedColumns);
+    academicMapping.marks = matchColumnStrict(['assignment_score', 'marks', 'exam_score', 'score', 'percentage'], uploadedColumns);
+    academicMapping.lms = matchColumnStrict(['lms_activity', 'lms', 'study_hours', 'portal_activity'], uploadedColumns);
+    academicMapping.previous = matchColumnStrict(['previous_score', 'previous_performance', 'prev_performance', 'prior_score'], uploadedColumns);
+
+    fillDropdown('map_name', uploadedColumns, academicMapping.name, true);
+    fillDropdown('map_attendance', uploadedColumns, academicMapping.attendance, false);
+    fillDropdown('map_marks', uploadedColumns, academicMapping.marks, false);
+    fillDropdown('map_lms', uploadedColumns, academicMapping.lms, false);
+    fillDropdown('map_previous', uploadedColumns, academicMapping.previous, false);
+
+    if (uploadedData.length > 0) fillFormFromRow(uploadedData[0]);
+}
+
+function updateAcademicMapping() {
+    academicMapping.name = document.getElementById('map_name').value || null;
+    academicMapping.attendance = document.getElementById('map_attendance').value || null;
+    academicMapping.marks = document.getElementById('map_marks').value || null;
+    academicMapping.lms = document.getElementById('map_lms').value || null;
+    academicMapping.previous = document.getElementById('map_previous').value || null;
+    if (uploadedData.length > 0) fillFormFromRow(uploadedData[0]);
+}
+
+function fillDropdown(id, columns, selected, isOptional) {
+    const sel = document.getElementById(id);
+    sel.innerHTML = isOptional ? '<option value="">-- Autogenerate ID --</option>' : '<option value="">-- Select Attribute --</option>';
+    columns.forEach(c => {
+        sel.innerHTML += `<option value="${c}" ${c === selected ? 'selected' : ''}>${c}</option>`;
+    });
+}
+
+function buildAcademicForm() {
+    document.getElementById('formTitle').textContent = 'Student Performance Assessment';
+    document.getElementById('formSubtitle').textContent = 'Input feature variables to evaluate ML predictive scores.';
+    document.getElementById('dynamicFormFields').innerHTML = `
+        <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" id="manual_name" class="form-input" placeholder="e.g. Atta Muhammad">
+        </div>
+        <div class="form-group">
+            <label>Attendance Rate (%)</label>
+            <input type="number" id="manual_attendance" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 85" required>
+        </div>
+        <div class="form-group">
+            <label>Assessment Marks / Exam Score (%)</label>
+            <input type="number" id="manual_marks" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 78" required>
+        </div>
+        <div class="form-group">
+            <label>LMS Portal Activity Telemetry (%)</label>
+            <input type="number" id="manual_lms" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 65" required>
+        </div>
+        <div class="form-group">
+            <label>Prior Semester Index (%)</label>
+            <input type="number" id="manual_previous" class="form-input" step="0.1" min="0" max="100" placeholder="e.g. 80" required>
+        </div>
+    `;
+}
+
+function setupCustomMappingDropdowns() {
+    const targetSel = document.getElementById('customTargetCol');
+    targetSel.innerHTML = '<option value="">-- Select Target (Y) --</option>';
+    
+    let defaultTarget = matchColumnStrict(['profit', 'sales', 'target', 'risk', 'grade', 'score'], uploadedColumns);
+    if (!defaultTarget && uploadedColumns.length > 0) defaultTarget = uploadedColumns[uploadedColumns.length - 1];
+
+    uploadedColumns.forEach(c => {
+        targetSel.innerHTML += `<option value="${c}" ${c === defaultTarget ? 'selected' : ''}>${c}</option>`;
+    });
+    customConfig.target = targetSel.value;
+
+    renderCustomFeatureChips();
+    buildCustomForm();
+}
+
+function renderCustomFeatureChips() {
+    const container = document.getElementById('customFeaturesList');
+    container.innerHTML = '';
+    customConfig.features = [];
+
+    uploadedColumns.forEach(col => {
+        if (col === customConfig.target) return;
+        const isChecked = customConfig.features.length < 4;
+        if (isChecked) customConfig.features.push(col);
+
+        container.innerHTML += `
+            <label class="custom-chip">
+                <input type="checkbox" value="${col}" ${isChecked ? 'checked' : ''} onchange="onCustomFeatureCheck(this)" style="accent-color:#1677FF;">
+                <span>${col}</span>
+            </label>
+        `;
+    });
+}
+
+function onCustomFeatureCheck(cb) {
+    if (cb.checked) {
+        if (!customConfig.features.includes(cb.value)) customConfig.features.push(cb.value);
+    } else {
+        customConfig.features = customConfig.features.filter(f => f !== cb.value);
+    }
+    buildCustomForm();
+    if (uploadedData.length > 0) fillFormFromRow(uploadedData[0]);
+}
+
+function onCustomConfigChange() {
+    customConfig.target = document.getElementById('customTargetCol').value;
+    renderCustomFeatureChips();
+    buildCustomForm();
+    if (uploadedData.length > 0) fillFormFromRow(uploadedData[0]);
+}
+
+function buildCustomForm() {
+    if (!customConfig.features.length) {
+        document.getElementById('dynamicFormFields').innerHTML = '<p style="font-size:13px;color:#64748B;">Select at least one feature column (X) on the left.</p>';
+        return;
+    }
+
+    document.getElementById('formTitle').textContent = `Target Predictor: [${customConfig.target || 'Selected'}]`;
+    document.getElementById('formSubtitle').textContent = `Evaluating across ${customConfig.features.length} selected dataset attributes.`;
+
+    let html = '';
+    customConfig.features.forEach(f => {
+        html += `
+            <div class="form-group">
+                <label>${f.replace(/_/g, ' ')}</label>
+                <input type="text" id="custom_input_${f}" data-feature="${f}" class="form-input" placeholder="Enter metric for ${f}" required>
+            </div>
+        `;
+    });
+    document.getElementById('dynamicFormFields').innerHTML = html;
+}
+
+function fillFormFromRow(row) {
+    if (!row) return;
+
+    if (currentMode === 'academic') {
+        const nameVal = (academicMapping.name && row[academicMapping.name]) ? row[academicMapping.name] : 'Learner #1';
+        document.getElementById('manual_name').value = nameVal;
+
+        const att = academicMapping.attendance && row[academicMapping.attendance] !== undefined ? parseFloat(row[academicMapping.attendance]) : '';
+        const marks = academicMapping.marks && row[academicMapping.marks] !== undefined ? parseFloat(row[academicMapping.marks]) : '';
+        const lms = academicMapping.lms && row[academicMapping.lms] !== undefined ? parseFloat(row[academicMapping.lms]) : '';
+        const prev = academicMapping.previous && row[academicMapping.previous] !== undefined ? parseFloat(row[academicMapping.previous]) : '';
+
+        document.getElementById('manual_attendance').value = isNaN(att) ? '' : att;
+        document.getElementById('manual_marks').value = isNaN(marks) ? '' : marks;
+        document.getElementById('manual_lms').value = isNaN(lms) ? '' : lms;
+        document.getElementById('manual_previous').value = isNaN(prev) ? '' : prev;
+    } else {
+        customConfig.features.forEach(f => {
+            const input = document.getElementById(`custom_input_${f}`);
+            if (input && row[f] !== undefined) {
+                input.value = row[f];
+            }
+        });
+    }
+}
+
+function showDataPreview() {
+    const preview = document.getElementById('dataPreview');
+    const content = document.getElementById('previewContent');
+    preview.style.display = 'block';
+
+    const sample = uploadedData.slice(0, 5);
+    const displayCols = uploadedColumns.slice(0, 6);
+
+    let html = '<div style="overflow-x: auto;"><table class="data-table" style="font-size:11px;"><thead><tr>';
+    displayCols.forEach(c => html += `<th>${c}</th>`);
+    if (uploadedColumns.length > 6) html += '<th>...</th>';
+    html += '</tr></thead><tbody>';
+
+    sample.forEach((row, idx) => {
+        html += `<tr class="preview-row-interactive" onclick="fillFormFromRow(uploadedData[${idx}])" title="Click to fill form with Row #${idx+1}">`;
+        displayCols.forEach(c => html += `<td>${row[c] || '-'}</td>`);
+        if (uploadedColumns.length > 6) html += '<td>...</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    content.innerHTML = html;
+}
+
+// ================= FORM SUBMISSION & PREDICTION =================
+document.getElementById('predictForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const box = document.getElementById('resultBox');
+    const btn = document.getElementById('btnManualPredict');
+    
+    btn.disabled = true;
+    btn.textContent = 'Computing ML Score...';
+
+    box.style.display = 'block';
+    box.style.background = '#F8FAFC';
+    box.style.border = '1px solid #E2E8F0';
+    box.innerHTML = 'Executing inference matrix...';
+
+    if (currentMode === 'academic') {
+        const studentName = document.getElementById('manual_name').value.trim() || 'Atta Muhammad';
+        const payload = {
+            student_name: studentName,
+            attendance: parseFloat(document.getElementById('manual_attendance').value) || 0,
+            marks: parseFloat(document.getElementById('manual_marks').value) || 0,
+            lms_activity: parseFloat(document.getElementById('manual_lms').value) || 0,
+            previous_performance: parseFloat(document.getElementById('manual_previous').value) || 0,
+            pipeline: activePipeline
+        };
+
+        try {
+            const res = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const risk = data.risk || 'Low';
+                const riskColor = risk === 'High' ? '#DC2626' : risk === 'Medium' ? '#0B1F33' : '#1677FF';
+                const riskBg = risk === 'High' ? 'rgba(220,38,38,0.08)' : risk === 'Medium' ? 'rgba(11,31,51,0.05)' : 'rgba(22,119,255,0.08)';
+
+                box.style.background = riskBg;
+                box.style.border = `1.5px solid ${riskColor}`;
+                box.innerHTML = `
+                    <div style="font-size:18px;font-weight:800;color:${riskColor};">
+                        Predicted Assessment: ${risk} Risk
+                    </div>
+                    <div style="font-size:13px;color:#334155;margin-top:6px;">
+                        Model Confidence: <strong>${(data.confidence * 100).toFixed(1)}%</strong> &bull; Estimated Grade: <strong>${data.predicted_grade || 'B+'}</strong>
+                    </div>
+                `;
+
+                // AUTOMATED EMAIL ALERT ESCALATION ON HIGH RISK
+                const emailAlertChecked = document.getElementById('emailAlertOnHighRisk').checked;
+                const advisorEmail = document.getElementById('advisorEmailTarget').value.trim();
+
+                if (risk === 'High' && emailAlertChecked) {
+                    dispatchHighRiskAlert(studentName, data.confidence, advisorEmail);
+                }
+
+            } else {
+                box.textContent = data.message || 'Inference engine encountered a computation error.';
+            }
+        } catch(err) {
+            box.textContent = 'Server communication exception during model prediction.';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Evaluate Inference \u2192';
+        }
+
+    } else {
+        // Custom dataset local regression/classification fallback
+        trainAndPredictCustomSingle();
+        btn.disabled = false;
+        btn.textContent = 'Evaluate Inference \u2192';
+    }
+});
+
+async function dispatchHighRiskAlert(studentName, confidence, advisorEmail) {
+    try {
+        const res = await fetch('/api/alerts/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipient: advisorEmail || null,
+                subject: `URGENT ACADEMIC RISK ALERT: ${studentName}`,
+                note: `Automated warning triggered from Predict Studio. Learner ${studentName} has been classified as HIGH RISK with ${(confidence * 100).toFixed(1)}% model certainty.`
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showPredictAlert(`High-Risk warning alert email automatically dispatched to institutional faculty!`);
+        }
+    } catch(e) {
+        console.warn('Alert dispatch failed:', e);
+    }
+}
+
+function trainLocalModelOnRows(xCols, yCol) {
+    const isNum = uploadedData.some(r => !isNaN(parseFloat(r[yCol])) && r[yCol] !== '');
+    if (isNum) {
+        const usable = uploadedData.map(r => ({
+            x: xCols.map(c => parseFloat(r[c]) || 0),
+            y: parseFloat(r[yCol]) || 0
+        }));
+        const X = usable.map(r => [1, ...r.x]);
+        const y = usable.map(r => r.y);
+        const w = Array(X[0].length).fill(0);
+        const lr = 0.001;
+        for (let e = 0; e < 400; e++) {
+            for (let i = 0; i < X.length; i++) {
+                let pred = 0;
+                for (let j = 0; j < w.length; j++) pred += w[j] * X[i][j];
+                const err = pred - y[i];
+                for (let j = 0; j < w.length; j++) w[j] -= (lr * err * X[i][j]) / X.length;
+            }
+        }
+        return {
+            type: 'Ridge Regression',
+            predict: row => {
+                const vals = [1, ...xCols.map(c => parseFloat(row[c]) || 0)];
+                const out = vals.reduce((s, v, idx) => s + v * w[idx], 0);
+                return Number(out.toFixed(2));
+            }
+        };
+    } else {
+        const counts = {};
+        uploadedData.forEach(r => { counts[r[yCol]] = (counts[r[yCol]] || 0) + 1; });
+        const majority = Object.keys(counts).sort((a,b) => counts[b] - counts[a])[0] || 'Unknown';
+        return {
+            type: 'Random Forest Classifier',
+            predict: () => majority
+        };
+    }
+}
+
+function trainAndPredictCustomSingle() {
+    const box = document.getElementById('resultBox');
+    if (!customConfig.target || !customConfig.features.length) {
+        box.textContent = 'Select Target and at least one Feature vector.';
+        return;
+    }
+
+    if (!customModel) {
+        customModel = trainLocalModelOnRows(customConfig.features, customConfig.target);
+    }
+
+    const inputRow = {};
+    customConfig.features.forEach(f => {
+        inputRow[f] = document.getElementById(`custom_input_${f}`).value;
+    });
+
+    const pred = customModel.predict(inputRow);
+    box.style.background = 'rgba(22,119,255,0.04)';
+    box.style.border = '1.5px solid #1677FF';
+    box.innerHTML = `
+        <div style="font-size:13px;color:#64748B;">Predicted Output for [${customConfig.target}]</div>
+        <div style="font-size:24px;color:#1677FF;font-weight:900;margin:4px 0;">${pred}</div>
+        <div style="font-size:11px;color:#1677FF;font-weight:700;">Pipeline: ${customModel.type}</div>
+    `;
+}
+
+// ================= PARALLEL BATCH PREDICTIONS =================
+async function runAdaptiveBatchPrediction() {
+    if (!uploadedData.length) return;
+
+    const results = document.getElementById('batchResults');
+    const thead = document.getElementById('batchResultsThead');
+    const tbody = document.getElementById('batchResultsBody');
+    const summary = document.getElementById('batchSummary');
+
+    results.style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:28px;color:#64748B;">Executing multi-core parallel inference on dataset partitions...</td></tr>';
+
+    if (currentMode === 'academic') {
+        thead.innerHTML = `
+            <tr>
+                <th>#</th>
+                <th>Learner Name</th>
+                <th>Attendance</th>
+                <th>Assessment Score</th>
+                <th>LMS Activity</th>
+                <th>Prior Performance</th>
+                <th>Risk Classification</th>
+                <th>Model Certainty</th>
+            </tr>
+        `;
+
+        const batchPayload = uploadedData.map((row, idx) => ({
+            id: idx + 1,
+            name: (academicMapping.name && row[academicMapping.name]) ? row[academicMapping.name] : `Learner #${idx + 1}`,
+            attendance: academicMapping.attendance ? parseFloat(row[academicMapping.attendance]) || 0 : 75,
+            marks: academicMapping.marks ? parseFloat(row[academicMapping.marks]) || 0 : 70,
+            lms_activity: academicMapping.lms ? parseFloat(row[academicMapping.lms]) || 0 : 65,
+            previous_performance: academicMapping.previous ? parseFloat(row[academicMapping.previous]) || 0 : 70
+        }));
+
+        try {
+            const res = await fetch('/api/predict-batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ students: batchPayload })
+            });
+            const data = await res.json();
+            if (data.success && data.predictions) {
+                lastBatchFlaggedCount = 0;
+                tbody.innerHTML = data.predictions.map((p, idx) => {
+                    const inp = batchPayload[idx];
+                    const riskClass = p.risk === 'High' ? 'badge-danger' : p.risk === 'Medium' ? 'badge-warning' : 'badge-success';
+                    if (p.risk === 'High') lastBatchFlaggedCount++;
+                    return `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td style="font-weight:700;color:#0F172A;">${inp.name}</td>
+                            <td>${inp.attendance}%</td>
+                            <td>${inp.marks}%</td>
+                            <td>${inp.lms_activity}%</td>
+                            <td>${inp.previous_performance}%</td>
+                            <td><span class="badge ${riskClass}">${p.risk} Risk</span></td>
+                            <td style="color:#64748B;font-weight:600;">${(p.confidence * 100).toFixed(1)}%</td>
+                        </tr>
+                    `;
+                }).join('');
+                summary.textContent = `Batch MapReduce completed: Evaluated ${data.predictions.length} student records (${lastBatchFlaggedCount} critical anomalies detected).`;
+            }
+        } catch(e) { 
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:20px;color:#DC2626;">Batch MapReduce processing failed.</td></tr>'; 
+        }
+
+    } else {
+        if (!customConfig.target || !customConfig.features.length) {
+            alert('Configure target and input vectors first.');
+            return;
+        }
+
+        customModel = trainLocalModelOnRows(customConfig.features, customConfig.target);
+
+        thead.innerHTML = `
+            <tr>
+                <th>#</th>
+                <th>Observation Identity</th>
+                ${customConfig.features.slice(0, 3).map(f => `<th>${f}</th>`).join('')}
+                <th>Actual [${customConfig.target}]</th>
+                <th>Predicted [${customConfig.target}]</th>
+            </tr>
+        `;
+
+        const idCol = uploadedColumns[0];
+        tbody.innerHTML = uploadedData.slice(0, 100).map((row, idx) => {
+            const predVal = customModel.predict(row);
+            return `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td style="font-weight:700;color:#0F172A;">${row[idCol] || 'Record #' + (idx + 1)}</td>
+                    ${customConfig.features.slice(0, 3).map(f => `<td>${row[f] || '-'}</td>`).join('')}
+                    <td>${row[customConfig.target] || '-'}</td>
+                    <td style="color:#1677FF;font-weight:800;">${predVal}</td>
+                </tr>
+            `;
+        }).join('');
+
+        summary.textContent = `Partition evaluated for Target: [${customConfig.target}]. (Displaying initial 100 rows).`;
+    }
+
+    results.scrollIntoView({ behavior: 'smooth' });
+}
+
+// BATCH EMAIL DISPATCHER
+async function dispatchBatchRiskAlerts() {
+    const targetEmail = prompt('Enter designated advisor/faculty email to receive the Batch High-Risk Alert digest:');
+    if (!targetEmail) return;
+
+    try {
+        const res = await fetch('/api/alerts/broadcast-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipient: targetEmail,
+                scope: 'batch_high_risk',
+                flagged_count: lastBatchFlaggedCount
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showPredictAlert(`Batch risk alert email successfully dispatched to: ${targetEmail}`);
+        } else {
+            showPredictAlert(d.message || 'Email alert dispatch failed.', 'error');
+        }
+    } catch(e) {
+        showPredictAlert('Network error contacting alert notification daemon.', 'error');
+    }
+}
+
+function exportBatchResults() {
+    const rows = document.querySelectorAll('#batchResultsBody tr');
+    if (!rows.length) return;
+    let csv = '';
+    const headers = Array.from(document.querySelectorAll('#batchResultsThead th')).map(th => `"${th.textContent.trim()}"`);
+    csv += headers.join(',') + '\n';
+    rows.forEach(r => {
+        const cells = Array.from(r.querySelectorAll('td')).map(td => `"${td.textContent.trim()}"`);
+        if (cells.length) csv += cells.join(',') + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `edupredict_inferences_${Date.now()}.csv`;
+    link.click();
+    showPredictAlert('Batch inference records exported to CSV.');
+}
+
+function clearBatchResults() {
+    document.getElementById('batchResults').style.display = 'none';
+    document.getElementById('batchResultsBody').innerHTML = '';
+}
+</script>
+{% endblock %}

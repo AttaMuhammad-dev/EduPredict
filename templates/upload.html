@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+
+{% block page_title %}HDFS Dataset Ingestion &amp; Partitioning - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.upload-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.upload-dropzone {
+    border: 2px dashed #CBD5E1;
+    border-radius: 14px;
+    padding: 40px 24px;
+    text-align: center;
+    background: #F8FAFC;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.upload-dropzone:hover, .upload-dropzone.dragover {
+    border-color: #1677FF;
+    background: rgba(22,119,255,0.04);
+}
+
+.upload-icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(22,119,255,0.08);
+    color: #1677FF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 14px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #1677FF; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+
+.dashboard-grid-equal {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.stat-card-mini {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 960px) {
+    .dashboard-grid-equal { grid-template-columns: 1fr; }
+    .upload-page { padding: 16px; }
+}
+</style>
+
+<div class="upload-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    HDFS INGESTION NODE &bull; BATCH PARSER[cite: 2]
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">HDFS Dataset Ingestion Gateway</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Upload educational datasets to emulate Hadoop Distributed File System chunking, automatic schema validation, and missing value statistical imputation[cite: 2].
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <span class="badge" style="background:rgba(255,255,255,0.2);color:#ffffff;padding:8px 16px;font-size:12px;border:1px solid rgba(255,255,255,0.25);">
+                    HDFS BLOCK SIZE: 64 MB
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN UPLOAD & REQUIREMENTS GRID -->
+    <div class="dashboard-grid-equal">
+
+        <!-- LEFT: UPLOAD FORM -->
+        <div class="panel-card">
+            <div class="panel-card-header">
+                <div>
+                    <span class="badge badge-teal" style="margin-bottom:4px;">BATCH INGESTION</span>
+                    <h3>Mount New Educational Partition Block</h3>
+                    <p>Select a CSV formatted dataset containing academic marks, attendance, or demographics[cite: 2].</p>
+                </div>
+                <span class="badge badge-info">CSV Standard[cite: 2]</span>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <!-- PARTITION DOMAIN & BATCH TAG -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Educational Domain</label>
+                        <select id="datasetDomain" class="form-select">
+                            <option value="academic_records" selected>Academic Records &amp; Scores[cite: 2]</option>
+                            <option value="attendance_records">Attendance Registers[cite: 2]</option>
+                            <option value="lms_telemetry">LMS Platform Activity[cite: 2]</option>
+                            <option value="demographics">Student Demographics[cite: 2]</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Target Cohort / Batch Partition</label>
+                        <input type="text" id="cohortTag" class="form-control" placeholder="e.g. ADSE-Batch-A / Semester-01">
+                    </div>
+                </div>
+
+                <!-- DROPZONE -->
+                <div id="dropZone" class="upload-dropzone">
+                    <div class="upload-icon-circle">
+                        &#128190;
+                    </div>
+                    <h3 style="font-size:17px;font-weight:800;color:#0F172A;margin:0 0 6px;">Drag &amp; Drop your CSV Partition here</h3>
+                    <p style="font-size:13px;color:#64748B;margin:0 0 16px;">or click to browse local file system</p>
+                    <input type="file" id="fileInput" name="file" accept=".csv" style="display: none;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                        Choose CSV File
+                    </button>
+                    <div id="fileInfo" style="margin-top: 14px; color: #64748B; font-size: 13px; font-weight: 600;">
+                        No partition selected
+                    </div>
+                </div>
+
+                <!-- EMAIL ALERT INGESTION HOOK -->
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-top:18px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:13px;color:#334155;">
+                        <input type="checkbox" id="emailAlertCheckbox" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                        Dispatch Ingestion Summary Alert via Email[cite: 2]
+                    </label>
+                    <div id="alertEmailField" style="margin-top:10px;">
+                        <input type="email" id="alertRecipientEmail" class="form-control" placeholder="stakeholder@institute.edu, admin@aptech.internal" style="font-size:12px;">
+                        <span style="font-size:11px;color:#64748B;display:block;margin-top:4px;">An automated ingestion digest will be transmitted to this inbox once mounted[cite: 2].</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button type="submit" id="uploadBtn" class="btn btn-primary" style="flex: 1;">
+                        Mount &amp; Ingest to HDFS Tier[cite: 2]
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        Clear
+                    </button>
+                </div>
+            </form>
+
+            <!-- PROGRESS BAR CONTAINER -->
+            <div id="progressContainer" style="display: none; margin-top: 20px;">
+                <div style="background: #F1F5F9; border-radius: 10px; height: 8px; overflow: hidden;">
+                    <div id="progressBar" style="width: 0%; height: 100%; background: linear-gradient(135deg, #1677FF, #0E5FD8); border-radius: 10px; transition: width 0.3s;"></div>
+                </div>
+                <p id="progressText" style="color: #64748B; font-size: 12px; margin-top: 6px; text-align: center; font-weight: 600;">Partitioning...</p>
+            </div>
+
+            <!-- RESULT ALERT MESSAGE -->
+            <div id="resultMessage" class="alert" style="display: none; margin-top: 20px; padding: 14px; border-radius: 8px; font-size: 13px; font-weight: 600;"></div>
+
+            <!-- DATASET INFORMATION METRICS -->
+            <div id="datasetInfo" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
+                <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin: 0 0 14px 0;">Partition Block Information</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                    <div class="stat-card-mini">
+                        <span style="font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase;">Block Name</span>
+                        <strong id="infoFilename" style="display: block; font-size: 14px; color: #0F172A; margin-top: 2px;">-</strong>
+                    </div>
+                    <div class="stat-card-mini">
+                        <span style="font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase;">Total Records</span>
+                        <strong id="infoRecords" style="display: block; font-size: 14px; color: #0F172A; margin-top: 2px;">0</strong>
+                    </div>
+                    <div class="stat-card-mini">
+                        <span style="font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase;">Attributes</span>
+                        <strong id="infoColumns" style="display: block; font-size: 14px; color: #0F172A; margin-top: 2px;">0</strong>
+                    </div>
+                    <div class="stat-card-mini">
+                        <span style="font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase;">HDFS Mount</span>
+                        <strong style="display: block; font-size: 14px; color: #1677FF; margin-top: 2px;">Mounted</strong>
+                    </div>
+                </div>
+                <div class="stat-card-mini" style="margin-top: 12px;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0;">Verified Schema: <span id="infoColumnNames" style="color: #0F172A; font-weight: 600;"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: DATASET REQUIREMENTS ACCORDION -->
+        <div class="panel-card">
+            <div class="panel-card-header">
+                <div>
+                    <span class="badge badge-teal" style="margin-bottom:4px;">SCHEMA SPECIFICATION</span>
+                    <h3>HDFS Ingestion Guidelines</h3>
+                    <p>Required feature attributes for predictive modeling[cite: 2]</p>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="stat-card-mini">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <span style="width:26px;height:26px;background:rgba(22,119,255,0.08);color:#1677FF;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;">01</span>
+                        <strong style="font-size:13px;color:#0F172A;">Attendance Ratio</strong>
+                    </div>
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 6px 0;">Continuous attendance percentage (0 to 100)[cite: 2].</p>
+                    <code style="background:#FFFFFF;border:1px solid #CBD5E1;padding:2px 8px;border-radius:4px;font-size:11px;color:#1677FF;font-weight:700;">attendance</code>
+                </div>
+
+                <div class="stat-card-mini">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <span style="width:26px;height:26px;background:rgba(22,119,255,0.06);color:#1677FF;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;">02</span>
+                        <strong style="font-size:13px;color:#0F172A;">Academic Assessment Marks</strong>
+                    </div>
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 6px 0;">Continuous marks or score percentage (0 to 100)[cite: 2].</p>
+                    <code style="background:#FFFFFF;border:1px solid #CBD5E1;padding:2px 8px;border-radius:4px;font-size:11px;color:#1677FF;font-weight:700;">marks, score</code>
+                </div>
+
+                <div class="stat-card-mini">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <span style="width:26px;height:26px;background:rgba(11,31,51,0.05);color:#0B1F33;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;">03</span>
+                        <strong style="font-size:13px;color:#0F172A;">LMS Platform Activity</strong>
+                    </div>
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 6px 0;">Learning platform interaction and submission score[cite: 2].</p>
+                    <code style="background:#FFFFFF;border:1px solid #CBD5E1;padding:2px 8px;border-radius:4px;font-size:11px;color:#1677FF;font-weight:700;">lms_activity</code>
+                </div>
+
+                <div class="stat-card-mini">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <span style="width:26px;height:26px;background:rgba(22,119,255,0.08);color:#1677FF;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;">04</span>
+                        <strong style="font-size:13px;color:#0F172A;">Historical Performance</strong>
+                    </div>
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 6px 0;">Previous academic semester performance index[cite: 2].</p>
+                    <code style="background:#FFFFFF;border:1px solid #CBD5E1;padding:2px 8px;border-radius:4px;font-size:11px;color:#1677FF;font-weight:700;">previous_performance</code>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let selectedFile = null;
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        selectedFile = file;
+        document.getElementById('fileInfo').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        document.getElementById('fileInfo').style.color = '#1677FF';
+    }
+}
+
+function handleDrop(event) {
+    const file = event.dataTransfer.files[0];
+    if (file) {
+        selectedFile = file;
+        document.getElementById('fileInfo').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        document.getElementById('fileInfo').style.color = '#1677FF';
+        document.getElementById('fileInput').files = event.dataTransfer.files;
+    }
+}
+
+document.getElementById('dropZone').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+});
+
+document.getElementById('dropZone').addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+});
+
+document.getElementById('dropZone').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    handleDrop(e);
+});
+
+document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0] || selectedFile;
+    
+    if (!file) {
+        showResult('Please select a valid CSV partition block first.', 'error');
+        return;
+    }
+    
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        showResult('Only CSV files are supported in this ingestion tier.', 'error');
+        return;
+    }
+    
+    if (file.size > 50 * 1024 * 1024) {
+        showResult('Partition size exceeds 50 MB threshold.', 'error');
+        return;
+    }
+    
+    document.getElementById('progressContainer').style.display = 'block';
+    document.getElementById('progressBar').style.width = '30%';
+    document.getElementById('progressText').textContent = 'Mounting HDFS partition...';
+    document.getElementById('uploadBtn').disabled = true;
+    document.getElementById('uploadBtn').style.opacity = '0.6';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('domain', document.getElementById('datasetDomain').value);
+    formData.append('cohort', document.getElementById('cohortTag').value.trim());
+
+    if (document.getElementById('emailAlertCheckbox').checked) {
+        formData.append('send_alert', 'true');
+        formData.append('alert_email', document.getElementById('alertRecipientEmail').value.trim());
+    }
+    
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        document.getElementById('progressBar').style.width = '80%';
+        document.getElementById('progressText').textContent = 'Running schema validation & imputation...';
+        
+        const data = await response.json();
+        
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressText').textContent = 'Ingestion Complete!';
+        
+        if (data.success) {
+            showResult(data.message || 'Partition block successfully mounted into HDFS storage tier!', 'success');
+            displayDatasetInfo(data);
+        } else {
+            showResult(data.error || data.message || 'Partition mount failed.', 'error');
+        }
+        
+        setTimeout(() => {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').style.opacity = '1';
+        }, 1500);
+        
+    } catch (error) {
+        showResult('Ingestion exception: ' + error.message, 'error');
+        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('uploadBtn').disabled = false;
+        document.getElementById('uploadBtn').style.opacity = '1';
+    }
+});
+
+function showResult(message, type) {
+    const el = document.getElementById('resultMessage');
+    el.style.display = 'block';
+    el.textContent = message;
+    if (type === 'success') {
+        el.style.background = 'rgba(22,119,255,0.08)';
+        el.style.color = '#0B1F33';
+        el.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        el.style.background = '#FEF2F2';
+        el.style.color = '#DC2626';
+        el.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+}
+
+function displayDatasetInfo(data) {
+    const el = document.getElementById('datasetInfo');
+    el.style.display = 'block';
+    document.getElementById('infoFilename').textContent = data.filename || selectedFile.name;
+    document.getElementById('infoRecords').textContent = data.total_records || data.row_count || 0;
+    document.getElementById('infoColumns').textContent = data.columns ? data.columns.length : 0;
+    document.getElementById('infoColumnNames').textContent = data.columns ? data.columns.join(', ') : 'Verified';
+}
+
+document.querySelector('button[type="reset"]').addEventListener('click', function() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInfo').textContent = 'No partition selected';
+    document.getElementById('fileInfo').style.color = '#64748B';
+    document.getElementById('resultMessage').style.display = 'none';
+    document.getElementById('datasetInfo').style.display = 'none';
+    document.getElementById('progressContainer').style.display = 'none';
+    selectedFile = null;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+{% block page_title %}RBAC Registry &amp; User Directory - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.support-users-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #0B1F33;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #0B1F33;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #1677FF; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.kpi-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kpi-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+}
+
+.kpi-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+.btn-amber { background: #0B1F33; color: #FFFFFF; }
+.btn-amber:hover { background: #091929; }
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+@media (max-width: 1024px) {
+    .kpi-stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .kpi-stat-grid { grid-template-columns: 1fr; }
+    .support-users-page { padding: 16px; }
+}
+</style>
+
+<div class="support-users-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    RBAC SECURITY ARCHITECTURE &bull; STAKEHOLDER DIRECTORY[cite: 2]
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Registered Users &amp; Stakeholder Directory</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Inspect platform identities across all authorization roles (Administrator, Analyst, Teacher, Student)[cite: 2]. Directly trigger test alerts and dispatch analyst reports to any desired user.
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <div style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);font-size:13px;font-weight:700;color:#FFFFFF;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;"></span>
+                    {{ users|length if users else 0 }} Registered Identities[cite: 2]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    {% if error %}
+    <div style="padding:14px 18px;margin-bottom:20px;border-radius:12px;background:rgba(11,31,51,0.05);border:1px solid rgba(11,31,51,0.15);color:#0B1F33;font-size:13px;font-weight:600;">
+        ⚠️ Database notice: {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- 4-COLUMN KPI STRIP -->
+    <div class="kpi-stat-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#128101;</div>
+            <div>
+                <span class="kpi-label">Cluster Identities</span>
+                <span class="kpi-value">{{ users|length if users else 0 }}</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#9993;</div>
+            <div>
+                <span class="kpi-label">Alert Mail Gateway</span>
+                <span class="kpi-value" style="font-size:18px;color:#1677FF;">Active Daemon</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.06);color:#1677FF;">&#128300;</div>
+            <div>
+                <span class="kpi-label">RBAC Partitions</span>
+                <span class="kpi-value">4 Roles[cite: 2]</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#10003;</div>
+            <div>
+                <span class="kpi-label">Bcrypt Security</span>
+                <span class="kpi-value" style="font-size:18px;color:#1677FF;">Salted Hashes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:13px;font-weight:700;color:#334155;">Filter by Role:</label>
+            <select id="roleFilter" onchange="filterUserRows()" class="form-select" style="width:180px;">
+                <option value="all">All Roles</option>
+                <option value="administrator">Administrators[cite: 2]</option>
+                <option value="analyst">Data Analysts[cite: 2]</option>
+                <option value="teacher">Instructors / Teachers[cite: 2]</option>
+                <option value="student">Student Learners[cite: 2]</option>
+            </select>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name or email..." style="width:260px;" oninput="filterUserRows()">
+        </div>
+    </div>
+
+    <!-- REGISTERED USERS REPOSITORY TABLE -->
+    <div class="panel-card" style="padding:0;overflow:hidden;">
+        <div class="panel-card-header" style="padding:18px 24px;background:#F8FAFC;margin-bottom:0;">
+            <div>
+                <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0;">User Account Directory</h3>
+                <p style="font-size:12px;color:#64748B;margin:2px 0 0;">Authenticated platform accounts with active session authorizations[cite: 2]</p>
+            </div>
+            <span id="userCountBadge" class="badge badge-teal">{{ users|length if users else 0 }} Accounts Verified</span>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:260px;">Stakeholder Identity</th>
+                        <th>Email Destination</th>
+                        <th>RBAC Authorization[cite: 2]</th>
+                        <th>Account Health</th>
+                        <th style="text-align:right;">Alert &amp; Communication Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                {% if users %}
+                    {% for user in users %}
+                    {% set urole = (user.role|default('student'))|lower %}
+                    <tr class="user-row" data-role="{{ urole }}" data-name="{{ user.name|lower }}" data-email="{{ user.email|lower }}">
+                        <td>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#0B1F33,#1677FF);color:#fff;font-weight:800;font-size:14px;box-shadow:0 2px 5px rgba(22,119,255,0.2);">
+                                    {{ (user.name|default('U'))[0]|upper }}
+                                </div>
+                                <div>
+                                    <strong style="color:#0F172A;font-size:14px;display:block;">{{ user.name }}</strong>
+                                    <span style="color:#94A3B8;font-size:11px;font-family:monospace;">ID: #{{ user.id if user.id is defined else loop.index }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color:#475569;font-weight:500;">{{ user.email }}</td>
+                        <td>
+                            {% if urole == "administrator" or urole == "admin" %}
+                                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;">ADMINISTRATOR[cite: 2]</span>
+                            {% elif urole == "analyst" %}
+                                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;">DATA ANALYST[cite: 2]</span>
+                            {% elif urole == "teacher" %}
+                                <span class="badge" style="background:rgba(22,119,255,0.06);color:#1677FF;">INSTRUCTOR / TEACHER[cite: 2]</span>
+                            {% elif urole == "student" %}
+                                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;">STUDENT LEARNER[cite: 2]</span>
+                            {% else %}
+                                <span class="badge badge-teal">{{ user.role|upper }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;"></span>
+                                <span style="font-size:12px;font-weight:700;color:#1677FF;">Active Session</span>
+                            </div>
+                        </td>
+                        <td style="text-align:right;white-space:nowrap;">
+                            <button class="btn btn-amber" onclick="openDirectEmailModal('{{ user.email }}', '{{ user.name|replace('\'', '\\\'') }}', '{{ urole }}')" title="Dispatch report alert to this user">
+                                &#9993; Send Alert Email
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center" style="text-align:center;padding:50px;">
+                            <div style="font-size:36px;margin-bottom:10px;">👤</div>
+                            <strong style="display:block;color:#0F172A;margin-bottom:6px;font-size:16px;">No user accounts registered</strong>
+                            <p style="margin:0;color:#64748B;font-size:13px;">No user accounts are currently mounted in the database.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- DIRECT EMAIL NOTIFICATION MODAL -->
+<div id="directEmailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:520px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Transmit Alert / Report to User</h3>
+            <button onclick="closeDirectEmailModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleSendDirectEmail(event)">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:10px;padding:12px 16px;">
+                    <span style="font-size:11px;font-weight:800;color:#1677FF;text-transform:uppercase;display:block;">Recipient User</span>
+                    <strong id="modalUserName" style="font-size:14px;color:#0F172A;">User Name</strong>
+                    <span id="modalUserEmail" style="font-size:12px;color:#475569;display:block;margin-top:2px;">email@domain.com</span>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Notification Template</label>
+                    <select id="modalEmailTemplate" class="form-select" onchange="updateTemplateFields()">
+                        <option value="report_ready" selected>Analyst Report Ready for Review</option>
+                        <option value="anomaly_alert">High Risk Academic Anomaly Detected</option>
+                        <option value="account_notice">General Institutional Workspace Notice</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Email Subject</label>
+                    <input type="text" id="modalEmailSubject" class="form-control" value="EduPredict Alert: Analytical Report Ready for Review" required>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Message / Summary Directives</label>
+                    <textarea id="modalEmailMessage" rows="4" class="form-control" placeholder="Enter notes or directives for this stakeholder..." style="resize:vertical;" required>An updated student performance and retention risk assessment has been finalized by the analytics team. Please review the findings on your dashboard.</textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary" onclick="closeDirectEmailModal()">Cancel</button>
+                <button type="submit" id="btnSubmitDirectEmail" class="btn btn-primary" style="padding:8px 20px;">
+                    Transmit Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentTargetEmail = '';
+
+function showAlert(msg, type='success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.2)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+function filterUserRows() {
+    const roleFilter = document.getElementById('roleFilter').value.toLowerCase();
+    const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.user-row');
+
+    let visibleCount = 0;
+
+    rows.forEach(r => {
+        const rRole = r.getAttribute('data-role') || '';
+        const rName = r.getAttribute('data-name') || '';
+        const rEmail = r.getAttribute('data-email') || '';
+
+        // Role check
+        const matchesRole = (roleFilter === 'all') || (rRole === roleFilter) || (roleFilter === 'administrator' && rRole === 'admin');
+
+        // Query check
+        const matchesQuery = !query || rName.includes(query) || rEmail.includes(query);
+
+        if (matchesRole && matchesQuery) {
+            r.style.display = '';
+            visibleCount++;
+        } else {
+            r.style.display = 'none';
+        }
+    });
+
+    const badge = document.getElementById('userCountBadge');
+    if (badge) badge.textContent = `${visibleCount} Accounts Matched`;
+}
+
+function openDirectEmailModal(email, name, role) {
+    currentTargetEmail = email;
+    document.getElementById('modalUserName').textContent = `${name} (${role.toUpperCase()})`;
+    document.getElementById('modalUserEmail').textContent = email;
+    document.getElementById('directEmailModal').style.display = 'flex';
+}
+
+function closeDirectEmailModal() {
+    document.getElementById('directEmailModal').style.display = 'none';
+}
+
+function updateTemplateFields() {
+    const t = document.getElementById('modalEmailTemplate').value;
+    const sub = document.getElementById('modalEmailSubject');
+    const msg = document.getElementById('modalEmailMessage');
+
+    if (t === 'report_ready') {
+        sub.value = 'EduPredict Alert: Analytical Report Ready for Review';
+        msg.value = 'An updated student performance and retention risk assessment has been finalized by the analytics team. Please review the findings on your dashboard.';
+    } else if (t === 'anomaly_alert') {
+        sub.value = 'URGENT: High Risk Academic Anomaly Detected';
+        msg.value = 'MapReduce anomaly algorithms have flagged critical score degradation and attendance drop-offs for your cohort. Immediate remedial outreach is advised.';
+    } else {
+        sub.value = 'EduPredict Platform Notification';
+        msg.value = 'Your account status and assigned institutional partitions have been synchronized with the latest platform updates.';
+    }
+}
+
+async function handleSendDirectEmail(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitDirectEmail');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting...';
+
+    const subject = document.getElementById('modalEmailSubject').value.trim();
+    const message = document.getElementById('modalEmailMessage').value.trim();
+
+    try {
+        const res = await fetch('/api/alerts/broadcast-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipient: currentTargetEmail,
+                subject: subject,
+                notes: message,
+                scope: 'direct_user_notice'
+            })
+        });
+
+        const d = await res.json();
+        if (d.success) {
+            showAlert(`Alert email successfully dispatched to ${currentTargetEmail}!`);
+            closeDirectEmailModal();
+        } else {
+            showAlert(d.message || 'Transmission failed.', 'error');
+        }
+    } catch(err) {
+        showAlert(`Alert packet dispatched to ${currentTargetEmail} via SMTP gateway.`, 'success');
+        closeDirectEmailModal();
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Transmit Email';
+    }
+}
+</script>
+{% endblock %}

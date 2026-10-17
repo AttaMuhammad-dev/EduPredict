@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block page_title %}Platform Capabilities &amp; Big Data Features - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.features-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.feature-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 36px;
+}
+
+.feature-box {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08);
+}
+
+.feature-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.feature-num-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #1677FF;
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.feature-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.feature-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.feature-desc {
+    font-size: 13px;
+    color: #64748B;
+    line-height: 1.6;
+    margin: 0 0 18px 0;
+}
+
+.tech-pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 14px;
+    border-top: 1px solid #F1F5F9;
+}
+
+.tech-pill {
+    font-size: 11px;
+    font-weight: 600;
+    background: #F8FAFC;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.callout-banner {
+    background: linear-gradient(135deg, rgba(22,119,255,0.04) 0%, rgba(22,119,255,0.08) 100%);
+    border: 1.5px solid #1677FF;
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+@media (max-width: 1024px) {
+    .feature-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+    .feature-grid-3 { grid-template-columns: 1fr; }
+    .features-page { padding: 16px; }
+}
+</style>
+
+<div class="features-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:36px;margin-bottom:32px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="max-width:760px;">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;"></span>
+                APTECH ePROJECT SPECIFICATION &bull; BIG DATA CAPABILITIES
+            </div>
+            <h1 style="font-size:34px;font-weight:800;color:#ffffff;margin:0 0 10px;line-height:1.2;">Everything Required for Educational Intelligence</h1>
+            <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;line-height:1.6;">
+                EduPredict reproduces the Hadoop Big Data stack in Python—combining distributed storage emulation, multi-core MapReduce processing, ensemble predictive modeling, and automated email escalation daemons.
+            </p>
+        </div>
+    </div>
+
+    <!-- FEATURE GRID: 9 SPEC-ALIGNED CORE CAPABILITIES -->
+    <div class="feature-grid-3">
+
+        <!-- 01: HDFS PARTITIONED STORAGE -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">01</div>
+                    <span class="feature-tag" style="background:rgba(22,119,255,0.08);color:#1677FF;">Storage Tier</span>
+                </div>
+                <h3 class="feature-title">HDFS Distributed Storage Emulation</h3>
+                <p class="feature-desc">
+                    Replicates Hadoop Distributed File System through partitioned block storage. Organizes academic records, demographics, and clickstreams into segmented tables and Parquet files for fast retrieval.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Chunked Storage</span>
+                <span class="tech-pill">MongoDB Compass</span>
+                <span class="tech-pill">Parquet Parity</span>
+            </div>
+        </div>
+
+        <!-- 02: MAPREDUCE PARALLEL REDUCTION -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">02</div>
+                    <span class="feature-tag" style="background:rgba(22,119,255,0.06);color:#1677FF;">Compute Engine</span>
+                </div>
+                <h3 class="feature-title">MapReduce Multi-Core Processing</h3>
+                <p class="feature-desc">
+                    Parallelizes large-scale educational dataset processing across CPU cores. Mappers parse student cohort batches while reducers aggregate mean performance, attendance, and statistical anomalies.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Python Multiprocessing</span>
+                <span class="tech-pill">Vectorized Pandas</span>
+                <span class="tech-pill">Parallel Reduction</span>
+            </div>
+        </div>
+
+        <!-- 03: PREDICTIVE ML ENSEMBLE (3 MODELS) -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">03</div>
+                    <span class="feature-tag" style="background:rgba(22,119,255,0.06);color:#1677FF;">Machine Learning</span>
+                </div>
+                <h3 class="feature-title">Trained Predictive ML Triad</h3>
+                <p class="feature-desc">
+                    Supervised learning models for student dropout risk classification (Low, Medium, High), continuous grade prediction, and elective course demand forecasting for institutional planning.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Random Forest</span>
+                <span class="tech-pill">Course Demand Model</span>
+                <span class="tech-pill">Scikit-Learn</span>
+            </div>
+        </div>
+
+        <!-- 04: AUTOMATED EMAIL ALERT GATEWAY -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">04</div>
+                    <span class="feature-tag" style="background:rgba(22,119,255,0.06);color:#1677FF;">Escalation Daemon</span>
+                </div>
+                <h3 class="feature-title">Automated Email Alert Dispatcher</h3>
+                <p class="feature-desc">
+                    Whenever an analyst compiles a report or MapReduce detects critical academic drop-offs, automated alert emails are instantly dispatched via SMTP to designated stakeholder inboxes.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Flask-Mail Gateway</span>
+                <span class="tech-pill">Real-Time Dispatch</span>
+                <span class="tech-pill">Executive Digests</span>
+            </div>
+        </div>
+
+        <!-- 05: ACADEMIC ANOMALY DETECTION -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">05</div>
+                    <span class="feature-tag" style="background:rgba(220,38,38,0.08);color:#DC2626;">Surveillance</span>
+                </div>
+                <h3 class="feature-title">Academic Anomaly &amp; Outlier Detection</h3>
+                <p class="feature-desc">
+                    Unsupervised algorithms scan student trajectories to isolate sudden attendance drops (&lt;75%), assessment degradation (&gt;25%), and LMS disengagement before semester evaluations conclude.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Z-Score Outliers</span>
+                <span class="tech-pill">Threshold Triggers</span>
+                <span class="tech-pill">Early Interventions</span>
+            </div>
+        </div>
+
+        <!-- 06: MULTI-SOURCE INGESTION & STREAMING -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">06</div>
+                    <span class="feature-tag" style="background:rgba(11,31,51,0.08);color:#0B1F33;">Data Ingestion</span>
+                </div>
+                <h3 class="feature-title">Batch &amp; Real-Time Data Ingestion</h3>
+                <p class="feature-desc">
+                    Accepts diverse educational data formats: academic records, attendance logs, student demographics, and LMS activity telemetry with drag-and-drop batch upload and streaming pipelines.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">CSV &bull; JSON &bull; REST</span>
+                <span class="tech-pill">LMS Telemetry</span>
+                <span class="tech-pill">Dynamic Chunking</span>
+            </div>
+        </div>
+
+        <!-- 07: ROLE-BASED ACCESS CONTROL (RBAC) -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">07</div>
+                    <span class="feature-tag" style="background:#F1F5F9;color:#475569;">Security Tier</span>
+                </div>
+                <h3 class="feature-title">Granular RBAC Stakeholder Views</h3>
+                <p class="feature-desc">
+                    Enforces strict data privacy and isolation across four distinct roles: Administrators (cluster controls), Analysts (ML models), Teachers (cohort management), and Students (personal progress).
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Bcrypt Hashing</span>
+                <span class="tech-pill">Session Authentication</span>
+                <span class="tech-pill">Isolated Endpoints</span>
+            </div>
+        </div>
+
+        <!-- 08: DATA CLEANING & STATISTICAL INTEGRITY -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">08</div>
+                    <span class="feature-tag" style="background:rgba(22,119,255,0.08);color:#1677FF;">Data Quality</span>
+                </div>
+                <h3 class="feature-title">Data Scrubbing &amp; Imputation Engine</h3>
+                <p class="feature-desc">
+                    Maintains pipeline consistency by catching missing values, negative scores, and corrupted lines. Uses statistical mean/mode imputation so predictive inference never fails on partial records.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">Missing Value Imputation</span>
+                <span class="tech-pill">StandardScaler</span>
+                <span class="tech-pill">Validation Guards</span>
+            </div>
+        </div>
+
+        <!-- 09: ANALYTICAL REPORT COMPILER -->
+        <div class="feature-box">
+            <div>
+                <div class="feature-top">
+                    <div class="feature-num-badge">09</div>
+                    <span class="feature-tag" style="background:rgba(22,119,255,0.06);color:#1677FF;">Reporting</span>
+                </div>
+                <h3 class="feature-title">Report Generator &amp; Telemetry Exports</h3>
+                <p class="feature-desc">
+                    Generates standardized analytical briefings in CSV/PDF format. Captures Pearson correlation matrices, risk distributions, and institutional action items with one-click export.
+                </p>
+            </div>
+            <div class="tech-pill-container">
+                <span class="tech-pill">CSV / PDF Exports</span>
+                <span class="tech-pill">Historical Audits</span>
+                <span class="tech-pill">Download Catalog</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PIPELINE SUMMARY CALLOUT BANNER -->
+    <div class="callout-banner">
+        <div>
+            <h3 style="font-size:18px;font-weight:800;color:#0F172A;margin:0 0 6px;">Ready to observe the distributed pipeline in action?</h3>
+            <p style="font-size:14px;color:#334155;margin:0;max-width:680px;line-height:1.5;">
+                Explore the system architecture diagram or log in as an Analyst to configure feature models, train estimators, and test automated email alerts.
+            </p>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <a href="/architecture" class="btn btn-secondary" style="font-weight:700;">HDFS Topology &rarr;</a>
+            <a href="/login" class="btn btn-primary" style="font-weight:700;">Open Workspace</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

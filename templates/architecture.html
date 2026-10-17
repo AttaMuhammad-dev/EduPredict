@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block page_title %}System Architecture & Hadoop Replication - EduPredict{% endblock %}
+
+{% block content %}
+<section class="hero-section" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;padding:48px 0 36px;">
+    <div class="container">
+        <div class="hero-badge" style="background:rgba(255,255,255,0.15);color:#ffffff;border:1px solid rgba(255,255,255,0.25);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:12px;">
+            APTECH ePROJECT &bull; HADOOP BIG DATA REPLICATION IN PYTHON
+        </div>
+        <h1 style="font-size:36px;font-weight:800;color:#ffffff;margin:0 0 10px;line-height:1.2;">Distributed Intelligence Architecture</h1>
+        <center><p class="hero-desc" style="font-size:16px;color:rgba(255,255,255,0.85);max-width:760px;line-height:1.6;margin:0;">
+            EduPredict replicates enterprise Big Data infrastructure (HDFS partitioned storage, MapReduce multi-core processing, predictive ML pipelines, and automated email escalation daemons) inside a modular Python and Flask ecosystem.
+        </p></center>
+    </div>
+</section>
+
+<section class="page-section" style="padding:40px 0;">
+    <div class="container">
+
+        <!-- 1. DISTRIBUTED BIG DATA PIPELINE (HADOOP EQUIVALENCE) -->
+        <div class="panel mb-lg" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:32px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;border-bottom:1px solid #F1F5F9;padding-bottom:16px;">
+                <div>
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">ARCHITECTURAL TOPOLOGY</span>
+                    <h2 style="font-size:22px;font-weight:800;color:#0F172A;margin:4px 0 0;">End-to-End Hadoop Replication Layers</h2>
+                </div>
+                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-weight:700;padding:6px 12px;border-radius:20px;">CLUSTER SPECIFICATION &bull; ACTIVE</span>
+            </div>
+
+            <div class="panel-body">
+                <div style="display:grid;grid-template-columns:repeat(5, 1fr);gap:16px;position:relative;">
+                    
+                    <!-- LAYER 1 -->
+                    <div class="card" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:6px;">TIER 01</div>
+                            <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0 0 6px;">Data Ingestion &amp; Streaming</h3>
+                            <p style="font-size:12px;color:#64748B;line-height:1.5;margin:0;">
+                                Multi-source ingestion capturing real-time attendance, academic scores, and LMS telemetry logs.
+                            </p>
+                        </div>
+                        <div style="margin-top:14px;">
+                            <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:10px;font-weight:700;">Batch &bull; Event Stream</span>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 2 -->
+                    <div class="card" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:6px;">TIER 02</div>
+                            <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0 0 6px;">HDFS Partitioned Storage</h3>
+                            <p style="font-size:12px;color:#64748B;line-height:1.5;margin:0;">
+                                Simulated distributed block storage with chunked Parquet files and document-based data tables.
+                            </p>
+                        </div>
+                        <div style="margin-top:14px;">
+                            <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:10px;font-weight:700;">Partitioned Blocks &bull; MongoDB</span>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 3 -->
+                    <div class="card" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:6px;">TIER 03</div>
+                            <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0 0 6px;">MapReduce Parallel Engine</h3>
+                            <p style="font-size:12px;color:#64748B;line-height:1.5;margin:0;">
+                                Multi-core mappers &amp; reducers executing anomaly screening and metric aggregations concurrently.
+                            </p>
+                        </div>
+                        <div style="margin-top:14px;">
+                            <span class="badge" style="background:rgba(11,31,51,0.08);color:#0B1F33;font-size:10px;font-weight:700;">Python Multiprocessing</span>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 4 -->
+                    <div class="card" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:6px;">TIER 04</div>
+                            <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0 0 6px;">ML Inference &amp; Analytics</h3>
+                            <p style="font-size:12px;color:#64748B;line-height:1.5;margin:0;">
+                                Scikit-Learn estimators for student retention, course demand forecasting, and grade regression.
+                            </p>
+                        </div>
+                        <div style="margin-top:14px;">
+                            <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:10px;font-weight:700;">Random Forest &bull; Logistic &bull; Ridge</span>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 5 -->
+                    <div class="card" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:6px;">TIER 05</div>
+                            <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0 0 6px;">Alerts &amp; Mail Dispatch</h3>
+                            <p style="font-size:12px;color:#64748B;line-height:1.5;margin:0;">
+                                Real-time threshold monitoring with automated email notifications delivered to designated stakeholders.
+                            </p>
+                        </div>
+                        <div style="margin-top:14px;">
+                            <span class="badge" style="background:rgba(220,38,38,0.08);color:#DC2626;font-size:10px;font-weight:700;">SMTP Daemon &bull; REST API</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DETAILED TECHNICAL ARCHITECTURE: HOW HADOOP IS REPLICATED IN PYTHON -->
+        <div class="panel mb-lg" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:32px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="margin-bottom:20px;border-bottom:1px solid #F1F5F9;padding-bottom:16px;">
+                
+                <h2 style="font-size:22px;font-weight:800;color:#0F172A;margin:4px 0 0;">Technical Component Equivalence Matrix</h2>
+                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">HADOOP TO PYTHON MAPPING</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="background:#0B1F33;color:#ffffff;text-align:left;">
+                            <th style="padding:12px 16px;font-weight:700;border-top-left-radius:8px;">Hadoop Big Data Ecosystem Component</th>
+                            <th style="padding:12px 16px;font-weight:700;">EduPredict Python Replication Architecture</th>
+                            <th style="padding:12px 16px;font-weight:700;border-top-right-radius:8px;">Project Operational Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid #F1F5F9;">
+                            <td style="padding:14px 16px;font-weight:700;color:#0F172A;">HDFS (Hadoop Distributed File System)</td>
+                            <td style="padding:14px 16px;color:#1677FF;font-weight:600;">Chunked Partitioned Storage (Parquet / Structured DB)</td>
+                            <td style="padding:14px 16px;color:#64748B;">Fault-tolerant storage of educational records partitioned by cohort and semester blocks.</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #F1F5F9;background:#F8FAFC;">
+                            <td style="padding:14px 16px;font-weight:700;color:#0F172A;">MapReduce Framework</td>
+                            <td style="padding:14px 16px;color:#1677FF;font-weight:600;">Python <code>multiprocessing</code> Map/Reduce Jobs</td>
+                            <td style="padding:14px 16px;color:#64748B;">Parallel data transformation, academic anomaly filtering, and grade aggregation across multi-core CPUs.</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #F1F5F9;">
+                            <td style="padding:14px 16px;font-weight:700;color:#0F172A;">Apache Impala / Hive SQL</td>
+                            <td style="padding:14px 16px;color:#1677FF;font-weight:600;">Pandas Vectorized Analytical Query Layer</td>
+                            <td style="padding:14px 16px;color:#64748B;">In-memory relational evaluation of student marks, attendance trends, and correlation coefficients.</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #F1F5F9;background:#F8FAFC;">
+                            <td style="padding:14px 16px;font-weight:700;color:#0F172A;">Apache Spark MLlib</td>
+                            <td style="padding:14px 16px;color:#1677FF;font-weight:600;">Scikit-Learn Model Ensembles</td>
+                            <td style="padding:14px 16px;color:#64748B;">Student dropout classification, continuous grade regression, and elective course demand prediction.</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #F1F5F9;">
+                            <td style="padding:14px 16px;font-weight:700;color:#0F172A;">Apache Kafka / Flume (Streaming)</td>
+                            <td style="padding:14px 16px;color:#1677FF;font-weight:600;">Real-Time Ingestion Daemons</td>
+                            <td style="padding:14px 16px;color:#64748B;">Captures live attendance taps, LMS grade submissions, and triggers early-warning flags without reload.</td>
+                        </tr>
+                        <tr style="background:#F8FAFC;">
+                            <td style="padding:14px 16px;font-weight:700;color:#0F172A;">Alerting &amp; Notification Service</td>
+                            <td style="padding:14px 16px;color:#1677FF;font-weight:600;">Automated SMTP Alert Gateway</td>
+                            <td style="padding:14px 16px;color:#64748B;">Dispatches executive analytical reports and critical anomaly notices to desired stakeholder email inboxes.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. APPLICATION LIFE-CYCLE: STEP-BY-STEP WORKFLOW -->
+        <div class="panel mb-lg" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:32px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="margin-bottom:20px;border-bottom:1px solid #F1F5F9;padding-bottom:16px;">
+               
+                <h2 style="font-size:22px;font-weight:800;color:#0F172A;margin:4px 0 0;">From Ingestion to Executive Action</h2>
+                 <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">SYSTEM EXECUTION CYCLE</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:20px;">
+                
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:#1677FF;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">01</span>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0;">Ingest &amp; Cleanse</h3>
+                    </div>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">
+                        Datasets are ingested through CSV upload or live database tables. Null and corrupted records are handled gracefully through mean/mode statistical imputation.
+                    </p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:#1677FF;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">02</span>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0;">MapReduce Filter</h3>
+                    </div>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">
+                        Python mapper workers process student cohorts concurrently, isolating threshold outliers (attendance &lt; 75%, score degradation &gt; 25%) into reduced anomaly vectors.
+                    </p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:#1677FF;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">03</span>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0;">ML Predictive Scoring</h3>
+                    </div>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">
+                        Features are passed to pre-trained estimators, outputting individual dropout risk classifications (Low, Medium, High) alongside predicted course demands.
+                    </p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:#1677FF;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">04</span>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0;">Multi-Role Visualization</h3>
+                    </div>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">
+                        Inferences are delivered dynamically to specialized RBAC interfaces: Administrators manage records, Teachers view batch risks, and Students track personal grades.
+                    </p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:#1677FF;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">05</span>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0;">Automated Email Alerting</h3>
+                    </div>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">
+                        Whenever an analyst completes a report or a critical risk anomaly is detected, an automated alert email is compiled and dispatched directly to the desired stakeholder.
+                    </p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:#1677FF;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">06</span>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin:0;">Intervention &amp; Retention</h3>
+                    </div>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">
+                        Academic advisors initiate targeted mentoring prior to final examinations, directly addressing the core institutional problem statement of declining retention.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 4. SECURITY, RBAC & NON-FUNCTIONAL SPECIFICATIONS -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+            
+            <div class="panel" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+                <div style="border-bottom:1px solid #F1F5F9;padding-bottom:12px;margin-bottom:16px;">
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;">SECURITY &amp; COMPLIANCE</span>
+                    <h3 style="font-size:18px;font-weight:800;color:#0F172A;margin:4px 0 0;">RBAC &amp; Data Protection</h3>
+                </div>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#475569;">
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#1677FF;font-weight:800;">&#10003;</span>
+                        <div><strong>Role-Based Access Control (RBAC):</strong> Strict separation between Administrator, Analyst, Teacher, and Student roles.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#1677FF;font-weight:800;">&#10003;</span>
+                        <div><strong>Cryptographic Security:</strong> Bcrypt password hashing and secure Flask session token serialization.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#1677FF;font-weight:800;">&#10003;</span>
+                        <div><strong>Input Scrubbing:</strong> Strict type validation on all numerical features prior to model prediction vectors.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panel" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+                <div style="border-bottom:1px solid #F1F5F9;padding-bottom:12px;margin-bottom:16px;">
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;">NON-FUNCTIONAL SPECS</span>
+                    <h3 style="font-size:18px;font-weight:800;color:#0F172A;margin:4px 0 0;">Reliability, Backups &amp; Scale</h3>
+                </div>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#475569;">
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#0B1F33;font-weight:800;">&#9670;</span>
+                        <div><strong>High Availability (99% Uptime):</strong> Graceful degradation and multi-threaded service handling.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#0B1F33;font-weight:800;">&#9670;</span>
+                        <div><strong>Automated Data Backups:</strong> Scheduled database dumps and versioned dataset snapshots.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#0B1F33;font-weight:800;">&#9670;</span>
+                        <div><strong>Horizontal Scalability:</strong> Stateless REST APIs allow horizontal replica scaling behind reverse proxies.</div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<style>
+@media (max-width: 1024px) {
+    div[style*="grid-template-columns:repeat(5, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+    div[style*="grid-template-columns:repeat(3, 1fr)"] { grid-template-columns: 1fr 1fr !important; }
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 640px) {
+    div[style*="grid-template-columns:repeat(5, 1fr)"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns:repeat(3, 1fr)"] { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,684 @@
+{% extends "base.html" %}
+{% block page_title %}Analyst ML Workspace & Alert Dispatcher - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.analyst-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #0B1F33;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #0B1F33;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #0B1F33; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #1677FF;
+    color: #FFFFFF;
+}
+
+.btn-primary:hover {
+    background: #0E5FD8;
+}
+
+.btn-secondary {
+    background: #F8FAFC;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+}
+
+.btn-secondary:hover {
+    background: #F1F5F9;
+}
+
+.btn-amber {
+    background: #0B1F33;
+    color: #FFFFFF;
+}
+
+.btn-amber:hover {
+    background: #0A1728;
+}
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #334155;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.1);
+}
+
+.kpi-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+}
+
+.kpi-card .val {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0F172A;
+    margin-top: 4px;
+}
+
+.kpi-card .lbl {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748B;
+}
+
+@media (max-width: 868px) {
+    .kpi-stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .analyst-page { padding: 16px; }
+    div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+
+<div class="analyst-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    ANALYST PIPELINE &bull; HADOOP MAPREDUCE &amp; REPORT GATEWAY
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Lead Analyst Workspace</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:640px;line-height:1.6;">
+                    Execute MapReduce risk inferences, detect academic outliers, train custom predictive estimators, and broadcast automated email alerts with synthesized analytical reports.
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <a href="#reportSection" class="btn btn-amber" style="padding:11px 20px;">
+                    &#9993; Generate Report &amp; Alert
+                </a>
+                <a href="/analytics" class="btn btn-secondary" style="background:#ffffff;color:#0B1F33;border:none;font-weight:700;">
+                    &#128200; Visual Analytics &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="analystAlertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <!-- 1. LIVE DATABASE PERFORMANCE & RISK ENGINE (MAPREDUCE REPLICATION) -->
+    <div class="panel-card" style="border-left: 5px solid #1677FF;">
+        <div class="panel-card-header">
+            <div>
+                <span class="badge badge-success" style="margin-bottom:6px;">LIVE WORKFLOW</span>
+                <h3>Distributed MapReduce Performance &amp; Risk Engine</h3>
+                <p>Pull live attendance, marks, and activity telemetry from the database, execute parallel risk scoring, and broadcast flags across portals.</p>
+            </div>
+            <button id="btnSyncDb" onclick="runLiveDbAnalysis()" class="btn btn-primary" style="padding:12px 24px;">
+                &#9881; Sync &amp; Analyze All Students
+            </button>
+        </div>
+
+        <div id="syncSummaryBox" style="display:none;">
+            <div class="kpi-stat-grid">
+                <div class="kpi-card">
+                    <div class="lbl">Learners Evaluated</div>
+                    <div class="val" id="statTotal">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="lbl">Low Risk (Stable)</div>
+                    <div class="val" style="color:#1677FF;" id="statLow">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="lbl">Medium Watchlist</div>
+                    <div class="val" style="color:#0B1F33;" id="statMedium">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="lbl">High Risk Drop-Off</div>
+                    <div class="val" style="color:#DC2626;" id="statHigh">0</div>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Calculated Avg Score</th>
+                            <th>Attendance Rate</th>
+                            <th>Risk Classification</th>
+                            <th>Predicted Grade</th>
+                            <th>Portal Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="syncResultsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="syncPlaceholder" style="text-align:center;padding:32px 20px;color:#94A3B8;font-size:13px;background:#F8FAFC;border-radius:10px;border:1px dashed #CBD5E1;">
+            Click <strong>"Sync &amp; Analyze All Students"</strong> to execute parallel feature aggregation across all learner batches.
+        </div>
+    </div>
+
+    <!-- 2. ANALYST REPORT SYNTHESIS & DESIRED USER EMAIL ALERT DISPATCHER -->
+    <div class="panel-card" id="reportSection" style="border-left: 5px solid #0B1F33;">
+        <div class="panel-card-header">
+            <div>
+                <span class="badge badge-warning" style="margin-bottom:6px;">AUTOMATED ESCALATION</span>
+                <h3>Compile Analyst Report &amp; Dispatch Email Alert</h3>
+                <p>Generate formal analytical findings (Risk Assessments, Course Demand, Anomaly Audits) and instantly deliver automated alert emails to designated institutional stakeholders.</p>
+            </div>
+        </div>
+
+        <form id="analystReportForm" onsubmit="handleCompileAndMailReport(event)">
+            <div style="display:grid;grid-template-columns: 1fr 1fr;gap:24px;align-items:start;">
+                <!-- Column A: Report Scope -->
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:6px;">Report Model Focus</label>
+                        <select id="reportModelType" class="form-select">
+                            <option value="student_risk">Student Retention &amp; Dropout Risk Prediction</option>
+                            <option value="course_demand">Course Demand &amp; Elective Capacity Forecast</option>
+                            <option value="anomaly_summary">MapReduce Academic Anomaly &amp; Threshold Audit</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:6px;">Report Title / Label</label>
+                        <input type="text" id="reportCustomTitle" class="form-control" placeholder="e.g., Q3 ADSE Retention Audit &amp; High-Risk Intervention" required>
+                    </div>
+
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:6px;">Analyst Executive Summary / Directives</label>
+                        <textarea id="reportNotes" class="form-control" rows="3" placeholder="Provide executive context, remedial directives, and key takeaways for recipients..." style="resize:vertical;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Column B: Desired User Email Alert Setup -->
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+                    <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:8px;padding:12px 14px;">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:13px;color:#0B1F33;">
+                            <input type="checkbox" id="analystSendEmail" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                            Dispatch Instant Email Alert Upon Report Compilation
+                        </label>
+                        <span style="display:block;font-size:11px;color:#1677FF;margin-top:4px;margin-left:26px;">
+                            Sends direct analytical summaries, risk scores, and download links to your designated contact.
+                        </span>
+                    </div>
+
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:6px;">
+                            Desired Recipient Email Address <span style="color:#DC2626;">*</span>
+                        </label>
+                        <input type="email" id="analystRecipientEmail" class="form-control" placeholder="head.advisor@institute.edu, principal@aptech.internal" required>
+                        <span style="font-size:11px;color:#64748B;margin-top:4px;display:block;">The selected user will immediately receive the notification packet.</span>
+                    </div>
+
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:6px;">Urgency / Priority Tag</label>
+                        <select id="reportUrgency" class="form-select">
+                            <option value="high">High Priority - Immediate Intervention Requested</option>
+                            <option value="medium" selected>Standard Priority - Informational Review</option>
+                            <option value="critical">Critical Anomaly - Rapid Executive Action Required</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="btnCompileReport" class="btn btn-amber" style="width:100%;padding:12px;margin-top:6px;font-weight:700;">
+                        &#9993; Compile Report &amp; Transmit Alert
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- RECENT GENERATED REPORTS TABLE -->
+        <div style="margin-top:28px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h4 style="font-size:14px;font-weight:700;color:#0F172A;margin:0;">Recent Analyst Reports Catalog</h4>
+                <button class="btn btn-secondary btn-sm" onclick="loadAnalystReports()" style="padding:6px 12px;font-size:12px;">&#8635; Refresh Reports</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width:70px;">ID</th>
+                            <th>Report Name</th>
+                            <th>Analyst Origin</th>
+                            <th>Created Timestamp</th>
+                            <th style="text-align:right;">Actions &amp; Dispatches</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbAnalystReports">
+                        <tr><td colspan="5" class="text-center" style="padding:24px;color:#94A3B8;">Loading reports manifest...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. DATASET UPLOAD & ESTIMATOR CONFIGURATION (HDFS SIMULATION) -->
+    <div class="panel-card">
+        <div class="panel-card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom:6px;">HDFS INGESTION &amp; TRAINING</span>
+                <h3>Custom Dataset Ingestion &amp; Feature Model Configuration</h3>
+                <p>Ingest raw partitioned CSV datasets, map feature vectors, and calibrate predictive machine learning models.</p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns: 1fr 1fr;gap:24px;align-items:start;">
+            <div>
+                <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:6px;">Upload Partitioned CSV Dataset</label>
+                <div style="display:flex;gap:10px;">
+                    <input type="file" id="datasetFileInput" class="form-control" accept=".csv">
+                    <button onclick="uploadDatasetFile()" id="btnUploadDataset" class="btn btn-primary" style="white-space:nowrap;">Upload</button>
+                </div>
+                <div id="uploadStatusMsg" style="font-size:12px;margin-top:8px;"></div>
+            </div>
+
+            <div id="modelConfigBox" style="display:none;background:#F8FAFC;padding:20px;border-radius:12px;border:1px solid #E2E8F0;">
+                <h4 style="font-size:13px;font-weight:700;margin:0 0 12px 0;color:#0F172A;">Feature Mapping &amp; Target Vector</h4>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:11px;font-weight:700;color:#64748B;">X Input Features (Hold Ctrl to select multiple):</label>
+                    <select id="xFeaturesSelect" class="form-select" multiple size="4" style="margin-top:4px;"></select>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:11px;font-weight:700;color:#64748B;">Y Target Predictor:</label>
+                    <select id="yTargetSelect" class="form-select" style="margin-top:4px;"></select>
+                </div>
+                <button onclick="processAndTrainModel()" id="btnTrainModel" class="btn btn-primary" style="width:100%;padding:11px;">
+                    Calibrate &amp; Train Model
+                </button>
+                <div id="trainResultMsg" style="font-size:12px;margin-top:8px;text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let currentDatasetId = null;
+
+function showAnalystAlert(msg, type='success') {
+    const box = document.getElementById('analystAlertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 5000);
+}
+
+// 1. LIVE DATABASE RISK ANALYSIS
+async function runLiveDbAnalysis() {
+    const btn = document.getElementById('btnSyncDb');
+    const summaryBox = document.getElementById('syncSummaryBox');
+    const placeholder = document.getElementById('syncPlaceholder');
+    const tbody = document.getElementById('syncResultsTableBody');
+
+    btn.disabled = true;
+    btn.innerHTML = '&#8987; Running MapReduce Reduction...';
+
+    try {
+        const res = await fetch('/api/analyst/analyze-db-students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success && data.results) {
+            placeholder.style.display = 'none';
+            summaryBox.style.display = 'block';
+
+            let low = 0, med = 0, high = 0;
+            tbody.innerHTML = data.results.map(r => {
+                let badgeClass = 'badge-success';
+                if (r.risk === 'High') { badgeClass = 'badge-danger'; high++; }
+                else if (r.risk === 'Medium') { badgeClass = 'badge-warning'; med++; }
+                else { low++; }
+
+                return `<tr>
+                    <td style="font-weight:700;color:#0F172A;">${r.student_name}</td>
+                    <td style="font-weight:600;">${r.marks}%</td>
+                    <td>${r.attendance}%</td>
+                    <td><span class="badge ${badgeClass}">${r.risk} Risk</span></td>
+                    <td><span class="badge badge-teal">${r.grade || 'Nominal'}</span></td>
+                    <td><span style="color:#1677FF;font-weight:600;font-size:12px;">&#10003; Synced to Portals</span></td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('statTotal').textContent = data.total_analyzed;
+            document.getElementById('statLow').textContent = low;
+            document.getElementById('statMedium').textContent = med;
+            document.getElementById('statHigh').textContent = high;
+
+            showAnalystAlert(`Inference complete! ${data.total_analyzed} students processed. Risk statuses are now live across all dashboards.`);
+        } else {
+            showAnalystAlert(data.message || 'Analysis could not be completed.', 'error');
+        }
+    } catch(err) {
+        showAnalystAlert('Server communication error during MapReduce analysis.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '&#9881; Sync &amp; Analyze All Students';
+    }
+}
+
+// 2. COMPILE REPORT & DISPATCH EMAIL ALERT
+async function handleCompileAndMailReport(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnCompileReport');
+    btn.disabled = true;
+    btn.innerHTML = '&#8987; Compiling &amp; Transmitting Email...';
+
+    const reportType = document.getElementById('reportModelType').value;
+    const title = document.getElementById('reportCustomTitle').value.trim();
+    const notes = document.getElementById('reportNotes').value.trim();
+    const sendEmail = document.getElementById('analystSendEmail').checked;
+    const recipient = document.getElementById('analystRecipientEmail').value.trim();
+    const urgency = document.getElementById('reportUrgency').value;
+
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: reportType,
+                title: title,
+                notes: notes,
+                send_email: sendEmail,
+                recipient: recipient,
+                urgency: urgency
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAnalystAlert(
+                sendEmail && recipient 
+                    ? `Report synthesized and automated alert email successfully dispatched to ${recipient}!` 
+                    : 'Report synthesized successfully!'
+            );
+            document.getElementById('reportCustomTitle').value = '';
+            document.getElementById('reportNotes').value = '';
+            loadAnalystReports();
+        } else {
+            showAnalystAlert(data.message || 'Report generation error.', 'error');
+        }
+    } catch(err) {
+        showAnalystAlert('Network error during report compilation and email alert dispatch.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '&#9993; Compile Report &amp; Transmit Alert';
+    }
+}
+
+// LOAD ANALYST REPORTS CATALOG
+async function loadAnalystReports() {
+    try {
+        const res = await fetch('/api/reports');
+        const data = await res.json();
+        const tb = document.getElementById('tbAnalystReports');
+
+        if (data.success && data.reports && data.reports.length) {
+            tb.innerHTML = data.reports.map(r => `
+                <tr>
+                    <td style="color:#64748B;font-family:monospace;">#${r.id || r._id}</td>
+                    <td style="font-weight:600;color:#0F172A;">${r.name || r.title || 'Analytical Assessment'}</td>
+                    <td>${r.created_by_name || 'Lead Analyst'}</td>
+                    <td style="color:#64748B;font-size:12px;">${r.created_at || 'Just now'}</td>
+                    <td style="text-align:right;">
+                        <a href="/static/reports/${r.name || r.filename}" download class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:12px;margin-right:6px;">Download</a>
+                        <button class="btn btn-amber btn-sm" onclick="resendAlertToUser('${r.id || r._id}')" style="padding:4px 10px;font-size:12px;">&#9993; Resend Alert</button>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            tb.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:24px;color:#94A3B8;">No analyst reports compiled yet.</td></tr>';
+        }
+    } catch(e) {
+        console.error('Error loading reports catalog:', e);
+    }
+}
+
+async function resendAlertToUser(reportId) {
+    const target = prompt('Enter recipient email address to resend this analytical report alert to:');
+    if (!target) return;
+
+    try {
+        const res = await fetch(`/api/reports/${reportId}/send-mail`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipient: target })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAnalystAlert(`Analytical report alert resent to: ${target}`);
+        } else {
+            showAnalystAlert(d.message || 'Dispatch failed.', 'error');
+        }
+    } catch(err) {
+        showAnalystAlert('Error contacting alert mail gateway.', 'error');
+    }
+}
+
+// 3. DATASET UPLOAD & TRAINING
+async function uploadDatasetFile() {
+    const fileInput = document.getElementById('datasetFileInput');
+    const msg = document.getElementById('uploadStatusMsg');
+    const btn = document.getElementById('btnUploadDataset');
+
+    if (!fileInput.files || !fileInput.files.length) {
+        msg.textContent = 'Please choose a CSV file first.';
+        msg.style.color = '#DC2626';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    msg.textContent = '';
+
+    try {
+        const res = await fetch('/api/upload-dataset', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            currentDatasetId = data.dataset_id;
+            msg.textContent = `Uploaded successfully: ${data.filename} (${data.row_count} records ingested)`;
+            msg.style.color = '#1677FF';
+
+            const xSelect = document.getElementById('xFeaturesSelect');
+            const ySelect = document.getElementById('yTargetSelect');
+            xSelect.innerHTML = '';
+            ySelect.innerHTML = '';
+
+            data.columns.forEach(col => {
+                xSelect.innerHTML += `<option value="${col}">${col}</option>`;
+                ySelect.innerHTML += `<option value="${col}">${col}</option>`;
+            });
+
+            document.getElementById('modelConfigBox').style.display = 'block';
+        } else {
+            msg.textContent = data.message || 'Upload failed.';
+            msg.style.color = '#DC2626';
+        }
+    } catch(e) {
+        msg.textContent = 'Error uploading file.';
+        msg.style.color = '#DC2626';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Upload';
+    }
+}
+
+async function processAndTrainModel() {
+    if (!currentDatasetId) return;
+
+    const xSelect = document.getElementById('xFeaturesSelect');
+    const ySelect = document.getElementById('yTargetSelect');
+    const msg = document.getElementById('trainResultMsg');
+    const btn = document.getElementById('btnTrainModel');
+
+    const selectedX = Array.from(xSelect.selectedOptions).map(o => o.value);
+    const selectedY = ySelect.value;
+
+    if (!selectedX.length || !selectedY) {
+        msg.textContent = 'Select at least one X feature and a valid Y target predictor.';
+        msg.style.color = '#DC2626';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Calibrating Model...';
+    msg.textContent = '';
+
+    try {
+        const res = await fetch('/api/process-dataset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                dataset_id: currentDatasetId,
+                x_columns: selectedX,
+                y_column: selectedY
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            msg.textContent = `${data.message} (Evaluation Accuracy / Score: ${data.score})`;
+            msg.style.color = '#1677FF';
+        } else {
+            msg.textContent = data.message || 'Model training failed.';
+            msg.style.color = '#DC2626';
+        }
+    } catch(e) {
+        msg.textContent = 'Error during model training pipeline.';
+        msg.style.color = '#DC2626';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Calibrate & Train Model';
+    }
+}
+
+// INITIALIZE
+document.addEventListener('DOMContentLoaded', () => {
+    loadAnalystReports();
+});
+</script>
+{% endblock %}

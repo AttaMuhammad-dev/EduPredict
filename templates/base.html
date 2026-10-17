@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPredict | {% block head_title %}Big Data &amp; Predictive Intelligence Platform{% endblock %}</title>
+    
+    <!-- FAVICON (Browser Tab Logo - EP Blue Box) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231677FF'/%3E%3Ctext x='50' y='50' dominant-baseline='central' text-anchor='middle' font-family='Arial, sans-serif' font-weight='800' font-size='46' fill='white'%3EEP%3C/text%3E%3C/svg%3E">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .notif-dropdown {
+            position: absolute;
+            top: 54px;
+            right: 20px;
+            width: 360px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: none;
+            overflow: hidden;
+        }
+        .notif-header {
+            padding: 14px 18px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notif-list {
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        .notif-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .notif-item:hover {
+            background: #f8fafc;
+        }
+        .notif-badge-pill {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        .cluster-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #1677FF;
+            background: rgba(22, 119, 255, 0.08);
+            border: 1px solid rgba(22, 119, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-right: 8px;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% set role = session.get('role', '') %}
+{% set is_logged_in = session.get('user_id') is not none %}
+{% set _show_sidebar = show_sidebar if show_sidebar is defined else is_logged_in %}
+
+{% if _show_sidebar %}
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-mark">EP</div>
+            <div class="brand-text">
+                <span class="brand-name">EduPredict</span>
+                <span class="brand-desc">Hadoop Big Data Core</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            {% if role == 'administrator' %}
+            <div class="sidebar-section-label">Cluster Management</div>
+            <a href="/dashboard" class="sidebar-link {% if request.path == '/dashboard' %}active{% endif %}"><span class="link-icon">&#9632;</span> Admin Console</a>
+            <a href="/students" class="sidebar-link {% if request.path == '/students' %}active{% endif %}"><span class="link-icon">&#9679;</span> Students Matrix</a>
+            
+            <div class="sidebar-section-label">Big Data &amp; Models</div>
+            <a href="/predict" class="sidebar-link {% if request.path == '/predict' %}active{% endif %}"><span class="link-icon">&#9670;</span> Risk Predictions</a>
+            <a href="/analytics" class="sidebar-link {% if request.path == '/analytics' %}active{% endif %}"><span class="link-icon">&#9651;</span> Visual Analytics</a>
+            <a href="/data" class="sidebar-link {% if request.path == '/data' %}active{% endif %}"><span class="link-icon">&#9881;</span> HDFS Partition Store</a>
+
+            <div class="sidebar-section-label">Communication &amp; Alerts</div>
+            <a href="/reports" class="sidebar-link {% if request.path == '/reports' %}active{% endif %}"><span class="link-icon">&#9993;</span> Reports &amp; Dispatch</a>
+            <a href="/alerts" class="sidebar-link {% if request.path == '/alerts' %}active{% endif %}"><span class="link-icon">&#9888;</span> Anomaly Alerts</a>
+
+            {% elif role == 'teacher' %}
+            <div class="sidebar-section-label">Academic Portal</div>
+            <a href="/dashboard" class="sidebar-link {% if request.path == '/dashboard' %}active{% endif %}"><span class="link-icon">&#9632;</span> Faculty Overview</a>
+            <a href="/teacher" class="sidebar-link {% if request.path == '/teacher' %}active{% endif %}"><span class="link-icon">&#9998;</span> Grade Ledger &amp; Tasks</a>
+            <a href="/students" class="sidebar-link {% if request.path == '/students' %}active{% endif %}"><span class="link-icon">&#9679;</span> Cohort Students</a>
+            
+            <div class="sidebar-section-label">Predictive Diagnostics</div>
+            <a href="/predict" class="sidebar-link {% if request.path == '/predict' %}active{% endif %}"><span class="link-icon">&#9670;</span> Student Risk Inferences</a>
+            <a href="/alerts" class="sidebar-link {% if request.path == '/alerts' %}active{% endif %}"><span class="link-icon">&#9888;</span> Incident Alerts</a>
+
+            {% elif role == 'analyst' %}
+            <div class="sidebar-section-label">Analyst Workspace</div>
+            <a href="/dashboard" class="sidebar-link {% if request.path == '/dashboard' %}active{% endif %}"><span class="link-icon">&#9632;</span> ML Ops Workspace</a>
+            <a href="/analytics" class="sidebar-link {% if request.path == '/analytics' %}active{% endif %}"><span class="link-icon">&#9651;</span> Visual Analytics</a>
+            <a href="/predict" class="sidebar-link {% if request.path == '/predict' %}active{% endif %}"><span class="link-icon">&#9670;</span> Predictive Inference</a>
+            
+            <div class="sidebar-section-label">Data Tier &amp; Dispatch</div>
+            <a href="/data" class="sidebar-link {% if request.path == '/data' %}active{% endif %}"><span class="link-icon">&#9881;</span> Ingest HDFS Datasets</a>
+            <a href="/reports" class="sidebar-link {% if request.path == '/reports' %}active{% endif %}"><span class="link-icon">&#9993;</span> Compile Report &amp; Mail</a>
+            <a href="/alerts" class="sidebar-link {% if request.path == '/alerts' %}active{% endif %}"><span class="link-icon">&#9888;</span> MapReduce Anomalies</a>
+
+            {% elif role == 'student' %}
+            <div class="sidebar-section-label">Student Workspace</div>
+            <a href="/dashboard" class="sidebar-link {% if request.path == '/dashboard' %}active{% endif %}"><span class="link-icon">&#9632;</span> Academic Dashboard</a>
+            <a href="/profile" class="sidebar-link {% if request.path == '/profile' %}active{% endif %}"><span class="link-icon">&#9679;</span> Student Dossier</a>
+
+            {% else %}
+            <div class="sidebar-section-label">Platform Core</div>
+            <a href="/" class="sidebar-link {% if request.path == '/' %}active{% endif %}"><span class="link-icon">&#9632;</span> Portal Home</a>
+            <a href="/about" class="sidebar-link {% if request.path == '/about' %}active{% endif %}"><span class="link-icon">&#9679;</span> Project Mission</a>
+            <a href="/features" class="sidebar-link {% if request.path == '/features' %}active{% endif %}"><span class="link-icon">&#9670;</span> Analytical Features</a>
+            <a href="/architecture" class="sidebar-link {% if request.path == '/architecture' %}active{% endif %}"><span class="link-icon">&#9881;</span> Hadoop Architecture</a>
+            <a href="/contact" class="sidebar-link {% if request.path == '/contact' %}active{% endif %}"><span class="link-icon">&#9998;</span> Support &amp; Contact</a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            {% if is_logged_in %}
+            <a href="/profile" class="sidebar-user" style="text-decoration:none;">
+                <div class="user-avatar" style="background:#1677FF;color:#ffffff;font-weight:700;">{{ session.get('name', 'U')[0] | upper }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ session.get('name', 'User') }}</div>
+                    <div class="user-role">{{ role }}</div>
+                </div>
+            </a>
+            <a href="/logout" class="sidebar-link" style="margin-top:6px;color:#dc2626;"><span class="link-icon">&#10140;</span> Sign Out</a>
+            {% else %}
+            <a href="/login" class="sidebar-link"><span class="link-icon">&#10140;</span> Sign In</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <header class="top-header" style="position:relative;">
+            <div class="header-left">
+                <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
+                <div class="header-breadcrumb">
+                    <span style="font-weight:700;color:#1677FF;">EduPredict</span>
+                    <span>/</span>
+                    <span class="crumb-active" style="font-weight:600;color:#111827;">{% block page_title %}Dashboard{% endblock %}</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="cluster-status-pill">
+                    <span style="width:7px;height:7px;border-radius:50%;background:#1677FF;display:inline-block;"></span>
+                    HDFS Online
+                </div>
+
+                <div class="header-search">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" placeholder="Search students, marks, batches..." id="globalSearch" onkeypress="handleGlobalSearch(event)">
+                </div>
+
+                <div style="position:relative;display:flex;align-items:center;gap:8px;">
+                    <button class="header-icon-btn" id="notifBellBtn" onclick="toggleNotifDropdown()" title="Cluster Notifications">
+                        &#128276;<span class="notif-dot" id="headerNotifBadge" style="display:none;"></span>
+                    </button>
+
+                    <!-- UNIVERSAL EMAIL DISPATCH BUTTON (ALL ROLES) -->
+                    <button class="header-icon-btn" id="composeEmailBtn" onclick="openComposeEmail('')" title="Send Email">
+                        &#9993;
+                    </button>
+
+                    <!-- LIVE NOTIFICATION POPUP -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <strong style="font-size:14px;color:#0f172a;">Cluster Alerts &amp; Reports</strong>
+                            <span id="notifDropdownCount" style="font-size:11px;font-weight:700;color:#1677FF;">0 Alerts</span>
+                        </div>
+                        <ul class="notif-list" id="notifDropdownList">
+                            <li style="padding:20px;text-align:center;color:#94a3b8;font-size:12px;">Checking notification daemon...</li>
+                        </ul>
+                        <div style="padding:10px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;">
+                            <a href="/alerts" style="font-size:12px;font-weight:700;color:#1677FF;text-decoration:none;">Open Alerts Center &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/profile" class="header-profile" style="text-decoration:none;">
+                    <div class="profile-avatar" style="background:#1677FF;color:#ffffff;font-weight:700;">{{ session.get('name', 'U')[0] | upper }}</div>
+                    <span class="profile-name" style="font-weight:600;color:#111827;">{{ session.get('name', 'User') }}</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="page-content">
+{% else %}
+<div class="public-topbar" style="background:#ffffff;border-bottom:1px solid #e2e8f0;padding:0 24px;position:sticky;top:0;z-index:100;">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;height:64px;">
+        <!-- FIXED: Public Topbar Logo -->
+        <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+            <span class="brand-mark">EP</span>
+            <span style="font-weight:800;font-size:18px;color:#0B1F33;">EduPredict</span>
+        </a>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <a href="/" class="btn btn-ghost btn-sm" style="font-weight:600;color:#334155;">Home</a>
+            <a href="/about" class="btn btn-ghost btn-sm" style="font-weight:600;color:#334155;">About</a>
+            <a href="/features" class="btn btn-ghost btn-sm" style="font-weight:600;color:#334155;">Features</a>
+            <a href="/architecture" class="btn btn-ghost btn-sm" style="font-weight:600;color:#334155;">Architecture</a>
+            <a href="/contact" class="btn btn-ghost btn-sm" style="font-weight:600;color:#334155;">Contact</a>
+            <a href="/login" class="btn btn-primary btn-sm" style="margin-left:12px;background:#1677FF;font-weight:700;">Portal Login</a>
+        </div>
+    </div>
+</div>
+<main>
+{% endif %}
+
+            <div role="note" style="padding:10px 16px;margin-bottom:16px;border-radius:8px;background:#173f35;color:white;text-align:center;font-size:13px">Portfolio demo · Use synthetic data only · Educational predictions are learning examples</div>
+            {% block content %}{% endblock %}
+
+{% if _show_sidebar %}
+        </div>
+    </div>
+</div>
+{% else %}
+</main>
+<footer class="site-footer" style="background:#0B1F33;color:#cbd5e1;padding:48px 0 24px;border-top:1px solid rgba(255,255,255,0.08);">
+    <div class="container">
+        <div class="footer-grid" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:32px;">
+            <div>
+                <!-- FIXED: Footer Logo -->
+                <div class="footer-brand" style="display:flex;align-items:center;gap:10px;color:#ffffff;font-size:20px;font-weight:800;margin-bottom:12px;">
+                    <span class="brand-mark" style="width: 36px; height: 36px; font-size: 13px; border-radius: 10px;">EP</span>
+                    EduPredict
+                </div>
+                <p class="footer-desc" style="font-size:13px;color:#94a3b8;line-height:1.6;max-width:320px;">
+                    Replicating Apache Hadoop Big Data infrastructure in Python to provide student retention forecasting, parallel MapReduce anomaly screening, and automated stakeholder alert dispatching.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h4 style="color:#ffffff;font-size:14px;font-weight:700;margin-bottom:14px;">Platform</h4>
+                <a href="/dashboard" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">Dashboard</a>
+                <a href="/students" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">Students</a>
+                <a href="/predict" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">Risk Models</a>
+                <a href="/analytics" style="display:block;color:#94a3b8;text-decoration:none;font-size:13px;">Analytics</a>
+            </div>
+            <div class="footer-col">
+                <h4 style="color:#ffffff;font-size:14px;font-weight:700;margin-bottom:14px;">Architecture</h4>
+                <a href="/about" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">About Project</a>
+                <a href="/features" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">Features</a>
+                <a href="/architecture" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">HDFS Topology</a>
+                <a href="/contact" style="display:block;color:#94a3b8;text-decoration:none;font-size:13px;">Support Desk</a>
+            </div>
+            <div class="footer-col">
+                <h4 style="color:#ffffff;font-size:14px;font-weight:700;margin-bottom:14px;">Access</h4>
+                {% if is_logged_in %}
+                <a href="/dashboard" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">Workspace</a>
+                <a href="/logout" style="display:block;color:#dc2626;text-decoration:none;font-size:13px;">Logout</a>
+                {% else %}
+                <a href="/login" style="display:block;color:#94a3b8;text-decoration:none;margin-bottom:8px;font-size:13px;">Sign In</a>
+                <a href="/register" style="display:block;color:#94a3b8;text-decoration:none;font-size:13px;">Register</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;text-align:center;font-size:12px;color:#64748b;">
+            &copy; 2026 EduPredict &bull; Replicating Hadoop Ecosystem in Python &bull; Aptech ADSE eProject Specification.
+        </div>
+    </div>
+</footer>
+{% endif %}
+
+<!-- UNIVERSAL EMAIL COMPOSE MODAL (ALL ROLES) -->
+<div id="composeEmailModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);align-items:center;justify-content:center;z-index:10001;padding:20px;">
+    <div style="background:#ffffff;border-radius:16px;border:1px solid #e2e8f0;max-width:560px;width:100%;box-shadow:0 20px 45px -12px rgba(0,0,0,0.35);overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#123c36;color:#ffffff;">
+            <strong style="font-size:15px;font-weight:800;">&#9993; Compose Email</strong>
+            <button type="button" onclick="closeComposeEmail()" style="border:none;background:none;color:#ffffff;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <form id="composeEmailForm" onsubmit="handleComposeEmailSend(event)" style="padding:20px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Recipient Email *</label>
+            <input class="form-input" type="email" id="composeRecipient" required placeholder="recipient@gmail.com" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;margin-bottom:14px;">
+
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Subject *</label>
+            <input class="form-input" type="text" id="composeSubject" required placeholder="Email subject" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;margin-bottom:14px;">
+
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Message *</label>
+            <textarea class="form-input" id="composeMessage" rows="5" required placeholder="Write your message here..." style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;resize:vertical;margin-bottom:16px;"></textarea>
+
+            <div id="composeEmailStatus" style="font-size:13px;margin-bottom:12px;"></div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeComposeEmail()" style="padding:9px 18px;border:1px solid #D1D5DB;background:#ffffff;border-radius:8px;font-weight:600;color:#374151;cursor:pointer;">Cancel</button>
+                <button type="submit" id="composeEmailBtn" class="btn btn-primary btn-sm" style="padding:9px 22px;background:#1677FF;border:none;border-radius:8px;font-weight:700;color:#ffffff;cursor:pointer;">&#9993; Send Email</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+function toggleNotifDropdown() {
+    const d = document.getElementById('notifDropdown');
+    if (!d) return;
+    d.style.display = d.style.display === 'block' ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(e) {
+    const d = document.getElementById('notifDropdown');
+    const b = document.getElementById('notifBellBtn');
+    if (d && b && !d.contains(e.target) && !b.contains(e.target)) {
+        d.style.display = 'none';
+    }
+});
+
+async function fetchLiveHeaderAlerts() {
+    try {
+        const res = await fetch('/api/analytics/alerts');
+        const data = await res.json();
+        const badge = document.getElementById('headerNotifBadge');
+        const list = document.getElementById('notifDropdownList');
+        const countTxt = document.getElementById('notifDropdownCount');
+
+        if (data.success && data.alerts && data.alerts.length) {
+            const alerts = data.alerts;
+            if (badge) badge.style.display = 'block';
+            if (countTxt) countTxt.textContent = `${alerts.length} Incident${alerts.length > 1 ? 's' : ''}`;
+
+            if (list) {
+                list.innerHTML = alerts.slice(0, 5).map(a => {
+                    const sev = (a.severity || 'info').toLowerCase();
+                    const color = sev === 'critical' ? '#dc2626' : sev === 'high' ? '#0B1F33' : '#1677FF';
+                    const bg = sev === 'critical' ? 'rgba(220,38,38,0.08)' : sev === 'high' ? 'rgba(11, 31, 51, 0.07)' : 'rgba(22,119,255,0.08)';
+                    return `
+                        <li class="notif-item" onclick="window.location.href='/alerts'">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                                <strong style="color:#0f172a;font-size:12px;">${a.alert_type || a.type || 'Risk Warning'}</strong>
+                                <span class="notif-badge-pill" style="background:${bg};color:${color};">${sev}</span>
+                            </div>
+                            <div style="color:#475569;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.message || 'Anomaly threshold detected.'}</div>
+                        </li>
+                    `;
+                }).join('');
+            }
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (countTxt) countTxt.textContent = '0 Alerts';
+            if (list) list.innerHTML = '<li style="padding:20px;text-align:center;color:#94a3b8;font-size:12px;">Nominal status. No unread anomaly alerts.</li>';
+        }
+    } catch(e) {
+        // Silent catch for guest views
+    }
+}
+
+function handleGlobalSearch(e) {
+    if (e.key === 'Enter') {
+        const q = e.target.value.trim();
+        if (q) {
+            window.location.href = `/students?search=${encodeURIComponent(q)}`;
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchLiveHeaderAlerts();
+});
+
+function openComposeEmail(prefillRecipient) {
+    const modal = document.getElementById('composeEmailModal');
+    if (!modal) return;
+    if (prefillRecipient) document.getElementById('composeRecipient').value = prefillRecipient;
+    document.getElementById('composeEmailStatus').innerHTML = '';
+    modal.style.display = 'flex';
+}
+
+function closeComposeEmail() {
+    const modal = document.getElementById('composeEmailModal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function handleComposeEmailSend(e) {
+    e.preventDefault();
+    const recipient = document.getElementById('composeRecipient').value.trim();
+    const subject = document.getElementById('composeSubject').value.trim();
+    const message = document.getElementById('composeMessage').value.trim();
+    const status = document.getElementById('composeEmailStatus');
+    const sendBtn = e.target.querySelector('button[type="submit"]');
+
+    if (!recipient || !subject || !message) {
+        status.innerHTML = '<span style="color:#DC2626;font-weight:600;">All fields are required.</span>';
+        return;
+    }
+
+    status.innerHTML = '<span style="color:#1677FF;font-weight:600;">Dispatching email...</span>';
+    sendBtn.disabled = true;
+
+    try {
+        const res = await fetch('/api/email/send', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({recipient, subject, message, context: 'Portal Dispatch'})
+        });
+        const data = await res.json();
+        if (data.success) {
+            status.innerHTML = `<span style="color:#059669;font-weight:700;">&#10003; ${data.message}</span>`;
+            setTimeout(() => {
+                closeComposeEmail();
+                document.getElementById('composeEmailForm').reset();
+            }, 1400);
+        } else {
+            status.innerHTML = `<span style="color:#DC2626;font-weight:600;">&#10007; ${data.message}</span>`;
+        }
+    } catch(err) {
+        status.innerHTML = '<span style="color:#DC2626;font-weight:600;">Network error while dispatching email.</span>';
+    } finally {
+        sendBtn.disabled = false;
+    }
+}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

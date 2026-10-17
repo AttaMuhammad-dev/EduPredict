@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+
+.vercel
+.env*
+!.env.example
+tests/runtime-*/
+uploads/
+backups/
+static/reports/
+static/uploads/
+*.db
+data/*.db
+

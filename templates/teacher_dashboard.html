@@ -1,0 +1,1156 @@
+{% extends "base.html" %}
+{% block page_title %}Faculty Workspace &amp; Cohort Diagnostics - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.teacher-page { margin: 0 auto; padding: 32px 24px; }
+.panel-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+.panel-card-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #F1F5F9; }
+.panel-card-header h3 { font-size: 18px; font-weight: 700; color: #0F172A; margin: 0 0 4px 0; }
+.panel-card-header p { font-size: 13px; color: #64748B; margin: 0; }
+
+/* Cohort filter banner */
+.cohort-filter-banner {
+    background: linear-gradient(135deg, rgba(22,119,255,0.04) 0%, rgba(22,119,255,0.08) 100%);
+    border: 1.5px solid rgba(22,119,255,0.2);
+    border-radius: 14px;
+    padding: 16px 22px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.kpi-stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+.kpi-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+.kpi-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.kpi-icon.teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.kpi-icon.blue { background: rgba(22,119,255,0.06); color: #1677FF; }
+.kpi-icon.green { background: rgba(22,119,255,0.08); color: #1677FF; }
+.kpi-icon.amber { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.kpi-icon.red { background: rgba(220,38,38,0.08); color: #DC2626; }
+.kpi-label { display: block; font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.kpi-value { display: block; font-size: 24px; font-weight: 800; color: #0F172A; line-height: 1.1; }
+
+.tabs { display: flex; border-bottom: 1px solid #E2E8F0; background: #F8FAFC; overflow-x: auto; }
+.tab-btn { padding: 14px 20px; font-size: 13px; font-weight: 700; color: #475569; background: transparent; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.tab-btn:hover { color: #1677FF; }
+.tab-btn.active { color: #1677FF; border-bottom-color: #1677FF; background: #FFFFFF; }
+.tab-badge { background: rgba(11,31,51,0.05); color: #0B1F33; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; }
+.tab-badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+.tab-content { display: none; padding: 24px; }
+.tab-content.active { display: block; }
+
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th { background: #0B1F33; color: #FFFFFF; padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #0B1F33; text-align: left; }
+.data-table tbody td { padding: 14px 16px; font-size: 13px; color: #334155; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+.data-table tbody tr:hover { background: #F8FAFC; }
+
+.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; }
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #0B1F33; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; white-space: nowrap; }
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+.btn-amber { background: #0B1F33; color: #FFFFFF; }
+.btn-amber:hover { background: #0A1728; }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+
+.form-control, .form-select { width: 100%; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px; color: #1E293B; background: #FFFFFF; box-sizing: border-box; }
+.form-control:focus, .form-select:focus { outline: none; border-color: #1677FF; box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12); }
+.form-control:disabled, .form-select:disabled { background: #F1F5F9; color: #94A3B8; cursor: not-allowed; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.modal-box { background: #FFFFFF; border-radius: 16px; width: 90%; max-width: 540px; box-shadow: 0 24px 48px rgba(0,0,0,0.15); overflow: hidden; }
+.modal-header-dark { background: #0B1F33; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
+.modal-header-dark h3 { font-size: 17px; font-weight: 700; color: #FFFFFF; margin: 0; }
+.modal-close { background: none; border: none; font-size: 22px; color: #94A3B8; cursor: pointer; line-height: 1; }
+.modal-close:hover { color: #FFFFFF; }
+
+.info-callout { background: rgba(22,119,255,0.06); border: 1px solid rgba(22,119,255,0.15); border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #0B1F33; line-height: 1.6; margin-bottom: 16px; }
+
+/* Card-based submission view */
+.submission-card { border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; background: #FFFFFF; transition: box-shadow 0.2s, border-color 0.2s; }
+.submission-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-color: #CBD5E1; }
+.submission-card.pending { border-left: 4px solid #F59E0B; }
+.submission-card.graded { border-left: 4px solid #1677FF; }
+.submission-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.submission-body { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+.submission-text-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #334155; line-height: 1.6; max-height: 140px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; }
+.submission-meta { display: flex; flex-direction: column; gap: 8px; }
+.submission-meta-item { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px dashed #E2E8F0; }
+.submission-meta-item:last-child { border-bottom: none; }
+.submission-meta-label { color: #64748B; font-weight: 600; }
+.submission-meta-value { color: #0F172A; font-weight: 700; text-align: right; }
+.submission-actions { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #F1F5F9; flex-wrap: wrap; }
+
+.filter-bar { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.filter-bar label { font-size: 11px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px; }
+.filter-bar .filter-item { display: flex; flex-direction: column; min-width: 160px; }
+
+@media (max-width: 1024px) {
+    .kpi-stat-grid { grid-template-columns: repeat(3, 1fr); }
+    .submission-body { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+    .kpi-stat-grid { grid-template-columns: 1fr 1fr; }
+    .teacher-page { padding: 16px; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+}
+</style>
+
+<div class="teacher-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:24px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;"></span>
+                    FACULTY PORTAL &bull; COHORT PARTITIONS &amp; REMEDIAL ALERTS[cite: 2]
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Instructor Workspace</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Supervise assigned student cohorts, evaluate coursework deliverables, track MapReduce risk inferences, and dispatch automated email alerts to learners and academic advisors[cite: 2].
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-secondary" onclick="loadTeacherData()" style="background:#ffffff;color:#0B1F33;border:none;">
+                    &#8635; Refresh Cohort Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COHORT PARTITION FILTER BANNER (Keeping your existing filter) -->
+    <div class="cohort-filter-banner">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:36px;height:36px;border-radius:10px;background:rgba(22,119,255,0.12);color:#1677FF;display:inline-flex;align-items:center;justify-content:center;font-size:16px;">&#128218;</span>
+            <div>
+                <strong style="display:block;font-size:11px;font-weight:800;color:#1677FF;text-transform:uppercase;letter-spacing:0.5px;">COHORT PARTITION VIEW</strong>
+                <span style="font-size:12px;color:#475569;font-weight:600;">Filter data by a specific batch or view all</span>
+            </div>
+        </div>
+        <select id="cohortFilter" class="form-select" style="flex:1;min-width:220px;max-width:400px;" onchange="applyCohortFilter()">
+            <option value="all">-- All Cohorts / Batches --</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="clearCohortFilter()">Clear Filter</button>
+    </div>
+
+    <div id="alertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-stat-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon teal">&#128218;</div>
+            <div><span class="kpi-label">Active Cohorts</span><span class="kpi-value" id="batchCount">0</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon blue">&#128196;</div>
+            <div><span class="kpi-label">Assignments</span><span class="kpi-value" id="assignmentCount">0</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon green">&#9989;</div>
+            <div><span class="kpi-label">Graded Submissions</span><span class="kpi-value" id="gradedCount">0</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon amber">&#128221;</div>
+            <div><span class="kpi-label">Pending Reviews</span><span class="kpi-value" id="pendingCount" style="color:#0B1F33;">0</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon red">&#9888;</div>
+            <div><span class="kpi-label">High Risk Flagged</span><span class="kpi-value" id="highRiskCohortCount" style="color:#DC2626;">0</span></div>
+        </div>
+    </div>
+
+    <!-- CREATE ASSIGNMENT PANEL -->
+    <div class="panel-card" style="border-left:5px solid #1677FF;">
+        <div class="panel-card-header">
+            <div>
+                <span class="badge badge-teal" style="margin-bottom:4px;">CURRICULUM MODULE</span>
+                <h3>Create New Coursework Assignment</h3>
+                <p>Assign tasks to cohort partitions with optional automated email notifications dispatched to enrolled learners[cite: 2].</p>
+            </div>
+        </div>
+
+        <form id="assignmentForm">
+            <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Assignment Title</label>
+                    <input type="text" id="assignTitle" class="form-control" placeholder="e.g. MapReduce Paradigm Implementation" required>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Subject Domain</label>
+                    <input type="text" id="assignSubject" class="form-control" placeholder="e.g. Big Data Analytics" required>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Target Cohort / Batch Partition</label>
+                    <select id="assignBatch" class="form-select" required>
+                        <option value="">-- Select Assigned Batch --</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:16px;align-items:flex-end;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Total Maximum Score</label>
+                    <input type="number" id="assignTotal" class="form-control" placeholder="100" value="100" min="1" required>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Submission Deadline</label>
+                    <input type="date" id="assignDue" class="form-control" required>
+                </div>
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="broadcastAssignmentEmail" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                    <label for="broadcastAssignmentEmail" style="font-size:12px;font-weight:600;color:#334155;cursor:pointer;margin:0;">
+                        Dispatch Instant Email Notice to Cohort Students[cite: 2]
+                    </label>
+                </div>
+            </div>
+            <div style="margin-top:20px;text-align:right;">
+                <button type="submit" id="btnCreateAssignment" class="btn btn-primary" style="padding:11px 28px;">
+                    Publish Assignment &amp; Notify Cohort[cite: 2]
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MAIN TABS -->
+    <div class="panel-card" style="padding:0;overflow:hidden;" id="tabsPanel">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('submissions', this)">
+                &#128235; All Submissions <span class="tab-badge" id="allSubsTabBadge">0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('pending', this)">
+                &#8987; Pending Reviews <span class="tab-badge tab-badge-danger" id="pendingTabBadge">0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('grade', this)">Grade Student</button>
+            <button class="tab-btn" onclick="switchTab('assignments', this)">Assignments Catalog</button>
+            <button class="tab-btn" onclick="switchTab('grades', this)">Evaluation Ledger</button>
+            <button class="tab-btn" onclick="switchTab('student-risk', this)">
+                Cohort Risk Surveillance <span class="badge badge-danger" style="font-size:10px;padding:2px 6px;margin-left:4px;">Live ML[cite: 2]</span>
+            </button>
+        </div>
+
+        <!-- ============ TAB 1: ALL SUBMISSIONS ============ -->
+        <div class="tab-content active" id="tab-submissions">
+            <div class="panel-card-header" style="margin-bottom:16px;padding-bottom:12px;">
+                <div>
+                    <h3>All Student Submissions &mdash; Review Center</h3>
+                    <p>Yahan har wo submission dikhega jo students ne kiya hai. Details inspect karein, marks dein, aur feedback bhejein.</p>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-item">
+                    <label>Filter by Assignment</label>
+                    <select id="filterByAssignment" class="form-control" onchange="applySubmissionFilters()">
+                        <option value="all">All Assignments</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Filter by Status</label>
+                    <select id="filterByStatus" class="form-control" onchange="applySubmissionFilters()">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending Review Only</option>
+                        <option value="graded">Graded Only</option>
+                    </select>
+                </div>
+                <div class="filter-item" style="flex:1;min-width:220px;">
+                    <label>Search Learner</label>
+                    <input type="text" id="filterBySearch" class="form-control" placeholder="Search by student name or email..." oninput="applySubmissionFilters()">
+                </div>
+                <div class="filter-item" style="min-width:auto;">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary btn-sm" onclick="resetSubmissionFilters()">&#10006; Clear</button>
+                </div>
+            </div>
+
+            <div id="submissionsCountInfo" style="font-size:12px;color:#64748B;font-weight:600;margin-bottom:14px;"></div>
+            <div id="allSubmissionsList">
+                <div style="text-align:center;padding:40px;color:#94A3B8;font-size:13px;">Loading student submissions...</div>
+            </div>
+        </div>
+
+        <!-- ============ TAB 2: PENDING REVIEWS ============ -->
+        <div class="tab-content" id="tab-pending">
+            <div class="panel-card-header" style="margin-bottom:16px;padding-bottom:12px;">
+                <div>
+                    <h3>Pending Submissions Needing Review</h3>
+                    <p>Ye submissions abhi tak grade nahi hui. Jaldi review karke marks aur feedback dein.</p>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student Learner</th>
+                            <th>Assignment Unit</th>
+                            <th>Submitted At</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingSubmissionsTable">
+                        <tr><td colspan="4" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">Loading pending submissions...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ TAB 3: GRADE STUDENT ============ -->
+        <div class="tab-content" id="tab-grade">
+            <div class="panel-card-header" style="margin-bottom:18px;padding-bottom:14px;">
+                <div>
+                    <h3>Grade Student &amp; Send Feedback</h3>
+                    <p>Award marks and optionally transmit automated performance alert emails directly to the learner[cite: 2].</p>
+                </div>
+            </div>
+
+            <div class="info-callout">
+                <strong>&#9432; Important:</strong> Sirf wahi students yahan show honge jinhone chuna gaya assignment <strong>submit</strong> kiya hai.
+            </div>
+
+            <form id="gradeStudentForm">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;">
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Select Coursework Assignment</label>
+                        <select id="gradeAssignmentSelect" class="form-select" required onchange="onGradeAssignmentChange()">
+                            <option value="">-- Choose Assignment --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Select Student Learner (Submitters Only)</label>
+                        <select id="gradeStudentSelect" class="form-select" required disabled>
+                            <option value="">-- Pehle Assignment select karein --</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-bottom:18px;">
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Obtained Marks</label>
+                        <input type="number" id="stdMarks" class="form-control" placeholder="e.g. 85" min="0" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Instructor Feedback / Guidance</label>
+                        <input type="text" id="stdFeedback" class="form-control" placeholder="Well structured MapReduce reduction logic. Revise exception handling.">
+                    </div>
+                </div>
+                <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="emailGradeAlert" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                    <label for="emailGradeAlert" style="font-size:12px;font-weight:600;color:#1677FF;cursor:pointer;margin:0;">
+                        Transmit Instant Grade &amp; Feedback Alert via Email to Student[cite: 2]
+                    </label>
+                </div>
+                <button type="submit" id="btnSubmitGrade" class="btn btn-primary" style="padding:11px 26px;margin-top:18px;">
+                    Save Grade &amp; Transmit Evaluation[cite: 2]
+                </button>
+            </form>
+        </div>
+
+        <!-- ============ TAB 4: ASSIGNMENTS CATALOG ============ -->
+        <div class="tab-content" id="tab-assignments">
+            <div class="panel-card-header" style="margin-bottom:16px;padding-bottom:12px;">
+                <div>
+                    <h3>Published Coursework Units</h3>
+                    <p>Assignments scheduled across your assigned batch partitions.</p>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Assignment Title</th>
+                            <th>Domain Subject</th>
+                            <th>Assigned Batch</th>
+                            <th style="text-align:center;">Total Marks</th>
+                            <th style="text-align:center;">Submissions</th>
+                            <th>Deadline</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsTable">
+                        <tr><td colspan="7" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">Loading coursework catalog...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ TAB 5: EVALUATION LEDGER ============ -->
+        <div class="tab-content" id="tab-grades">
+            <div class="panel-card-header" style="margin-bottom:16px;padding-bottom:12px;">
+                <div>
+                    <h3>Continuous Evaluation Ledger</h3>
+                    <p>Historical scores and feedback recorded for enrolled learners (submitted assignments only).</p>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student Learner</th>
+                            <th>Email Destination</th>
+                            <th>Coursework Unit</th>
+                            <th style="text-align:center;">Score Ratio</th>
+                            <th style="text-align:center;">Percentage</th>
+                            <th>Feedback Note</th>
+                            <th>Evaluation Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradesTable">
+                        <tr><td colspan="7" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">No grade records found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ TAB 6: COHORT RISK WATCH ============ -->
+        <div class="tab-content" id="tab-student-risk">
+            <div class="panel-card-header" style="margin-bottom:16px;padding-bottom:12px;">
+                <div>
+                    <h3>Cohort Predictive Risk &amp; Retention Monitor[cite: 2]</h3>
+                    <p>MapReduce scores aggregated from attendance and assessment grades to isolate at-risk students[cite: 2].</p>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Learner Identity</th>
+                            <th>Official Email</th>
+                            <th style="text-align:center;">Attendance Rate[cite: 2]</th>
+                            <th style="text-align:center;">Mean Score[cite: 2]</th>
+                            <th>Risk Assessment[cite: 2]</th>
+                            <th style="text-align:center;">Model Confidence[cite: 2]</th>
+                            <th>Last Inferred</th>
+                            <th style="text-align:right;">Mentor Escalation[cite: 2]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherStudentsRiskTable">
+                        <tr><td colspan="8" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">Loading risk metrics...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- REVIEW & GRADE SUBMISSION MODAL -->
+<div id="reviewModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-header-dark">
+            <h3>Review &amp; Grade Submission</h3>
+            <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+        </div>
+        <div style="padding:20px 24px;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">
+            <strong id="reviewStudentName" style="font-size:15px;color:#0F172A;display:block;"></strong>
+            <span id="reviewAssignmentInfo" style="font-size:12px;color:#64748B;"></span>
+        </div>
+        <div style="padding:16px 24px;background:#FFFFFF;border-bottom:1px solid #E2E8F0;max-height:180px;overflow-y:auto;">
+            <span style="font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;display:block;margin-bottom:4px;">Written Solution</span>
+            <p id="reviewSubmissionText" style="font-size:13px;color:#334155;line-height:1.6;margin:0;white-space:pre-wrap;"></p>
+            <div id="reviewFileContainer" style="margin-top:12px;padding-top:10px;border-top:1px dashed #CBD5E1;display:none;">
+                <span style="font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;display:block;margin-bottom:4px;">Attachment File</span>
+                <a id="reviewFileLink" href="#" target="_blank" class="btn btn-secondary btn-sm" style="color:#1677FF;">
+                    &#128206; <span id="reviewFileName">Download File</span>
+                </a>
+            </div>
+        </div>
+        <div style="padding:20px 24px;">
+            <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">
+                    Marks to Award (Max: <span id="reviewTotalMarks">100</span>)
+                </label>
+                <input type="number" id="reviewMarks" class="form-control" placeholder="Enter obtained marks" min="0" required>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Evaluator Feedback</label>
+                <textarea id="reviewFeedback" class="form-control" rows="2" placeholder="Constructive guidance for the student..." style="resize:vertical;"></textarea>
+            </div>
+            <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+                <input type="checkbox" id="sendEmailGradeNotification" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                <label for="sendEmailGradeNotification" style="font-size:12px;font-weight:600;color:#1677FF;cursor:pointer;margin:0;">
+                    Dispatch Grade &amp; Feedback Alert via Email to Student[cite: 2]
+                </label>
+            </div>
+        </div>
+        <div style="padding:16px 24px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;background:#F8FAFC;">
+            <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
+            <button type="button" id="btnGradeSubmit" class="btn btn-primary" onclick="gradeSubmission()">Save &amp; Transmit Evaluation</button>
+        </div>
+    </div>
+</div>
+
+<!-- ESCALATE RISK MODAL -->
+<div id="riskEscalateModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-header-dark">
+            <h3>Escalate At-Risk Student Alert[cite: 2]</h3>
+            <button class="modal-close" onclick="closeRiskEscalateModal()">&times;</button>
+        </div>
+        <form onsubmit="handleSendRiskEscalation(event)">
+            <input type="hidden" id="escStudentId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.15);border-radius:10px;padding:12px 16px;">
+                    <span style="font-size:11px;font-weight:800;color:#DC2626;text-transform:uppercase;display:block;">Incident Flag</span>
+                    <strong id="escStudentName" style="font-size:14px;color:#DC2626;">Student Name</strong>
+                    <span id="escStudentSummary" style="font-size:12px;color:#B91C1C;display:block;margin-top:2px;">Attendance: 0% &bull; Score: 0%</span>
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#334155;margin-bottom:6px;">Advisor / Parent / Dean Recipient Email <span style="color:#DC2626;">*</span></label>
+                    <input type="email" id="escRecipientEmail" required placeholder="counselor@university.edu, dean@aptech.internal" class="form-control">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#334155;margin-bottom:6px;">Remedial Directive Notes</label>
+                    <textarea id="escCustomNote" rows="3" class="form-control" placeholder="Attendance degradation (&lt;75%) detected..."></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;background:#F8FAFC;">
+                <button type="button" class="btn btn-secondary" onclick="closeRiskEscalateModal()">Cancel</button>
+                <button type="submit" id="btnSubmitRiskEscalate" class="btn btn-amber">Transmit Alert Email[cite: 2]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentReviewId = null;
+let currentReviewStudentEmail = null;
+let globalSubmissions = [];
+let globalAssignments = [];
+let globalStudents = [];
+let globalBatches = [];
+let selectedCohort = 'all';
+
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    btn.classList.add('active');
+}
+
+function showAlert(msg, type = 'success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
+// ======================== MAIN LOADER ========================
+async function loadTeacherData() {
+    try {
+        const [teacherRes, recordsRes, submissionsRes] = await Promise.all([
+            fetch('/api/teacher/data').catch(() => null),
+            fetch('/api/analytics/records').catch(() => null),
+            fetch('/api/teacher/submissions').catch(() => null)
+        ]);
+
+        if (!teacherRes || !teacherRes.ok) { console.error('Failed to fetch teacher data'); return; }
+        const data = await teacherRes.json();
+        if (!data.success) return;
+
+        globalAssignments = data.assignments || [];
+        globalStudents = data.students || [];
+        globalBatches = data.batches || [];
+
+        if (submissionsRes && submissionsRes.ok) {
+            const subData = await submissionsRes.json();
+            globalSubmissions = subData.success ? (subData.submissions || []) : [];
+        } else {
+            globalSubmissions = [];
+        }
+
+        let records = [];
+        if (recordsRes && recordsRes.ok) {
+            const rd = await recordsRes.json();
+            records = rd.records || [];
+        }
+        const recordsMap = {};
+        records.forEach(r => { recordsMap[String(r.student_id)] = r; });
+
+        // KPI Counts
+        document.getElementById('batchCount').textContent = globalBatches.length;
+        document.getElementById('assignmentCount').textContent = globalAssignments.length;
+        document.getElementById('gradedCount').textContent = globalSubmissions.filter(s => s.status === 'graded').length;
+
+        const pendingSubs = globalSubmissions.filter(s => s.status !== 'graded');
+        document.getElementById('pendingCount').textContent = pendingSubs.length;
+        document.getElementById('allSubsTabBadge').textContent = globalSubmissions.length;
+        document.getElementById('pendingTabBadge').textContent = pendingSubs.length;
+
+        // Cohort filter dropdown
+        populateCohortFilter();
+
+        // Batch select for creating assignment
+        const batchSelect = document.getElementById('assignBatch');
+        batchSelect.innerHTML = '<option value="">-- Select Assigned Batch --</option>';
+        globalBatches.forEach(b => {
+            batchSelect.innerHTML += `<option value="${b.id || b._id}">${b.name}</option>`;
+        });
+
+        // Populate filters
+        populateAssignmentFilter();
+        populateGradeAssignmentDropdown();
+
+        // Render everything
+        renderAllSubmissions();
+        renderPendingSubmissionsTable();
+        renderAssignmentsCatalog();
+        renderGradesLedger();
+        renderRiskSurveillance(recordsMap);
+
+    } catch(e) { console.error('Error loading teacher data:', e); }
+}
+
+// ======================== COHORT FILTER ========================
+function populateCohortFilter() {
+    const sel = document.getElementById('cohortFilter');
+    sel.innerHTML = '<option value="all">-- All Cohorts / Batches --</option>';
+    globalBatches.forEach(b => {
+        const bid = String(b.id || b._id);
+        sel.innerHTML += `<option value="${bid}">${b.name}</option>`;
+    });
+    if (selectedCohort && selectedCohort !== 'all') sel.value = selectedCohort;
+}
+
+function applyCohortFilter() {
+    selectedCohort = document.getElementById('cohortFilter').value;
+    // Re-render submissions filtered by cohort
+    renderAllSubmissions();
+    renderPendingSubmissionsTable();
+}
+
+function clearCohortFilter() {
+    selectedCohort = 'all';
+    document.getElementById('cohortFilter').value = 'all';
+    renderAllSubmissions();
+    renderPendingSubmissionsTable();
+}
+
+// ======================== ASSIGNMENT FILTER ========================
+function populateAssignmentFilter() {
+    const sel = document.getElementById('filterByAssignment');
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="all">All Assignments</option>';
+    const subsWithAssignments = new Set();
+    globalSubmissions.forEach(s => { if (s.assignment_id) subsWithAssignments.add(String(s.assignment_id)); });
+    globalAssignments.forEach(a => {
+        const aid = String(a.id || a._id);
+        if (subsWithAssignments.has(aid)) {
+            sel.innerHTML += `<option value="${aid}">${a.title} (${a.subject})</option>`;
+        }
+    });
+    if (currentVal) sel.value = currentVal;
+}
+
+// ======================== FILTERED SUBMISSIONS ========================
+function getFilteredSubmissions() {
+    const assignmentFilter = document.getElementById('filterByAssignment').value;
+    const statusFilter = document.getElementById('filterByStatus').value;
+    const searchQuery = (document.getElementById('filterBySearch').value || '').toLowerCase().trim();
+
+    return globalSubmissions.filter(s => {
+        // Cohort filter
+        if (selectedCohort !== 'all') {
+            const bId = String(s.batch_id || '');
+            const bName = String(s.batch_name || '').toLowerCase();
+            const selBatch = globalBatches.find(b => String(b.id || b._id) === String(selectedCohort));
+            if (selBatch) {
+                const selName = String(selBatch.name).toLowerCase();
+                if (bId !== String(selectedCohort) && bName !== selName) return false;
+            } else {
+                return false;
+            }
+        }
+
+        if (assignmentFilter !== 'all' && String(s.assignment_id) !== String(assignmentFilter)) return false;
+        if (statusFilter === 'pending' && s.status === 'graded') return false;
+        if (statusFilter === 'graded' && s.status !== 'graded') return false;
+
+        if (searchQuery) {
+            const name = (s.student_name || '').toLowerCase();
+            const email = (s.student_email || '').toLowerCase();
+            if (!name.includes(searchQuery) && !email.includes(searchQuery)) return false;
+        }
+        return true;
+    });
+}
+
+// ======================== RENDER ALL SUBMISSIONS ========================
+function renderAllSubmissions() {
+    const container = document.getElementById('allSubmissionsList');
+    const filtered = getFilteredSubmissions();
+
+    document.getElementById('submissionsCountInfo').textContent =
+        `Showing ${filtered.length} of ${globalSubmissions.length} submissions`;
+
+    if (!filtered.length) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:60px 20px;background:#F8FAFC;border-radius:12px;border:1px dashed #CBD5E1;">
+                <div style="font-size:40px;margin-bottom:12px;color:#94A3B8;">&#128229;</div>
+                <strong style="display:block;color:#0F172A;font-size:15px;margin-bottom:6px;">No submissions match your filters</strong>
+                <p style="color:#64748B;font-size:13px;margin:0;">Try adjusting filters or search query.</p>
+            </div>`;
+        return;
+    }
+
+    const sorted = [...filtered].sort((a, b) => {
+        const aG = a.status === 'graded' ? 1 : 0;
+        const bG = b.status === 'graded' ? 1 : 0;
+        if (aG !== bG) return aG - bG;
+        const aT = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+        const bT = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+        return bT - aT;
+    });
+
+    container.innerHTML = sorted.map(s => {
+        const isGraded = s.status === 'graded';
+        const cardClass = isGraded ? 'graded' : 'pending';
+        const statusBadge = isGraded
+            ? '<span class="badge badge-success">&#10003; Graded</span>'
+            : '<span class="badge badge-warning">&#8987; Pending Review</span>';
+        const submittedDate = s.submitted_at ? new Date(s.submitted_at).toLocaleString() : 'N/A';
+        const gradedDate = s.graded_at ? new Date(s.graded_at).toLocaleString() : '—';
+        const submissionText = s.submission_text ? escapeHtml(s.submission_text) : '<em style="color:#94A3B8;">No written response provided.</em>';
+        const fileLink = s.file_path
+            ? `<a href="/static/uploads/submissions/${s.file_path}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#1677FF;font-weight:700;text-decoration:none;margin-top:8px;">&#128206; Download Attached File</a>`
+            : '<span style="font-size:12px;color:#94A3B8;">No file attached</span>';
+        const marksDisplay = isGraded ? `<span style="color:#1677FF;font-weight:800;">${s.obtained_marks} / ${s.total_marks}</span>` : '<span style="color:#94A3B8;font-style:italic;">Not graded</span>';
+        const pctDisplay = isGraded && s.total_marks ? `<span style="font-weight:800;color:${Math.round((s.obtained_marks/s.total_marks)*100) >= 50 ? '#1677FF' : '#DC2626'};">${Math.round((s.obtained_marks/s.total_marks)*100)}%</span>` : '—';
+        const actionButtons = isGraded
+            ? `<button class="btn btn-secondary btn-sm" onclick='openReviewModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'>&#128065; View / Re-grade</button>`
+            : `<button class="btn btn-primary btn-sm" onclick='openReviewModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'>&#9998; Review &amp; Grade</button>`;
+
+        return `
+            <div class="submission-card ${cardClass}">
+                <div class="submission-header">
+                    <div>
+                        <strong style="font-size:15px;color:#0F172A;display:block;">${escapeHtml(s.student_name || 'Learner #' + s.student_id)}</strong>
+                        <span style="font-size:12px;color:#64748B;">${escapeHtml(s.student_email || 'N/A')}</span>
+                    </div>
+                    <div>${statusBadge}</div>
+                </div>
+                <div style="background:#F1F5F9;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;display:flex;gap:16px;flex-wrap:wrap;">
+                    <span><strong style="color:#334155;">Assignment:</strong> <span style="color:#1677FF;font-weight:700;">${escapeHtml(s.assignment_title || 'N/A')}</span></span>
+                    <span><strong style="color:#334155;">Subject:</strong> ${escapeHtml(s.subject || 'N/A')}</span>
+                    <span><strong style="color:#334155;">Batch:</strong> ${escapeHtml(s.batch_name || 'N/A')}</span>
+                </div>
+                <div class="submission-body">
+                    <div>
+                        <div style="font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;margin-bottom:6px;">Student's Written Response</div>
+                        <div class="submission-text-box">${submissionText}</div>
+                        ${fileLink}
+                    </div>
+                    <div class="submission-meta">
+                        <div class="submission-meta-item"><span class="submission-meta-label">Submitted At</span><span class="submission-meta-value">${submittedDate}</span></div>
+                        <div class="submission-meta-item"><span class="submission-meta-label">Score</span><span class="submission-meta-value">${marksDisplay}</span></div>
+                        <div class="submission-meta-item"><span class="submission-meta-label">Percentage</span><span class="submission-meta-value">${pctDisplay}</span></div>
+                        <div class="submission-meta-item"><span class="submission-meta-label">Graded At</span><span class="submission-meta-value">${gradedDate}</span></div>
+                        <div class="submission-meta-item"><span class="submission-meta-label">Feedback</span><span class="submission-meta-value" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(s.feedback || '')}">${escapeHtml(s.feedback || '—')}</span></div>
+                    </div>
+                </div>
+                <div class="submission-actions">${actionButtons}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function applySubmissionFilters() { renderAllSubmissions(); }
+function resetSubmissionFilters() {
+    document.getElementById('filterByAssignment').value = 'all';
+    document.getElementById('filterByStatus').value = 'all';
+    document.getElementById('filterBySearch').value = '';
+    renderAllSubmissions();
+}
+
+// ======================== PENDING SUBMISSIONS TABLE ========================
+function renderPendingSubmissionsTable() {
+    const tbody = document.getElementById('pendingSubmissionsTable');
+    let pending = globalSubmissions.filter(s => s.status !== 'graded');
+
+    // Apply cohort filter
+    if (selectedCohort !== 'all') {
+        const selBatch = globalBatches.find(b => String(b.id || b._id) === String(selectedCohort));
+        if (selBatch) {
+            const selName = String(selBatch.name).toLowerCase();
+            pending = pending.filter(s => {
+                const bId = String(s.batch_id || '');
+                const bName = String(s.batch_name || '').toLowerCase();
+                return bId === String(selectedCohort) || bName === selName;
+            });
+        }
+    }
+
+    if (!pending.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">&#10003; No pending submissions. Sab graded ho chuki hain.</td></tr>';
+        return;
+    }
+
+    const sorted = [...pending].sort((a, b) => {
+        const aT = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+        const bT = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+        return bT - aT;
+    });
+
+    tbody.innerHTML = sorted.map(s => `
+        <tr>
+            <td>
+                <strong style="color:#0F172A;display:block;">${escapeHtml(s.student_name || 'Student #' + s.student_id)}</strong>
+                <span style="font-size:11px;color:#64748B;">${escapeHtml(s.student_email || 'N/A')}</span>
+            </td>
+            <td>
+                <strong>${escapeHtml(s.assignment_title || 'Assignment')}</strong>
+                <div style="font-size:11px;color:#64748B;">${escapeHtml(s.subject || '')} &bull; ${escapeHtml(s.batch_name || '')}</div>
+            </td>
+            <td style="color:#64748B;font-size:12px;">${s.submitted_at ? new Date(s.submitted_at).toLocaleString() : 'Active'}</td>
+            <td style="text-align:right;">
+                <button class="btn btn-primary btn-sm" onclick='openReviewModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'>&#9998; Review &amp; Grade</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ======================== GRADE STUDENT DROPDOWNS ========================
+function populateGradeAssignmentDropdown() {
+    const asgSelect = document.getElementById('gradeAssignmentSelect');
+    asgSelect.innerHTML = '<option value="">-- Choose Assignment --</option>';
+    const subsSet = new Set();
+    globalSubmissions.forEach(s => { if (s.assignment_id) subsSet.add(String(s.assignment_id)); });
+    globalAssignments.forEach(a => {
+        const aid = String(a.id || a._id);
+        if (subsSet.has(aid)) {
+            const cnt = globalSubmissions.filter(s => String(s.assignment_id) === aid).length;
+            asgSelect.innerHTML += `<option value="${aid}">${a.title} (${a.subject}) - ${cnt} submission(s)</option>`;
+        }
+    });
+    const stdSelect = document.getElementById('gradeStudentSelect');
+    stdSelect.innerHTML = '<option value="">-- Pehle Assignment select karein --</option>';
+    stdSelect.disabled = true;
+}
+
+function onGradeAssignmentChange() {
+    const assignmentId = document.getElementById('gradeAssignmentSelect').value;
+    const stdSelect = document.getElementById('gradeStudentSelect');
+    stdSelect.innerHTML = '';
+    stdSelect.disabled = true;
+    if (!assignmentId) {
+        stdSelect.innerHTML = '<option value="">-- Pehle Assignment select karein --</option>';
+        return;
+    }
+    const relevant = globalSubmissions.filter(s => String(s.assignment_id) === String(assignmentId));
+    if (!relevant.length) {
+        stdSelect.innerHTML = '<option value="">-- Koi submission nahi mili --</option>';
+        return;
+    }
+    let opts = '<option value="">-- Choose Student (Submitters Only) --</option>';
+    relevant.forEach(s => {
+        const statusLabel = s.status === 'graded' ? ' [Already Graded]' : '';
+        opts += `<option value="${s.student_id || ''}" data-submission-id="${s.id || s._id}">${s.student_name} (${s.student_email || 'N/A'})${statusLabel}</option>`;
+    });
+    stdSelect.innerHTML = opts;
+    stdSelect.disabled = false;
+}
+
+// ======================== ASSIGNMENTS CATALOG ========================
+function renderAssignmentsCatalog() {
+    const atbody = document.getElementById('assignmentsTable');
+    if (!globalAssignments.length) {
+        atbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">No assignments scheduled.</td></tr>';
+        return;
+    }
+    atbody.innerHTML = globalAssignments.map(a => {
+        const aid = String(a.id || a._id);
+        const subCount = globalSubmissions.filter(s => String(s.assignment_id) === aid).length;
+        const gradedCount = globalSubmissions.filter(s => String(s.assignment_id) === aid && s.status === 'graded').length;
+        return `
+            <tr>
+                <td style="font-weight:700;color:#0F172A;">${escapeHtml(a.title)}</td>
+                <td>${escapeHtml(a.subject)}</td>
+                <td><span class="badge badge-teal">${escapeHtml(a.batch_name || 'Cohort Partition')}</span></td>
+                <td style="text-align:center;font-weight:600;">${a.total_marks}</td>
+                <td style="text-align:center;">
+                    <span class="badge badge-info">${subCount} submitted</span>
+                    ${gradedCount > 0 ? `<span class="badge badge-success" style="margin-left:4px;">${gradedCount} graded</span>` : ''}
+                </td>
+                <td style="color:#64748B;font-size:12px;">${escapeHtml(a.due_date)}</td>
+                <td style="text-align:right;"><button class="btn btn-secondary btn-sm" onclick="deleteAssignment('${aid}')">Delete</button></td>
+            </tr>`;
+    }).join('');
+}
+
+// ======================== GRADES LEDGER ========================
+function renderGradesLedger() {
+    const gtbody = document.getElementById('gradesTable');
+    const ledgerEntries = globalSubmissions.filter(s => s.submitted_at || s.submission_text || s.file_path);
+    if (!ledgerEntries.length) {
+        gtbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">No submission records found.</td></tr>';
+        return;
+    }
+    const sorted = [...ledgerEntries].sort((a, b) => {
+        const aT = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+        const bT = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+        return bT - aT;
+    });
+    gtbody.innerHTML = sorted.map(s => {
+        const isGraded = s.status === 'graded' && s.obtained_marks !== null && s.obtained_marks !== undefined;
+        const pct = isGraded && s.total_marks ? Math.round((s.obtained_marks / s.total_marks) * 100) : null;
+        const scoreDisplay = isGraded ? `<span style="color:#1677FF;font-weight:700;">${s.obtained_marks} / ${s.total_marks}</span>` : '<span style="color:#94A3B8;font-style:italic;">Pending</span>';
+        const pctDisplay = pct !== null ? `<span style="font-weight:700;color:${pct >= 50 ? '#1677FF' : '#DC2626'};">${pct}%</span>` : '<span style="color:#94A3B8;">—</span>';
+        return `
+            <tr>
+                <td style="font-weight:700;color:#0F172A;">${escapeHtml(s.student_name || 'Learner #' + s.student_id)}</td>
+                <td style="color:#475569;font-size:12px;">${escapeHtml(s.student_email || 'N/A')}</td>
+                <td>${escapeHtml(s.assignment_title || 'General Assessment')}</td>
+                <td style="text-align:center;">${scoreDisplay}</td>
+                <td style="text-align:center;">${pctDisplay}</td>
+                <td style="font-size:12px;color:#475569;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(s.feedback || '—')}</td>
+                <td style="color:#64748B;font-size:12px;">${s.graded_at ? new Date(s.graded_at).toLocaleDateString() : (s.submitted_at ? new Date(s.submitted_at).toLocaleDateString() : 'Active')}</td>
+            </tr>`;
+    }).join('');
+}
+
+// ======================== RISK SURVEILLANCE ========================
+function renderRiskSurveillance(recordsMap) {
+    let highRiskCount = 0;
+    const riskTbody = document.getElementById('teacherStudentsRiskTable');
+    if (globalStudents && globalStudents.length) {
+        riskTbody.innerHTML = globalStudents.map(s => {
+            const sid = String(s.id || s._id);
+            const rec = recordsMap[sid] || {};
+            const effectiveRisk = (rec.risk || rec.risk_level || s.risk || 'Low').toLowerCase();
+            const effectiveAttendance = rec.attendance != null ? rec.attendance : s.attendance;
+            const effectiveMarks = rec.marks != null ? rec.marks : (rec.score != null ? rec.score : s.marks);
+            const effectiveConfidence = rec.confidence || s.confidence;
+            if (effectiveRisk === 'high') highRiskCount++;
+            let badgeClass = 'badge-success';
+            if (effectiveRisk === 'high') badgeClass = 'badge-danger';
+            else if (effectiveRisk === 'medium') badgeClass = 'badge-warning';
+            const attText = effectiveAttendance != null ? `${effectiveAttendance}%` : '—';
+            const marksText = effectiveMarks != null ? `${effectiveMarks}%` : '—';
+            const confText = effectiveConfidence ? `${effectiveConfidence}%` : '—';
+            const normalizedStudent = {
+                id: sid, name: s.name, email: s.email,
+                attendance: effectiveAttendance, marks: effectiveMarks,
+                risk: effectiveRisk.charAt(0).toUpperCase() + effectiveRisk.slice(1),
+                confidence: effectiveConfidence,
+                predicted_at: rec.created_at || s.predicted_at
+            };
+            return `
+                <tr>
+                    <td style="font-weight:700;color:#0F172A;">${escapeHtml(s.name || 'Student #' + sid)}</td>
+                    <td style="color:#475569;">${escapeHtml(s.email || 'N/A')}</td>
+                    <td style="text-align:center;font-weight:700;color:${effectiveAttendance < 75 ? '#DC2626' : '#0F172A'};">${attText}</td>
+                    <td style="text-align:center;font-weight:700;color:${effectiveMarks < 50 ? '#DC2626' : '#1677FF'};">${marksText}</td>
+                    <td><span class="badge ${badgeClass}" style="text-transform:uppercase;">${effectiveRisk.toUpperCase()} Risk</span></td>
+                    <td style="text-align:center;font-weight:700;color:#1677FF;">${confText}</td>
+                    <td style="color:#64748B;font-size:12px;">${normalizedStudent.predicted_at ? new Date(normalizedStudent.predicted_at).toLocaleDateString() : 'Synchronized'}</td>
+                    <td style="text-align:right;">
+                        <button class="btn btn-amber btn-sm" onclick='openRiskEscalateModal(${JSON.stringify(normalizedStudent).replace(/'/g, "&#39;")})'>&#9993; Escalate Alert[cite: 2]</button>
+                    </td>
+                </tr>`;
+        }).join('');
+    } else {
+        riskTbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:32px;color:#94A3B8;text-align:center;">No students mapped.</td></tr>';
+    }
+    document.getElementById('highRiskCohortCount').textContent = highRiskCount;
+}
+
+// ======================== GRADE STUDENT FORM ========================
+document.getElementById('gradeStudentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitGrade');
+    const assignmentId = document.getElementById('gradeAssignmentSelect').value;
+    const studentSelect = document.getElementById('gradeStudentSelect');
+    const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+    const submissionId = selectedOption ? selectedOption.getAttribute('data-submission-id') : null;
+    const studentId = studentSelect.value;
+
+    if (!assignmentId || !studentId) { showAlert('Please select both assignment and student.', 'error'); return; }
+    if (!submissionId) { showAlert('Is student ki koi submission record nahi mili.', 'error'); return; }
+
+    const marks = parseInt(document.getElementById('stdMarks').value);
+    const feedback = document.getElementById('stdFeedback').value.trim();
+    const sendEmail = document.getElementById('emailGradeAlert').checked;
+    if (isNaN(marks) || marks < 0) { showAlert('Please enter valid marks.', 'error'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting Evaluation...';
+
+    try {
+        const res = await fetch('/api/teacher/review-submission', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ submission_id: submissionId, obtained_marks: marks, feedback: feedback, send_email: sendEmail })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert(data.message || 'Grade saved!');
+            this.reset();
+            document.getElementById('gradeStudentSelect').disabled = true;
+            document.getElementById('gradeStudentSelect').innerHTML = '<option value="">-- Pehle Assignment select karein --</option>';
+            loadTeacherData();
+        } else {
+            showAlert(data.message || 'Error submitting grade.', 'error');
+        }
+    } catch(err) { showAlert('Network error saving grade.', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Save Grade & Transmit Evaluation[cite: 2]'; }
+});
+
+// ======================== REVIEW MODAL ========================
+function openReviewModal(submission) {
+    currentReviewId = submission._id || submission.id;
+    currentReviewStudentEmail = submission.student_email || '';
+    document.getElementById('reviewStudentName').textContent = submission.student_name || 'Enrolled Student';
+    document.getElementById('reviewAssignmentInfo').textContent = `${submission.assignment_title || 'Assignment'} (Total: ${submission.total_marks || 100} Points)`;
+    document.getElementById('reviewTotalMarks').textContent = submission.total_marks || 100;
+    document.getElementById('reviewSubmissionText').textContent = submission.submission_text || (submission.file_path ? 'Written response blank (deliverable attached below).' : 'No solution content.');
+    const fileContainer = document.getElementById('reviewFileContainer');
+    const fileLink = document.getElementById('reviewFileLink');
+    if (submission.file_path) {
+        fileContainer.style.display = 'block';
+        fileLink.href = '/static/uploads/submissions/' + submission.file_path;
+    } else {
+        fileContainer.style.display = 'none';
+        fileLink.href = '#';
+    }
+    document.getElementById('reviewMarks').value = submission.obtained_marks != null ? submission.obtained_marks : '';
+    document.getElementById('reviewFeedback').value = submission.feedback || '';
+    document.getElementById('reviewModal').style.display = 'flex';
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+    currentReviewId = null;
+    currentReviewStudentEmail = null;
+}
+
+async function gradeSubmission() {
+    if (!currentReviewId) return;
+    const marks = document.getElementById('reviewMarks').value;
+    const feedback = document.getElementById('reviewFeedback').value;
+    const sendEmail = document.getElementById('sendEmailGradeNotification').checked;
+    const btn = document.getElementById('btnGradeSubmit');
+    if (!marks) { alert('Please enter marks to award.'); return; }
+    btn.disabled = true;
+    btn.textContent = 'Saving Evaluation...';
+    try {
+        const res = await fetch('/api/teacher/review-submission', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                submission_id: currentReviewId,
+                obtained_marks: parseInt(marks),
+                feedback: feedback,
+                send_email: sendEmail,
+                student_email: currentReviewStudentEmail
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            closeReviewModal();
+            showAlert(sendEmail ? 'Submission graded and email sent!' : 'Submission graded successfully!');
+            loadTeacherData();
+        } else { showAlert(data.message || 'Error grading submission', 'error'); }
+    } catch(e) { showAlert('Network error saving grade evaluation', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Save & Transmit Evaluation'; }
+}
+
+// ======================== CREATE ASSIGNMENT ========================
+document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnCreateAssignment');
+    btn.disabled = true;
+    btn.textContent = 'Publishing Module...';
+    const payload = {
+        batch_id: document.getElementById('assignBatch').value,
+        title: document.getElementById('assignTitle').value,
+        subject: document.getElementById('assignSubject').value,
+        total_marks: document.getElementById('assignTotal').value,
+        due_date: document.getElementById('assignDue').value,
+        send_email: document.getElementById('broadcastAssignmentEmail').checked
+    };
+    try {
+        const res = await fetch('/api/teacher/assignments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert(data.message || 'Assignment published!');
+            this.reset();
+            loadTeacherData();
+        } else { showAlert(data.message || 'Failed creating assignment.', 'error'); }
+    } catch(e) { showAlert('Error communicating with assignment endpoint.', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Publish Assignment & Notify Cohort[cite: 2]'; }
+});
+
+// ======================== RISK ESCALATION ========================
+function openRiskEscalateModal(student) {
+    document.getElementById('escStudentId').value = student.id;
+    document.getElementById('escStudentName').textContent = `${student.name} (#${student.id})`;
+    document.getElementById('escStudentSummary').textContent = `Attendance: ${student.attendance || 0}% | Marks: ${student.marks || 0}% | Status: ${(student.risk || 'Low').toUpperCase()} RISK`;
+    document.getElementById('escRecipientEmail').value = '';
+    document.getElementById('escCustomNote').value = student.risk === 'High' ? 'Warning: Learner has breached risk threshold. Immediate mentoring required.[cite: 2]' : '';
+    document.getElementById('riskEscalateModal').style.display = 'flex';
+}
+
+function closeRiskEscalateModal() {
+    document.getElementById('riskEscalateModal').style.display = 'none';
+}
+
+async function handleSendRiskEscalation(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitRiskEscalate');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting Alert...';
+    const sid = document.getElementById('escStudentId').value;
+    const recipient = document.getElementById('escRecipientEmail').value.trim();
+    const note = document.getElementById('escCustomNote').value.trim();
+    try {
+        const res = await fetch('/api/alerts/send-email', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ student_id: sid, recipient: recipient, note: note })
+        });
+        const d = await res.json();
+        if (d.success) { showAlert(`Risk alert email sent to ${recipient}!`); closeRiskEscalateModal(); }
+        else { showAlert(d.message || 'Alert transmission failed.', 'error'); }
+    } catch(err) { showAlert('Error contacting alert mail gateway.', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Transmit Alert Email'; }
+}
+
+async function deleteAssignment(id) {
+    if (!confirm('Delete this assignment unit?')) return;
+    try {
+        const res = await fetch(`/api/admin/assignments?id=${id}`, { method: 'DELETE' });
+        const d = await res.json();
+        if (d.success) { showAlert('Assignment deleted'); loadTeacherData(); }
+    } catch(e) { showAlert('Error deleting assignment', 'error'); }
+}
+
+document.addEventListener('DOMContentLoaded', loadTeacherData);
+</script>
+{% endblock %}

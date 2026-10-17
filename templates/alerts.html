@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block page_title %}Real-Time Anomaly & Threshold Alerts - EduPredict{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+
+        <!-- ALERTS HERO -->
+        <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:24px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+                <div>
+                    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                        AUTOMATED THRESHOLD MONITOR &bull; SMTP ALERT GATEWAY
+                    </div>
+                    <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Anomaly &amp; Risk Alert Center</h1>
+                    <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:620px;line-height:1.6;">
+                        Continuous surveillance of academic anomalies, attendance drops, and predictive dropout flags with instant email notification escalation to institutional advisors.
+                    </p>
+                </div>
+                <div class="hero-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-sm" onclick="runAnomalyScan()" id="btnScan" style="background:#ffffff;color:#0B1F33;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        &#9881; Scan Anomalies
+                    </button>
+                    <button class="btn btn-sm" onclick="openBroadcastModal()" style="background:#0B1F33;color:#ffffff;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        &#9993; Dispatch Alert Digest
+                    </button>
+                    <button class="btn btn-sm" onclick="loadAlerts()" style="background:#1677FF;color:#ffffff;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        &#8635; Refresh Feed
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertBox" class="alert" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+        <!-- STATS GRID -->
+        <div class="dashboard-grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+            <div class="stat-card" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                <div class="stat-icon" style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(220,38,38,0.08);color:#DC2626;">
+                    &#9888;
+                </div>
+                <div>
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Critical / High</span>
+                    <strong class="stat-value" id="highCount" style="font-size:24px;font-weight:800;color:#DC2626;line-height:1.2;">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                <div class="stat-icon" style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(11,31,51,0.05);color:#0B1F33;">
+                    &#9673;
+                </div>
+                <div>
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Medium Watchlist</span>
+                    <strong class="stat-value" id="mediumCount" style="font-size:24px;font-weight:800;color:#0B1F33;line-height:1.2;">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                <div class="stat-icon" style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(22,119,255,0.08);color:#1677FF;">
+                    &#10003;
+                </div>
+                <div>
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Low / Info</span>
+                    <strong class="stat-value" id="lowCount" style="font-size:24px;font-weight:800;color:#1677FF;line-height:1.2;">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                <div class="stat-icon" style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(22,119,255,0.08);color:#1677FF;">
+                    &#9993;
+                </div>
+                <div>
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Mail Escalation</span>
+                    <strong class="stat-value" id="emailStatusText" style="font-size:18px;font-weight:800;color:#1677FF;line-height:1.4;">Daemon Ready</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTER & CONTROLS TOOLBAR -->
+        <div style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <label style="font-size:13px;font-weight:600;color:#374151;">Filter Severity:</label>
+                <select id="severityFilter" onchange="filterAlerts()" style="padding:8px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;background:#ffffff;">
+                    <option value="all">All Alerts</option>
+                    <option value="critical">Critical &amp; High Only</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low / Informational</option>
+                </select>
+
+                <label style="font-size:13px;font-weight:600;color:#374151;margin-left:8px;">Anomaly Type:</label>
+                <select id="typeFilter" onchange="filterAlerts()" style="padding:8px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;background:#ffffff;">
+                    <option value="all">All Anomaly Types</option>
+                    <option value="Dropout Risk">High Dropout Risk</option>
+                    <option value="Attendance">Attendance Deterioration</option>
+                    <option value="Grade Drop">Severe Grade Degradation</option>
+                    <option value="LMS Disengagement">LMS Inactivity</option>
+                </select>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center;">
+                <input type="text" id="alertSearchInput" placeholder="Search learner or flag..." oninput="filterAlerts()" style="padding:8px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;width:220px;">
+            </div>
+        </div>
+
+        <!-- ACTIVE ALERTS FEED -->
+        <div class="panel" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="section-header" style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;">
+                <div>
+                    <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Active Alert Manifest</h3>
+                    <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Threshold breaches awaiting advisor intervention or automated dispatch</p>
+                </div>
+                <span id="showingCount" style="font-size:12px;font-weight:600;color:#1677FF;">Showing 0 alerts</span>
+            </div>
+            <div class="panel-body" style="padding:0;">
+                <div id="alertsList">
+                    <div class="empty-state" style="padding:40px;text-align:center;color:#9CA3AF;">Initializing notification daemon...</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= MODALS ================= -->
+
+<!-- DISPATCH SINGLE ALERT VIA EMAIL MODAL -->
+<div id="emailAlertModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:500px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Escalate Alert to Advisor</h3>
+            <button class="modal-close" onclick="closeModal('emailAlertModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form id="singleAlertEmailForm" onsubmit="handleSendSingleAlertEmail(event)">
+            <input type="hidden" id="modalAlertId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 16px;">
+                    <span style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;display:block;">Incident Subject</span>
+                    <strong id="modalAlertSummary" style="font-size:14px;color:#111827;">Learner Risk Incident</strong>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Advisor / Faculty Recipient Email</label>
+                    <input class="form-input" type="email" id="modalRecipientEmail" required placeholder="advisor@university.edu, mentor@aptech.internal" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Intervention Directives / Notes</label>
+                    <textarea class="form-input" id="modalCustomNote" rows="3" placeholder="Please schedule an academic counseling session to address attendance and score drops." style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;box-sizing:border-box;resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('emailAlertModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" id="btnSendSingleAlert" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+                    Transmit Alert Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BROADCAST DIGEST VIA EMAIL MODAL -->
+<div id="broadcastModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:520px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Dispatch Executive Anomaly Digest</h3>
+            <button class="modal-close" onclick="closeModal('broadcastModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form id="broadcastForm" onsubmit="handleBroadcastDigest(event)">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.6;">
+                    Compiles all currently active Critical and High-severity anomalies into a formatted executive analytical brief and delivers it directly to your recipient.
+                </p>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Target Recipient Email</label>
+                    <input class="form-input" type="email" id="broadcastRecipientEmail" required placeholder="head.academic@institute.edu" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Alert Scope Inclusion</label>
+                    <select class="form-select" id="broadcastScopeSelect" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;background:#ffffff;box-sizing:border-box;">
+                        <option value="critical_high">Critical &amp; High Priority Anomalies Only</option>
+                        <option value="all_active">All Active Discrepancies &amp; Warnings</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('broadcastModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" id="btnSendDigest" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+                    Dispatch Digest
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= SCRIPT LOGIC ================= -->
+<script>
+let globalAlerts = [];
+
+function showAlertMsg(msg, type='success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.15)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+function openModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'flex';
+}
+
+function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+}
+
+// LOAD ALERTS FROM BACKEND
+async function loadAlerts() {
+    try {
+        const res = await fetch('/api/analytics/alerts');
+        const data = await res.json();
+        if (data.success) {
+            globalAlerts = data.alerts || [];
+            updateStatsCounts();
+            renderAlerts(globalAlerts);
+        } else {
+            document.getElementById('alertsList').innerHTML = '<div class="empty-state" style="padding:40px;text-align:center;color:#9CA3AF;">Failed loading alerts telemetry.</div>';
+        }
+    } catch(e) {
+        console.error('Error fetching alerts:', e);
+        document.getElementById('alertsList').innerHTML = '<div class="empty-state" style="padding:40px;text-align:center;color:#DC2626;">Network error connecting to alert daemon.</div>';
+    }
+}
+
+function updateStatsCounts() {
+    let high = 0, medium = 0, low = 0;
+    globalAlerts.forEach(a => {
+        const sev = (a.severity || 'low').toLowerCase();
+        if (sev === 'high' || sev === 'critical') high++;
+        else if (sev === 'medium') medium++;
+        else low++;
+    });
+    document.getElementById('highCount').textContent = high;
+    document.getElementById('mediumCount').textContent = medium;
+    document.getElementById('lowCount').textContent = low;
+}
+
+// RENDER FILTERED ALERTS
+function renderAlerts(alertsToRender) {
+    const list = document.getElementById('alertsList');
+    document.getElementById('showingCount').textContent = `Showing ${alertsToRender.length} alerts`;
+
+    if (!alertsToRender.length) {
+        list.innerHTML = '<div class="empty-state" style="padding:50px 20px;text-align:center;color:#6B7280;"><span style="font-size:32px;display:block;margin-bottom:8px;">&#10003;</span>No matching alerts detected. System is operating within nominal thresholds.</div>';
+        return;
+    }
+
+    list.innerHTML = alertsToRender.map(a => {
+        const severity = (a.severity || 'low').toLowerCase();
+        let badgeBg = '#F3F4F6', badgeColor = '#4B5563';
+        if (severity === 'high' || severity === 'critical') {
+            badgeBg = 'rgba(220,38,38,0.08)'; badgeColor = '#DC2626';
+        } else if (severity === 'medium') {
+            badgeBg = 'rgba(11,31,51,0.05)'; badgeColor = '#0B1F33';
+        } else {
+            badgeBg = 'rgba(22,119,255,0.08)'; badgeColor = '#1677FF';
+        }
+
+        const aid = a.id || a._id;
+        const dateStr = a.created_at ? new Date(a.created_at).toLocaleString() : 'Just now';
+        const typeLabel = a.alert_type || a.type || 'Academic Risk';
+        const studentInfo = a.student_name ? `${a.student_name} ${a.student_id ? '(#' + a.student_id + ')' : ''}` : (a.student_id ? 'Learner #' + a.student_id : 'System-Wide');
+
+        return `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F3F4F6;gap:16px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:280px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                        <span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;background:${badgeBg};color:${badgeColor};text-transform:uppercase;letter-spacing:0.5px;">
+                            ${severity}
+                        </span>
+                        <strong style="color:#111827;font-size:15px;">${typeLabel}</strong>
+                        <span style="font-size:12px;color:#9CA3AF;">&bull; ${dateStr}</span>
+                    </div>
+                    <p style="color:#4B5563;font-size:13px;margin:4px 0 0;line-height:1.5;">${a.message || 'Anomaly threshold exceeded.'}</p>
+                    <div style="display:flex;gap:14px;margin-top:6px;font-size:12px;color:#6B7280;">
+                        <span>Target: <strong style="color:#111827;">${studentInfo}</strong></span>
+                        ${a.metric_value ? `<span>Trigger Metric: <strong style="color:#1677FF;">${a.metric_value}</strong></span>` : ''}
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-sm" onclick='openSingleAlertEmailModal(${JSON.stringify(a).replace(/'/g, "&#39;")})' style="padding:6px 14px;border:1px solid #1677FF;background:rgba(22,119,255,0.08);color:#1677FF;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
+                        &#9993; Escalate via Email
+                    </button>
+                    <button class="btn btn-sm" onclick="dismissAlert('${aid}')" style="padding:6px 12px;border:1px solid #E5E7EB;background:#ffffff;color:#6B7280;border-radius:6px;font-size:12px;cursor:pointer;">
+                        Acknowledge
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// FILTER CONTROLS
+function filterAlerts() {
+    const sev = document.getElementById('severityFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const query = document.getElementById('alertSearchInput').value.toLowerCase();
+
+    let filtered = globalAlerts.filter(a => {
+        const aSev = (a.severity || 'low').toLowerCase();
+        const aType = a.alert_type || a.type || '';
+        const aName = (a.student_name || '').toLowerCase();
+        const aMsg = (a.message || '').toLowerCase();
+
+        // Severity match
+        if (sev === 'critical' && aSev !== 'critical' && aSev !== 'high') return false;
+        if (sev === 'medium' && aSev !== 'medium') return false;
+        if (sev === 'low' && aSev !== 'low' && aSev !== 'info') return false;
+
+        // Type match
+        if (type !== 'all' && !aType.toLowerCase().includes(type.toLowerCase())) return false;
+
+        // Search match
+        if (query && !aName.includes(query) && !aMsg.includes(query) && !aType.toLowerCase().includes(query)) return false;
+
+        return true;
+    });
+
+    renderAlerts(filtered);
+}
+
+// SCAN ANOMALIES
+async function runAnomalyScan() {
+    const btn = document.getElementById('btnScan');
+    btn.disabled = true;
+    btn.textContent = 'Scanning MapReduce Nodes...';
+
+    try {
+        const res = await fetch('/api/analytics/scan-anomalies', { method: 'POST' });
+        const d = await res.json();
+        if (d.success) {
+            showAlertMsg(`Anomaly scan complete! ${d.detected_count || 0} alerts evaluated.`);
+            loadAlerts();
+        } else {
+            showAlertMsg(d.message || 'Anomaly scan returned non-zero warnings.', 'error');
+        }
+    } catch(e) {
+        showAlertMsg('Failed executing MapReduce anomaly algorithm.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '⚙ Scan Anomalies';
+    }
+}
+
+// DISMISS ALERT
+async function dismissAlert(id) {
+    if (!confirm('Acknowledge and dismiss this anomaly flag?')) return;
+    try {
+        const res = await fetch('/api/analytics/alerts?id=' + id, { method: 'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlertMsg('Alert flagged as resolved');
+            loadAlerts();
+        } else {
+            showAlertMsg(d.message || 'Dismiss failed', 'error');
+        }
+    } catch(e) {
+        showAlertMsg('Network error dismissing alert', 'error');
+    }
+}
+
+// SINGLE ALERT EMAIL ESCALATION
+function openSingleAlertEmailModal(a) {
+    document.getElementById('modalAlertId').value = a.id || a._id;
+    document.getElementById('modalAlertSummary').textContent = `${(a.severity||'Alert').toUpperCase()}: ${a.alert_type || a.type || 'Incident'} for ${a.student_name || 'Learner #' + (a.student_id || 'Global')}`;
+    document.getElementById('modalRecipientEmail').value = '';
+    document.getElementById('modalCustomNote').value = a.message ? `Regarding system finding: "${a.message}"` : '';
+    openModal('emailAlertModal');
+}
+
+async function handleSendSingleAlertEmail(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSendSingleAlert');
+    btn.disabled = true;
+    btn.textContent = 'Dispatching Email...';
+
+    const alertId = document.getElementById('modalAlertId').value;
+    const recipient = document.getElementById('modalRecipientEmail').value.trim();
+    const customNote = document.getElementById('modalCustomNote').value.trim();
+
+    try {
+        const res = await fetch('/api/alerts/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                alert_id: alertId,
+                recipient: recipient,
+                note: customNote
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlertMsg(d.message || 'Alert email successfully dispatched to ' + recipient);
+            closeModal('emailAlertModal');
+        } else {
+            showAlertMsg(d.message || 'Dispatch failed', 'error');
+        }
+    } catch(err) {
+        showAlertMsg('Error transmitting SMTP alert packet', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Transmit Alert Email';
+    }
+}
+
+// BROADCAST DIGEST VIA EMAIL
+function openBroadcastModal() {
+    openModal('broadcastModal');
+}
+
+async function handleBroadcastDigest(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSendDigest');
+    btn.disabled = true;
+    btn.textContent = 'Synthesizing Digest...';
+
+    const recipient = document.getElementById('broadcastRecipientEmail').value.trim();
+    const scope = document.getElementById('broadcastScopeSelect').value;
+
+    try {
+        const res = await fetch('/api/alerts/broadcast-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipient: recipient,
+                scope: scope
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlertMsg(d.message || 'Executive alert digest dispatched to ' + recipient);
+            closeModal('broadcastModal');
+        } else {
+            showAlertMsg(d.message || 'Digest transmission failed', 'error');
+        }
+    } catch(err) {
+        showAlertMsg('Error contacting broadcast mailer', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Dispatch Digest';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadAlerts);
+// alerts.html mein script ke end mein
+let autoRefreshInterval;
+
+function startAutoRefresh() {
+    // Har 30 second mein alerts refresh karein
+    autoRefreshInterval = setInterval(() => {
+        loadAlerts();
+        console.log("🔄 Auto-refreshing alerts...");
+    }, 30000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadAlerts();
+    startAutoRefresh();  // Auto-refresh start
+});
+
+// Page chhorne par interval clear karein
+window.addEventListener('beforeunload', () => {
+    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+});
+</script>
+{% endblock %}

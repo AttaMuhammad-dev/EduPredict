@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block page_title %}About System Architecture - EduPredict Big Data Analytics{% endblock %}
+
+{% block content %}
+<section class="hero-section" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;padding:48px 0 36px;">
+    <div class="container">
+        <div class="hero-badge" style="background:rgba(255,255,255,0.15);color:#ffffff;border:1px solid rgba(255,255,255,0.25);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:12px;">
+            DISTRIBUTED BIG DATA ANALYTICS PLATFORM
+        </div>
+        <h1 style="font-size:36px;font-weight:800;color:#ffffff;margin:0 0 10px;line-height:1.2;">Distributed Intelligence for Student Success</h1>
+        <center><p class="hero-desc" style="font-size:16px;color:rgba(255,255,255,0.85);max-width:760px;line-height:1.6;margin:0;">
+            EduPredict predicts student dropout risk using a lightweight Python alternative to the Hadoop Big Data stack. It combines HDFS-style partitioned storage, parallel MapReduce processing, and automated email alerts inside a single Flask application.
+        </p></center>
+    </div>
+</section>
+
+<section class="page-section" style="padding:40px 0;">
+    <div class="container">
+
+        <!-- 1. PROBLEM & PIPELINE -->
+        <div class="panel mb-lg" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:32px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;border-bottom:1px solid #F1F5F9;padding-bottom:16px;">
+                <div>
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">THE PROBLEM WE SOLVE</span>
+                    <h2 style="font-size:22px;font-weight:800;color:#0F172A;margin:4px 0 0;">From Scattered Records to Early Warnings</h2>
+                </div>
+                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-weight:700;padding:6px 12px;border-radius:20px;">DESIGN GOAL</span>
+            </div>
+
+            <div class="panel-body">
+                <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:40px;align-items:start;">
+                    <div>
+                        <p style="font-size:15px;line-height:1.8;color:#4b5563;margin-bottom:16px;">
+                            Institutes already store attendance, marks, and LMS data. The problem is not the lack of data — it is the lack of a system that can <strong>read, clean, and act</strong> on it before it is too late for the student.
+                        </p>
+                        <p style="font-size:15px;line-height:1.8;color:#4b5563;">
+                            Using Python's <strong>pandas</strong> and <strong>multiprocessing</strong>, we replicate how Hadoop works — split the data, process it in parallel, and reduce it into clear risk scores. No JVM, no YARN, no cluster. Just Flask, a database, and clean Python.
+                        </p>
+                    </div>
+
+                    <div class="info-card" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:24px;">
+                        <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 18px 0;">How the Pipeline Works</h3>
+                        <ul class="info-list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:16px;">
+                            <li style="display:flex;align-items:flex-start;gap:12px;">
+                                <span class="step-num" style="background:rgba(22,119,255,0.08);color:#1677FF;border:1px solid rgba(22,119,255,0.12);width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">01</span>
+                                <div>
+                                    <strong style="display:block;font-size:13.5px;color:#111827;">Chunked Data Ingestion</strong>
+                                    <span style="font-size:12.5px;color:#6b7280;">Records split into chunks; missing values filled with mean or mode imputation.</span>
+                                </div>
+                            </li>
+                            <li style="display:flex;align-items:flex-start;gap:12px;">
+                                <span class="step-num" style="background:rgba(22,119,255,0.08);color:#1677FF;border:1px solid rgba(22,119,255,0.12);width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">02</span>
+                                <div>
+                                    <strong style="display:block;font-size:13.5px;color:#111827;">Parallel MapReduce Scoring</strong>
+                                    <span style="font-size:12.5px;color:#6b7280;">Multiprocessing scores students across CPU cores, then reduces per cohort.</span>
+                                </div>
+                            </li>
+                            <li style="display:flex;align-items:flex-start;gap:12px;">
+                                <span class="step-num" style="background:rgba(22,119,255,0.08);color:#1677FF;border:1px solid rgba(22,119,255,0.12);width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">03</span>
+                                <div>
+                                    <strong style="display:block;font-size:13.5px;color:#111827;">Scikit-Learn Models</strong>
+                                    <span style="font-size:12.5px;color:#6b7280;">Random Forest, Logistic Regression, and Ridge models run per student.</span>
+                                </div>
+                            </li>
+                            <li style="display:flex;align-items:flex-start;gap:12px;">
+                                <span class="step-num" style="background:rgba(22,119,255,0.08);color:#1677FF;border:1px solid rgba(22,119,255,0.12);width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">04</span>
+                                <div>
+                                    <strong style="display:block;font-size:13.5px;color:#111827;">Automated Email Alerts</strong>
+                                    <span style="font-size:12.5px;color:#6b7280;">SMTP gateway emails the teacher or advisor when risk crosses a threshold.</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DESIGN GOALS -->
+        <div class="panel mb-lg" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:32px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="margin-bottom:24px;border-bottom:1px solid #F1F5F9;padding-bottom:16px;">
+                <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">DESIGN GOALS</span>
+                <h2 style="font-size:22px;font-weight:800;color:#0F172A;margin:4px 0 0;">What EduPredict Was Built For</h2>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:20px;">
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:22px;">
+                    <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:8px;">GOAL &bull; 01</div>
+                    <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 8px;">Hadoop Without a Cluster</h3>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">Reproduce HDFS and MapReduce in plain Python — no JVM, no YARN, no servers.</p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:22px;">
+                    <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:8px;">GOAL &bull; 02</div>
+                    <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 8px;">Solve a Real Problem</h3>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">Help schools identify at-risk students before final exams — not just build a demo.</p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:22px;">
+                    <div style="font-size:12px;font-weight:800;color:#1677FF;margin-bottom:8px;">GOAL &bull; 03</div>
+                    <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 8px;">Full-Stack Integration</h3>
+                    <p style="font-size:13px;color:#64748B;line-height:1.6;margin:0;">Flask, MongoDB, Scikit-Learn, HTML, CSS, JavaScript, and SMTP in one system.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. BOTTOM TWO-COLUMN (SECURITY + NON-FUNCTIONAL) -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div class="panel" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+                <div style="border-bottom:1px solid #F1F5F9;padding-bottom:12px;margin-bottom:16px;">
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;">SECURITY &amp; COMPLIANCE</span>
+                    <h3 style="font-size:18px;font-weight:800;color:#0F172A;margin:4px 0 0;">RBAC &amp; Data Protection</h3>
+                </div>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#475569;">
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#1677FF;font-weight:800;">&#10003;</span>
+                        <div><strong>Role-Based Access Control:</strong> Strict separation between Admin, Analyst, Teacher, and Student roles.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#1677FF;font-weight:800;">&#10003;</span>
+                        <div><strong>Cryptographic Security:</strong> Bcrypt password hashing and secure Flask session tokens.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#1677FF;font-weight:800;">&#10003;</span>
+                        <div><strong>Input Scrubbing:</strong> Strict type validation before every ML prediction vector.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panel" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+                <div style="border-bottom:1px solid #F1F5F9;padding-bottom:12px;margin-bottom:16px;">
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;">NON-FUNCTIONAL SPECS</span>
+                    <h3 style="font-size:18px;font-weight:800;color:#0F172A;margin:4px 0 0;">Reliability, Backups &amp; Scale</h3>
+                </div>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#475569;">
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#0B1F33;font-weight:800;">&#9670;</span>
+                        <div><strong>High Availability (99% Uptime):</strong> Graceful degradation and multi-threaded handling.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#0B1F33;font-weight:800;">&#9670;</span>
+                        <div><strong>Automated Data Backups:</strong> Scheduled database dumps and versioned dataset snapshots.</div>
+                    </li>
+                    <li style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:#0B1F33;font-weight:800;">&#9670;</span>
+                        <div><strong>Horizontal Scalability:</strong> Stateless REST APIs allow replica scaling behind proxies.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<style>
+@media (max-width: 1024px) {
+    div[style*="grid-template-columns:1.1fr 0.9fr"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns:repeat(3, 1fr)"] { grid-template-columns: 1fr 1fr !important; }
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 640px) {
+    div[style*="grid-template-columns:repeat(3, 1fr)"] { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1397 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty & Student Management Dashboard - EduPredict{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    .teacher-dashboard-wrapper {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #111827;
+        padding-bottom: 40px;
+    }
+    .custom-banner {
+        background: linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);
+        color: #ffffff;
+        border-radius: 18px;
+        padding: 32px 36px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 25px -5px rgba(18, 60, 54, 0.2);
+    }
+    .custom-banner h1, .custom-banner h2, .custom-banner h3, .custom-banner h4 { color: #ffffff !important; }
+    .custom-banner h2 { font-weight: 800; margin-bottom: 8px; font-size: 32px; line-height: 1.2; color: #ffffff; }
+    .custom-banner p { color: rgba(255, 255, 255, 0.85); margin: 0; font-size: 15px; max-width: 620px; line-height: 1.6; }
+    .custom-banner .banner-pill {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255, 255, 255, 0.15); padding: 4px 12px; border-radius: 20px;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .custom-banner .banner-pill .pulse-dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #1677FF; display: inline-block; animation: pulse 2s infinite;
+    }
+    .custom-card {
+        background: #ffffff;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+    .custom-card-body { padding: 24px; }
+    .stat-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 992px) { .stat-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 576px) { .stat-cards-grid { grid-template-columns: 1fr; } }
+    .stat-card-item {
+        background: #ffffff;
+        border: 1px solid #E5E7EB;
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s;
+    }
+    .stat-icon-box {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; margin-right: 16px; flex-shrink: 0;
+    }
+    .stat-blue { background: rgba(22,119,255,0.08); color: #1677FF; }
+    .stat-green { background: rgba(11,31,51,0.05); color: #0B1F33; }
+    .stat-yellow { background: #F1F5F9; color: #475569; }
+    .stat-red { background: rgba(220,38,38,0.08); color: #DC2626; }
+    .stat-title {
+        font-size: 12px; text-transform: uppercase; font-weight: 600;
+        color: #6B7280; margin-bottom: 4px; display: block;
+    }
+    .stat-value { font-size: 24px; font-weight: 800; color: #111827; margin: 0; line-height: 1.2; }
+
+    .custom-tabs-header { background: #F8FAFC; border-bottom: 1px solid #E5E7EB; padding: 0 12px; }
+    .custom-nav-tabs { display: flex; flex-wrap: wrap; gap: 0; margin: 0; padding: 0; list-style: none !important; }
+    .custom-tab-btn {
+        background: transparent; border: none; border-bottom: 2px solid transparent;
+        border-radius: 0; padding: 14px 18px; font-size: 13px; font-weight: 600;
+        color: #475569; cursor: pointer; transition: all 0.15s ease;
+        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    }
+    .custom-tab-btn:hover { color: #1677FF; background: #FFFFFF; }
+    .custom-tab-btn.active { background: #FFFFFF !important; color: #1677FF !important; border-bottom: 2px solid #1677FF !important; }
+    .custom-tab-content { display: none; padding: 24px; }
+    .custom-tab-content.active { display: block; }
+
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .form-grid-2 { grid-template-columns: 1fr; } }
+    .form-label-custom { display: block; font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+    .form-control-custom, .form-select-custom {
+        width: 100%; padding: 10px 14px; font-size: 14px; color: #111827;
+        background-color: #ffffff; border: 1px solid #CBD5E1; border-radius: 6px;
+        transition: border-color 0.15s ease-in-out; box-sizing: border-box;
+    }
+    .form-control-custom:focus, .form-select-custom:focus {
+        border-color: #1677FF; outline: none; box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+    }
+    .btn-custom-primary {
+        background: #1677FF; color: #ffffff; border: none; border-radius: 6px;
+        padding: 10px 20px; font-weight: 700; font-size: 14px; cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        transition: background 0.2s, box-shadow 0.2s; white-space: nowrap; line-height: 1.35;
+        box-shadow: 0 1px 2px rgba(22, 119, 255, 0.25);
+    }
+    .btn-custom-primary:hover { background: #0E5FD8; box-shadow: 0 2px 6px rgba(22, 119, 255, 0.35); }
+    .btn-custom-primary:disabled { background: #BFDBFE; color: #1D4ED8; cursor: not-allowed; box-shadow: none; opacity: 1; }
+    .btn-custom-outline {
+        background: #FFFFFF; color: #374151; border: 1px solid #D1D5DB;
+        border-radius: 6px; padding: 9px 16px; font-weight: 600; font-size: 13px;
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+        white-space: nowrap; line-height: 1.35; transition: all 0.15s;
+    }
+    .btn-custom-outline:hover { background: #F3F4F6; color: #111827; border-color: #9CA3AF; }
+    .btn-custom-outline:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .submission-proof-box {
+        background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #1677FF;
+        border-radius: 10px; padding: 18px; margin-top: 15px; margin-bottom: 20px;
+    }
+    .badge-status { display: inline-block; padding: 4px 10px; border-radius: 50px; font-size: 12px; font-weight: 700; }
+    .badge-success-custom { background: rgba(22,119,255,0.08); color: #1677FF; }
+    .badge-warning-custom { background: rgba(11,31,51,0.05); color: #0B1F33; }
+    .badge-info-custom { background: rgba(22,119,255,0.06); color: #1677FF; }
+    .badge-danger-custom { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+    .custom-table-container { width: 100%; overflow-x: auto; }
+    .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    .custom-table th {
+        background: #F8FAFC; color: #475569; font-weight: 600; text-transform: uppercase;
+        font-size: 12px; padding: 12px 14px; border-bottom: 1px solid #E5E7EB;
+    }
+    .custom-table td { padding: 12px 14px; border-bottom: 1px solid #F3F4F6; vertical-align: middle; color: #111827; }
+    .custom-table tr:hover { background-color: #F8FAFC; }
+
+    .empty-row td { text-align: center; padding: 34px; color: #9CA3AF; }
+
+    /* Modal */
+    .ep-modal-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(11, 31, 51, 0.55);
+        z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+    }
+    .ep-modal-overlay.active { display: flex; }
+    .ep-modal {
+        background: #ffffff; border-radius: 16px; width: 100%; max-width: 620px;
+        max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    .ep-modal-header {
+        padding: 18px 24px; border-bottom: 1px solid #E5E7EB;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .ep-modal-body { padding: 24px; }
+    .ep-modal-footer {
+        padding: 16px 24px; border-top: 1px solid #E5E7EB;
+        display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .ep-toast {
+        position: fixed; top: 20px; right: 20px; z-index: 3000;
+        background: #0B1F33; color: #fff; padding: 12px 18px; border-radius: 10px;
+        font-size: 14px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        opacity: 0; transform: translateY(-10px); transition: all 0.25s ease;
+        pointer-events: none; max-width: 380px;
+    }
+    .ep-toast.show { opacity: 1; transform: translateY(0); }
+    .ep-toast.success { background: #0B1F33; }
+    .ep-toast.error { background: #DC2626; }
+    .loading-spinner { display:inline-block; width:14px; height:14px; border:2px solid #CBD5E1; border-top-color:#1677FF; border-radius:50%; animation: ep-spin 0.7s linear infinite; }
+    @keyframes ep-spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+
+<div class="teacher-dashboard-wrapper">
+    <!-- Header Banner -->
+    <div class="custom-banner">
+        <span class="banner-pill">
+            <span class="pulse-dot"></span>
+            <i class="bi bi-mortarboard-fill"></i> FACULTY PORTAL
+        </span>
+        <h2>Faculty & Student Management Dashboard</h2>
+        <p>Supervise assigned student cohorts, post course assignments, review student submissions with live file attachments, and grade with automated feedback.</p>
+    </div>
+
+    <!-- Cohort Filter Bar -->
+    <div class="custom-card" style="margin-bottom: 20px;">
+        <div class="custom-card-body" style="padding: 16px 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="background:rgba(22,119,255,0.08); color:#1677FF; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px;">
+                        <i class="bi bi-funnel-fill"></i>
+                    </div>
+                    <div>
+                        <small style="color:#6B7280; font-size:11px; text-transform:uppercase; font-weight:700; display:block;">Cohort Partition View</small>
+                        <span style="font-weight:700; font-size:14px; color:#111827;">Filter data by a specific batch or view all</span>
+                    </div>
+                </div>
+                <div style="flex: 1; max-width: 480px; display: flex; gap: 10px;">
+                    <select id="cohortFilterSelect" class="form-select-custom" onchange="renderAll()">
+                        <option value="">-- All Cohorts / Batches --</option>
+                    </select>
+                    <button class="btn-custom-outline" onclick="resetCohortFilter()">
+                        <i class="bi bi-arrow-counterclockwise"></i> Clear
+                    </button>
+                    <button class="btn-custom-outline" onclick="loadAll(true)">
+                        <i class="bi bi-arrow-repeat"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-cards-grid">
+        <div class="stat-card-item">
+            <div class="stat-icon-box stat-blue"><i class="bi bi-journal-bookmark"></i></div>
+            <div>
+                <span class="stat-title">Assignments Created</span>
+                <h3 class="stat-value" id="statAssignments">0</h3>
+            </div>
+        </div>
+        <div class="stat-card-item">
+            <div class="stat-icon-box stat-green"><i class="bi bi-check2-all"></i></div>
+            <div>
+                <span class="stat-title">Graded Submissions</span>
+                <h3 class="stat-value" id="statGraded">0</h3>
+            </div>
+        </div>
+        <div class="stat-card-item">
+            <div class="stat-icon-box stat-yellow"><i class="bi bi-file-earmark-arrow-up"></i></div>
+            <div>
+                <span class="stat-title">Pending Reviews</span>
+                <h3 class="stat-value" id="statPending">0</h3>
+            </div>
+        </div>
+        <div class="stat-card-item">
+            <div class="stat-icon-box stat-red"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <span class="stat-title">Cohort High Risk</span>
+                <h3 class="stat-value" id="statHighRisk">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="custom-card">
+        <div class="custom-tabs-header">
+            <ul class="custom-nav-tabs">
+                <li><button type="button" class="custom-tab-btn active" id="tab-btn-submissions" onclick="switchTab('submissions-content', this)"><i class="bi bi-folder-check"></i> Submissions Queue</button></li>
+                <li><button type="button" class="custom-tab-btn" id="tab-btn-grade" onclick="switchTab('grade-content', this)"><i class="bi bi-pencil-square"></i> Grade Student</button></li>
+                <li><button type="button" class="custom-tab-btn" id="tab-btn-create" onclick="switchTab('create-assignment-content', this)"><i class="bi bi-plus-circle"></i> + Create Assignment</button></li>
+                <li><button type="button" class="custom-tab-btn" id="tab-btn-catalog" onclick="switchTab('catalog-content', this)"><i class="bi bi-collection"></i> Assignments Catalog</button></li>
+                <li><button type="button" class="custom-tab-btn" id="tab-btn-ledger" onclick="switchTab('ledger-content', this)"><i class="bi bi-journal-text"></i> Evaluation Ledger</button></li>
+                <li><button type="button" class="custom-tab-btn" id="tab-btn-risk" onclick="switchTab('risk-content', this)"><i class="bi bi-shield-exclamation"></i> Cohort Risk Surveillance</button></li>
+            </ul>
+        </div>
+
+        <!-- 1. SUBMISSIONS QUEUE TAB CONTENT -->
+        <div id="submissions-content" class="custom-tab-content active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h4 style="font-weight: 700; margin: 0 0 4px 0;">Student Submissions Queue</h4>
+                    <p style="color: #6B7280; font-size: 13px; margin: 0;">Every learner submission with named student, cohort, deliverable and review status.</p>
+                </div>
+                <div style="background: #f1f5f9; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                    Total Submissions: <span id="queueCountBadge" style="color:#1677FF;">0</span>
+                </div>
+            </div>
+
+            <div class="custom-table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Batch / Cohort</th>
+                            <th>Assignment</th>
+                            <th>Deliverable</th>
+                            <th>Submitted At</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. GRADE STUDENT TAB CONTENT -->
+        <div id="grade-content" class="custom-tab-content">
+            <div style="border-bottom: 1px solid #E5E7EB; padding-bottom: 12px; margin-bottom: 20px;">
+                <h4 style="font-weight: 700; margin: 0 0 4px 0;">Grade Student & Send Feedback</h4>
+                <p style="color: #6B7280; font-size: 13px; margin: 0;">Award marks, inspect the learner's attached deliverable, and transmit automated email feedback.</p>
+            </div>
+
+            <form id="gradeForm" onsubmit="return submitGrade(event);">
+                <div class="form-grid-2">
+                    <div>
+                        <label class="form-label-custom">Select Coursework Assignment <span style="color:#ef4444;">*</span></label>
+                        <select class="form-select-custom" id="assignmentSelect" required onchange="onAssignmentChange()">
+                            <option value="">-- Choose Assignment --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Select Student Learner <span style="color:#ef4444;">*</span></label>
+                        <select class="form-select-custom" id="studentSelect" required onchange="onStudentChange()">
+                            <option value="">-- Select an Assignment First --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-top:8px; align-items:start;">
+                    <div id="assignmentBatchNotice" style="min-height:20px;"></div>
+                    <small id="studentCountHelpText" style="color: #6B7280; font-size: 12px; display: block;">
+                        Only learners enrolled in the assignment's matching cohort will be listed.
+                    </small>
+                </div>
+
+                <!-- Context panel: assignment selected → cohort roster; student selected → all their assignments -->
+                <div id="gradeContextPanel" style="display:none; margin-top:18px; background:#F8FAFC; border:1px solid #E5E7EB; border-radius:12px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                        <strong id="gradePanelTitle" style="font-size:14px; color:#111827;"></strong>
+                        <span id="gradePanelSummary" style="font-size:12px; color:#6B7280; font-weight:600;"></span>
+                    </div>
+                    <div class="custom-table-container">
+                        <table class="custom-table">
+                            <thead id="gradePanelHead"></thead>
+                            <tbody id="gradePanelBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Submission Proof Inspector -->
+                <div id="submissionPreviewArea" class="submission-proof-box" style="display: none;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <span style="font-weight: 700; font-size: 15px; color: #111827; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-file-earmark-check text-primary"></i> Student Submitted Work & Proof
+                        </span>
+                        <span id="submissionStatusBadge" class="badge-status badge-info-custom">Status</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #ffffff; padding: 14px; border-radius: 8px; border: 1px solid #E5E7EB;">
+                        <div>
+                            <small style="color: #6B7280; display: block; font-weight: 600;">Submitted On:</small>
+                            <span id="submittedAtText" style="font-size: 13px; color: #111827; font-weight: 600;">--</span>
+                        </div>
+                        <div>
+                            <small style="color: #6B7280; display: block; font-weight: 600;">Student Cohort / Batch:</small>
+                            <span id="studentBatchText" style="font-size: 13px; color: #111827; font-weight: 700;">--</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <small style="color: #6B7280; display: block; font-weight: 600;">Attached File:</small>
+                            <div id="fileDownloadContainer" style="margin-top: 4px;">
+                                <span style="font-size: 12px; color: #6B7280;">No file</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="imagePreviewRow" style="display: none; margin-top: 12px;">
+                        <small style="color: #6B7280; display: block; font-weight: 600; margin-bottom: 6px;">Solution Image Preview:</small>
+                        <div style="background:#ffffff; padding:10px; border-radius:8px; border:1px solid #E5E7EB; display:inline-block;">
+                            <img id="submissionImgPreview" src="" alt="Solution Preview" style="max-height: 220px; max-width: 100%; border-radius: 6px; object-fit: contain;">
+                        </div>
+                    </div>
+
+                    <div id="submissionCommentsRow" style="display: none; margin-top: 12px;">
+                        <small style="color: #6B7280; display: block; font-weight: 600;">Student Comments / Notes:</small>
+                        <div id="submissionNotesText" style="background:#ffffff; padding:10px 12px; border-radius:8px; border:1px solid #E5E7EB; font-size:13px; color:#334155; margin-top:4px;"></div>
+                    </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: 20px; align-items: end;">
+                    <div>
+                        <label class="form-label-custom">Obtained Marks <span style="color:#ef4444;">*</span></label>
+                        <div style="display: flex; align-items: stretch;">
+                            <input type="number" step="0.1" class="form-control-custom" id="obtainedMarksInput" placeholder="e.g. 85" required min="0" style="border-top-right-radius: 0; border-bottom-right-radius: 0; height:42px; flex:1;">
+                            <span id="maxMarksLabel" style="background: #F1F5F9; border: 1px solid #CBD5E1; border-left: none; padding: 10px 14px; font-size: 14px; font-weight: 600; color: #6B7280; border-top-right-radius: 6px; border-bottom-right-radius: 6px; display:flex; align-items:center; white-space:nowrap;">/ 100</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Instructor Feedback / Guidance</label>
+                        <textarea class="form-control-custom" id="feedbackInput" rows="1" placeholder="Well structured logic. Revise exception handling..." style="height:42px; resize:vertical; min-height:42px;"></textarea>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #334155; cursor: pointer;">
+                        <input type="checkbox" id="sendEmailGrade" checked style="width: 18px; height: 18px; accent-color: #1677FF;">
+                        Transmit Instant Grade & Feedback Alert via Email to Student
+                    </label>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <button type="submit" class="btn-custom-primary" id="gradeSubmitBtn" style="padding: 12px 28px; font-size: 15px;">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Save Grade & Transmit Evaluation
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. CREATE ASSIGNMENT TAB CONTENT -->
+        <div id="create-assignment-content" class="custom-tab-content">
+            <div style="border-bottom: 1px solid #E5E7EB; padding-bottom: 12px; margin-bottom: 20px;">
+                <h4 style="font-weight: 700; margin: 0 0 4px 0;">Create New Assignment</h4>
+                <p style="color: #6B7280; font-size: 13px; margin: 0;">Publish coursework specifically locked to one of your academic cohorts/batches.</p>
+            </div>
+
+            <form id="createAssignmentForm" onsubmit="return submitAssignment(event);">
+                <div class="form-grid-2">
+                    <div>
+                        <label class="form-label-custom">Assignment Title <span style="color:#ef4444;">*</span></label>
+                        <input type="text" class="form-control-custom" id="caTitle" required placeholder="e.g. MapReduce Lab: WordCount & Partitioning">
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Target Batch / Cohort <span style="color:#ef4444;">*</span></label>
+                        <select class="form-select-custom" id="caBatch" required>
+                            <option value="">-- Choose Target Batch --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Subject / Domain</label>
+                        <input type="text" class="form-control-custom" id="caSubject" placeholder="e.g. Artificial Intelligence">
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Due Date</label>
+                        <input type="date" class="form-control-custom" id="caDueDate">
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Maximum Marks</label>
+                        <input type="number" class="form-control-custom" id="caMaxMarks" value="100" min="1">
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #334155; cursor: pointer;">
+                            <input type="checkbox" id="caSendEmail" checked style="width: 18px; height: 18px; accent-color: #1677FF;">
+                            Email broadcast to enrolled cohort learners
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <label class="form-label-custom">Instructions & Description</label>
+                    <textarea class="form-control-custom" id="caDescription" rows="3" placeholder="Provide problem statement, guidelines, and expected submission format..."></textarea>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-custom-primary" id="createAssignmentBtn">
+                        <i class="bi bi-plus-lg"></i> Post Assignment
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4. ASSIGNMENTS CATALOG TAB CONTENT -->
+        <div id="catalog-content" class="custom-tab-content">
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-weight: 700; margin: 0;">Assignments Catalog</h4>
+            </div>
+            <div class="custom-table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Assigned Batch</th>
+                            <th>Due Date</th>
+                            <th>Max Marks</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="catalogTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 5. EVALUATION LEDGER TAB CONTENT -->
+        <div id="ledger-content" class="custom-tab-content">
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-weight: 700; margin: 0;">Completed Evaluations Ledger</h4>
+            </div>
+            <div class="custom-table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Cohort / Batch</th>
+                            <th>Assignment</th>
+                            <th>Marks Given</th>
+                            <th>Instructor Feedback</th>
+                            <th>Graded Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 6. COHORT RISK SURVEILLANCE TAB CONTENT -->
+        <div id="risk-content" class="custom-tab-content">
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-weight: 700; margin: 0 0 4px 0;">Cohort Risk Surveillance</h4>
+                <p style="color: #6B7280; font-size: 13px; margin: 0;">AI-predicted academic risk monitoring for your assigned cohorts.</p>
+            </div>
+            <div class="custom-table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Cohort / Batch</th>
+                            <th>Risk Level</th>
+                            <th>Risk Probability Score</th>
+                            <th>Attendance</th>
+                            <th style="text-align: right;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riskTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEW / GRADE SUBMISSION MODAL -->
+<div class="ep-modal-overlay" id="reviewModal">
+    <div class="ep-modal" style="max-width: 680px;">
+        <div class="ep-modal-header" style="background: linear-gradient(135deg, #0B1F33 0%, #1677FF 100%); border-bottom: none; border-radius: 16px 16px 0 0; padding: 18px 24px;">
+            <h4 style="margin:0; font-weight:800; font-size:16px; color:#ffffff; display:flex; align-items:center; gap:10px;">
+                <span style="width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.25); display:inline-flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-clipboard-check"></i>
+                </span>
+                Review Student Submission
+            </h4>
+            <button type="button" onclick="closeReviewModal()" aria-label="Close" style="width:34px; height:34px; border-radius:9px; border:1px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.15); color:#ffffff; cursor:pointer; font-size:14px; display:inline-flex; align-items:center; justify-content:center;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="ep-modal-body" style="background:#F9FAFB; padding: 22px 24px;">
+            <div id="reviewStudentInfo" style="background:#ffffff; border:1px solid #E5E7EB; border-radius:12px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,0.04);"></div>
+
+            <div id="reviewFileBlock" style="background:#ffffff; border:1px solid #E5E7EB; border-radius:12px; padding:14px 16px; margin-top:14px; box-shadow:0 1px 3px rgba(0,0,0,0.04);"></div>
+            <div id="reviewNotesBlock" style="margin-top:14px;"></div>
+
+            <div style="background:#ffffff; border:1px solid #E5E7EB; border-radius:12px; padding:16px; margin-top:14px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <div class="form-grid-2">
+                    <div>
+                        <label class="form-label-custom">Obtained Marks <span style="color:#ef4444;">*</span></label>
+                        <div style="display:flex; align-items:stretch;">
+                            <input type="number" step="0.1" min="0" class="form-control-custom" id="reviewMarksInput" required placeholder="e.g. 85" style="border-top-right-radius:0; border-bottom-right-radius:0; height:42px; flex:1;">
+                            <span id="reviewMaxMarksLabel" style="background:#F1F5F9; border:1px solid #CBD5E1; border-left:none; padding:10px 14px; font-size:14px; font-weight:600; color:#6B7280; border-top-right-radius:6px; border-bottom-right-radius:6px; display:flex; align-items:center; white-space:nowrap;">/ 100</span>
+                        </div>
+                        <small id="reviewMarksHint" style="display:block; margin-top:6px; font-size:12px; color:#6B7280;">Marks cannot exceed the assignment's maximum.</small>
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Feedback</label>
+                        <input type="text" class="form-control-custom" id="reviewFeedbackInput" placeholder="Optional instructor feedback" style="height:42px;">
+                    </div>
+                </div>
+                <div style="margin-top: 14px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #334155; cursor: pointer;">
+                        <input type="checkbox" id="reviewSendEmail" checked style="width: 18px; height: 18px; accent-color: #1677FF;">
+                        Email the grade & feedback to this student
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="ep-modal-footer" style="background:#ffffff; border-top:1px solid #E5E7EB; border-radius: 0 0 16px 16px; padding: 16px 24px;">
+            <button type="button" class="btn-custom-outline" onclick="closeReviewModal()">Cancel</button>
+            <button type="button" class="btn-custom-primary" id="reviewSubmitBtn" onclick="submitReview()">
+                <i class="bi bi-check2-circle"></i> Save Evaluation
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="ep-toast" id="epToast"></div>
+
+<script>
+const state = { assignments: [], batches: [], students: [], marks: [], submissions: [] };
+let activeReviewSubmission = null;
+
+/* ---------------- Utilities ---------------- */
+function esc(s) {
+    return String(s === null || s === undefined ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function formatDateShort(v) {
+    if (!v) return '';
+    const s = String(v);
+    if (s.indexOf('T') !== -1) {
+        const parts = s.split('T');
+        return parts[0] + (parts[1] ? ' ' + parts[1].slice(0, 5) : '');
+    }
+    return s;
+}
+
+function baseFileName(path) {
+    if (!path) return '';
+    return String(path).split(/[\\/]/).pop();
+}
+
+function showToast(msg, type) {
+    const el = document.getElementById('epToast');
+    el.innerText = msg;
+    el.className = 'ep-toast show ' + (type || '');
+    setTimeout(() => { el.className = 'ep-toast ' + (type || ''); }, 3200);
+}
+
+async function api(path, options) {
+    const opts = Object.assign({ credentials: 'same-origin' }, options || {});
+    if (opts.body && typeof opts.body === 'string') {
+        opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    }
+    const res = await fetch(path, opts);
+    let json = {};
+    try { json = await res.json(); } catch (e) { json = { success: false, message: 'Invalid server response' }; }
+    return json;
+}
+
+function formatFileUrl(path) {
+    if (!path) return '';
+    let clean = String(path).trim().replace(/^\/?static\//, '');
+    if (!clean.startsWith('uploads/')) clean = 'uploads/submissions/' + clean;
+    return '/static/' + clean;
+}
+
+function isImageFile(path) {
+    return /\.(png|jpe?g|webp|gif)$/i.test(path || '');
+}
+
+/* ---------------- Data loading ---------------- */
+async function loadAll(showSpinner) {
+    const btn = document.getElementById('queueCountBadge');
+    if (btn && showSpinner) btn.innerHTML = '<span class="loading-spinner"></span>';
+    try {
+        const [data, subs] = await Promise.all([
+            api('/api/teacher/data'),
+            api('/api/teacher/submissions')
+        ]);
+        if (data && data.success === false) {
+            showToast(data.message || 'Failed to load teacher data', 'error');
+        }
+        state.assignments = (data && data.assignments) || [];
+        state.batches = (data && data.batches) || [];
+        state.students = (data && data.students) || [];
+        state.marks = (data && data.marks) || [];
+        state.submissions = (subs && subs.submissions) || [];
+        renderAll();
+    } catch (e) {
+        showToast('Network error while loading dashboard data', 'error');
+    }
+}
+
+/* ---------------- Cohort filtering ---------------- */
+function currentCohort() {
+    const el = document.getElementById('cohortFilterSelect');
+    return el ? el.value : '';
+}
+
+function batchMatches(batchId) {
+    const c = currentCohort();
+    if (!c) return true;
+    return String(batchId) === String(c);
+}
+
+function resetCohortFilter() {
+    const el = document.getElementById('cohortFilterSelect');
+    if (el) el.value = '';
+    renderAll();
+}
+
+function renderCohortOptions() {
+    const sel = document.getElementById('cohortFilterSelect');
+    if (!sel) return;
+    const prev = sel.value;
+    let html = '<option value="">-- All Cohorts / Batches --</option>';
+    state.batches.forEach(b => {
+        html += `<option value="${esc(b.id)}">${esc(b.name)} (${esc(b.student_count || 0)} learners)</option>`;
+    });
+    sel.innerHTML = html;
+    const exists = Array.prototype.some.call(sel.options, o => o.value === prev);
+    sel.value = exists ? prev : '';
+}
+
+function renderBatchDropdown() {
+    const sel = document.getElementById('caBatch');
+    if (!sel) return;
+    let html = '<option value="">-- Choose Target Batch --</option>';
+    state.batches.forEach(b => {
+        html += `<option value="${esc(b.id)}">${esc(b.name)}</option>`;
+    });
+    sel.innerHTML = html;
+}
+
+/* ---------------- Rendering ---------------- */
+function renderAll() {
+    renderCohortOptions();
+    renderBatchDropdown();
+    renderStats();
+    renderSubmissionsTable();
+    renderCatalog();
+    renderLedger();
+    renderRiskTable();
+    renderGradeAssignmentOptions();
+}
+
+function renderStats() {
+    const assignments = state.assignments.filter(a => batchMatches(a.batch_id));
+    const submissions = state.submissions.filter(s => batchMatches(s.batch_id));
+    const graded = submissions.filter(s => String(s.status).toLowerCase() === 'graded').length;
+    const pending = submissions.filter(s => String(s.status).toLowerCase() !== 'graded').length;
+    const highRisk = state.students.filter(s => batchMatches(s.batch_id) && /high|critical/i.test(String(s.risk || ''))).length;
+
+    document.getElementById('statAssignments').innerText = assignments.length;
+    document.getElementById('statGraded').innerText = graded;
+    document.getElementById('statPending').innerText = pending;
+    document.getElementById('statHighRisk').innerText = highRisk;
+}
+
+function emptyRow(cols, msg) {
+    return `<tr class="empty-row"><td colspan="${cols}"><i class="bi bi-inbox" style="font-size:26px; display:block; margin-bottom:6px;"></i>${esc(msg)}</td></tr>`;
+}
+
+function renderSubmissionsTable() {
+    const tbody = document.getElementById('submissionsTableBody');
+    if (!tbody) return;
+
+    const rows = state.submissions.filter(s => batchMatches(s.batch_id));
+    const badge = document.getElementById('queueCountBadge');
+    if (badge) badge.innerText = rows.length;
+
+    if (rows.length === 0) {
+        tbody.innerHTML = emptyRow(7, 'No student submissions recorded yet for this view.');
+        return;
+    }
+
+    let html = '';
+    rows.forEach(sub => {
+        const graded = String(sub.status).toLowerCase() === 'graded';
+        const fileUrl = formatFileUrl(sub.file_path);
+        const fileName = baseFileName(sub.file_path);
+        const text = String(sub.submission_text || sub.notes || '').trim();
+        let deliverable;
+        if (fileUrl) {
+            const label = fileName.length > 26 ? fileName.slice(0, 23) + '…' : fileName;
+            deliverable = `<a href="${esc(fileUrl)}" target="_blank" class="btn-custom-outline" style="color:#1677FF; border-color:#BFDBFE; padding:4px 10px; font-size:12px;" title="Open ${esc(fileName)}"><i class="bi bi-paperclip"></i> ${esc(label)}</a>`;
+        } else if (text) {
+            const short = text.length > 48 ? text.slice(0, 48) + '…' : text;
+            deliverable = `<span style="color:#374151; font-size:12px;" title="${esc(text)}"><i class="bi bi-fonts" style="color:#1677FF;"></i> ${esc(short)}</span>`;
+        } else {
+            deliverable = `<span style="color:#9CA3AF; font-size:12px; font-style:italic;">No deliverable</span>`;
+        }
+        const statusBadge = graded
+            ? `<span class="badge-status badge-success-custom">Graded: ${esc(sub.obtained_marks)}</span>`
+            : `<span class="badge-status badge-warning-custom">Pending Review</span>`;
+
+        html += `
+            <tr>
+                <td style="font-weight:700;">
+                    <a href="javascript:void(0)" onclick="openStudentInGrade('${esc(sub.assignment_id)}','${esc(sub.student_id)}')" title="Open in Grade Student" style="color:#111827; text-decoration:none; border-bottom:1px dashed #1677FF;">${esc(sub.student_name || ('Student #' + sub.student_id))}</a>
+                    <span style="display:block; font-size:12px; color:#6B7280; font-weight:400;">${esc(sub.student_email || '')}</span>
+                </td>
+                <td><span class="badge-status badge-info-custom">${esc(sub.batch_name || 'Unassigned')}</span></td>
+                <td style="font-weight:600;">${esc(sub.assignment_title || ('Assignment #' + sub.assignment_id))}</td>
+                <td>${deliverable}</td>
+                <td style="color:#6B7280; font-size:13px;">${esc(formatDateShort(sub.submitted_at) || '—')}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: right;">
+                    <button type="button" class="btn-custom-primary" style="padding:6px 14px; font-size:12px;"
+                            onclick="openReviewModal('${esc(sub.id)}')">
+                        <i class="bi bi-pencil"></i> ${graded ? 'Re-grade' : 'Review & Grade'}
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+function renderCatalog() {
+    const tbody = document.getElementById('catalogTableBody');
+    if (!tbody) return;
+    const rows = state.assignments.filter(a => batchMatches(a.batch_id));
+    if (rows.length === 0) { tbody.innerHTML = emptyRow(6, 'No assignments created yet.'); return; }
+    let html = '';
+    rows.forEach(a => {
+        html += `
+            <tr>
+                <td style="font-weight:700;">#${esc(a.id)}</td>
+                <td style="font-weight:600; color:#111827;">
+                    ${esc(a.title || 'Untitled')}
+                    <span style="display:block; font-size:12px; color:#6B7280; font-weight:400;">${esc(a.subject || '')}</span>
+                </td>
+                <td><span class="badge-status badge-info-custom">${esc(a.batch_name || 'Unassigned')}</span></td>
+                <td style="color:#6B7280;">${esc(a.due_date || 'No Deadline')}</td>
+                <td style="font-weight:600;">${esc(a.total_marks != null ? a.total_marks : 100)}</td>
+                <td style="text-align: right;">
+                    <button type="button" class="btn-custom-outline" onclick="selectAssignmentForGrading('${esc(a.id)}')">
+                        <i class="bi bi-pencil-square"></i> Grade
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+function renderLedger() {
+    const tbody = document.getElementById('ledgerTableBody');
+    if (!tbody) return;
+    const rows = state.marks.filter(m => String(m.status).toLowerCase() === 'graded' && batchMatches(m.batch_id));
+    if (rows.length === 0) { tbody.innerHTML = emptyRow(6, 'No graded evaluations recorded yet.'); return; }
+    let html = '';
+    rows.forEach(g => {
+        html += `
+            <tr>
+                <td style="font-weight:700; color:#111827;">${esc(g.student_name || ('Student #' + g.student_id))}</td>
+                <td><span class="badge-status badge-info-custom">${esc(g.batch_name || 'Unassigned')}</span></td>
+                <td style="font-weight:600;">${esc(g.assignment_title || ('Assignment #' + g.assignment_id))}</td>
+                <td><span class="badge-status badge-success-custom">${esc(g.obtained_marks)} / ${esc(g.total_marks != null ? g.total_marks : 100)}</span></td>
+                <td style="color:#6B7280; font-size:13px;">${esc(g.feedback || '-')}</td>
+                <td style="color:#6B7280; font-size:13px;">${esc(g.graded_at || '-')}</td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+function renderRiskTable() {
+    const tbody = document.getElementById('riskTableBody');
+    if (!tbody) return;
+    const rows = state.students.filter(s => batchMatches(s.batch_id));
+    if (rows.length === 0) { tbody.innerHTML = emptyRow(6, 'No student records found for this view.'); return; }
+    let html = '';
+    rows.forEach(s => {
+        const rlevel = String(s.risk || 'No prediction').toLowerCase();
+        let badge = '<span class="badge-status badge-success-custom">On Track</span>';
+        if (rlevel.indexOf('high') !== -1 || rlevel.indexOf('critical') !== -1) badge = '<span class="badge-status badge-danger-custom">High Risk</span>';
+        else if (rlevel.indexOf('medium') !== -1 || rlevel.indexOf('moderate') !== -1) badge = '<span class="badge-status badge-warning-custom">Moderate Risk</span>';
+        else if (rlevel.indexOf('no prediction') !== -1) badge = '<span class="badge-status badge-info-custom">Not Evaluated</span>';
+
+        const confidence = (s.confidence !== undefined && s.confidence !== null && s.confidence !== 0)
+            ? (s.confidence + '%') : 'Nominal';
+
+        html += `
+            <tr>
+                <td style="font-weight:700; color:#111827;">
+                    ${esc(s.name || s.username || ('Student #' + s.id))}
+                    <span style="display:block; font-size:12px; color:#6B7280; font-weight:400;">${esc(s.email || '')}</span>
+                </td>
+                <td><span class="badge-status badge-info-custom">${esc(s.batch_name || 'Unassigned')}</span></td>
+                <td>${badge}</td>
+                <td style="font-weight:600;">${esc(confidence)}</td>
+                <td style="font-weight:600;">${esc(s.attendance != null ? (s.attendance + '%') : 'N/A')}</td>
+                <td style="text-align: right;"><span style="font-size:12px; color:#6B7280; font-weight:600;">Monitored</span></td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+/* ---------------- Grade tab logic ---------------- */
+function renderGradeAssignmentOptions() {
+    const sel = document.getElementById('assignmentSelect');
+    if (!sel) return;
+    const prev = sel.value;
+    let html = '<option value="">-- Choose Assignment --</option>';
+    state.assignments.forEach(a => {
+        html += `<option value="${esc(a.id)}" data-batch-id="${esc(a.batch_id)}" data-batch="${esc(a.batch_name || '')}" data-max="${esc(a.total_marks != null ? a.total_marks : 100)}">
+            ${esc(a.title || 'Untitled')}${a.batch_name ? ' (Batch: ' + esc(a.batch_name) + ')' : ''}
+        </option>`;
+    });
+    sel.innerHTML = html;
+    const exists = Array.prototype.some.call(sel.options, o => o.value === prev);
+    sel.value = exists ? prev : '';
+}
+
+function findSubmission(assignmentId, studentId) {
+    return state.submissions.find(sub =>
+        String(sub.assignment_id) === String(assignmentId) &&
+        String(sub.student_id) === String(studentId)
+    );
+}
+
+function onAssignmentChange() {
+    const assignmentSelect = document.getElementById('assignmentSelect');
+    const studentSelect = document.getElementById('studentSelect');
+    const batchNotice = document.getElementById('assignmentBatchNotice');
+    const previewArea = document.getElementById('submissionPreviewArea');
+    const helpText = document.getElementById('studentCountHelpText');
+
+    previewArea.style.display = 'none';
+    studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+
+    const selectedAssId = assignmentSelect.value;
+    if (!selectedAssId) {
+        batchNotice.innerHTML = '';
+        helpText.innerText = 'Select an assignment above to automatically populate its enrolled cohort students.';
+        renderGradePanel();
+        return;
+    }
+
+    const selectedOption = assignmentSelect.options[assignmentSelect.selectedIndex];
+    const targetBatchId = (selectedOption.getAttribute('data-batch-id') || '').trim();
+    const targetBatchName = (selectedOption.getAttribute('data-batch') || '').trim();
+    const maxMarks = selectedOption.getAttribute('data-max') || '100';
+    document.getElementById('maxMarksLabel').innerText = '/ ' + maxMarks;
+    const marksInput = document.getElementById('obtainedMarksInput');
+    if (marksInput) {
+        marksInput.max = maxMarks;
+        marksInput.min = 0;
+        if (marksInput.value && parseFloat(marksInput.value) > parseFloat(maxMarks)) marksInput.value = '';
+    }
+
+    if (targetBatchId) {
+        batchNotice.innerHTML = `
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px;">
+                <i class="bi bi-info-circle-fill"></i> <strong>Cohort Enforced:</strong> This assignment belongs to
+                <strong>${esc(targetBatchName || ('#' + targetBatchId))}</strong>. Only learners in this cohort are listed.
+            </div>`;
+    } else {
+        batchNotice.innerHTML = '<span class="badge-status badge-info-custom">Cohort: Open to All Batches</span>';
+    }
+
+    let eligible = state.students;
+    if (targetBatchId) eligible = eligible.filter(st => String(st.batch_id) === String(targetBatchId));
+
+    if (eligible.length === 0) {
+        studentSelect.innerHTML = '<option value="">-- No students enrolled in this batch --</option>';
+        helpText.innerText = 'No students found for this cohort. Verify learner registrations.';
+        renderGradePanel();
+        return;
+    }
+
+    helpText.innerText = `Showing ${eligible.length} learner(s) enrolled in cohort: ${targetBatchName || 'All'}`;
+
+    eligible.forEach(st => {
+        const hasSubmission = !!findSubmission(selectedAssId, st.id);
+        const statusTag = hasSubmission ? '✓ [Solution Uploaded]' : '⚠ [Not Submitted]';
+        const opt = document.createElement('option');
+        opt.value = st.id;
+        opt.text = `${st.name || st.username || ('Student #' + st.id)} (${st.batch_name || 'General'}) -- ${statusTag}`;
+        studentSelect.appendChild(opt);
+    });
+    renderGradePanel();
+}
+
+function onStudentChange() {
+    const assignmentId = document.getElementById('assignmentSelect').value;
+    const studentId = document.getElementById('studentSelect').value;
+    const previewArea = document.getElementById('submissionPreviewArea');
+    const statusBadge = document.getElementById('submissionStatusBadge');
+    const submittedAtText = document.getElementById('submittedAtText');
+    const studentBatchText = document.getElementById('studentBatchText');
+    const fileContainer = document.getElementById('fileDownloadContainer');
+    const imagePreviewRow = document.getElementById('imagePreviewRow');
+    const imgEl = document.getElementById('submissionImgPreview');
+    const notesContainer = document.getElementById('submissionNotesText');
+    const notesRow = document.getElementById('submissionCommentsRow');
+    const marksInput = document.getElementById('obtainedMarksInput');
+    const feedbackInput = document.getElementById('feedbackInput');
+
+    renderGradePanel();
+
+    if (!studentId) { previewArea.style.display = 'none'; return; }
+    if (!assignmentId) { previewArea.style.display = 'none'; return; }
+    previewArea.style.display = 'block';
+
+    const student = state.students.find(s => String(s.id) === String(studentId));
+    studentBatchText.innerText = student ? (student.batch_name || 'General') : 'N/A';
+
+    const submission = findSubmission(assignmentId, studentId);
+
+    if (submission) {
+        const graded = String(submission.status).toLowerCase() === 'graded';
+        statusBadge.className = 'badge-status ' + (graded ? 'badge-success-custom' : 'badge-warning-custom');
+        statusBadge.innerHTML = graded
+            ? '<i class="bi bi-check-circle-fill"></i> Submitted & Graded'
+            : '<i class="bi bi-check-circle-fill"></i> Solution Submitted';
+        submittedAtText.innerText = formatDateShort(submission.submitted_at) || 'Recent';
+
+        if (submission.file_path) {
+            const downloadUrl = formatFileUrl(submission.file_path);
+            fileContainer.innerHTML = `<a href="${esc(downloadUrl)}" target="_blank" class="btn-custom-primary" style="padding:6px 14px; font-size:12px;"><i class="bi bi-cloud-arrow-down-fill"></i> Open / Download</a>`;
+            if (isImageFile(submission.file_path)) {
+                imagePreviewRow.style.display = 'block';
+                imgEl.src = downloadUrl;
+            } else {
+                imagePreviewRow.style.display = 'none';
+            }
+        } else {
+            fileContainer.innerHTML = '<span style="font-size:12px; color:#6B7280;">Text submission only</span>';
+            imagePreviewRow.style.display = 'none';
+        }
+
+        const notes = submission.submission_text || submission.notes || '';
+        if (notes) {
+            notesRow.style.display = 'block';
+            notesContainer.innerText = notes;
+        } else {
+            notesRow.style.display = 'none';
+        }
+
+        if (graded) {
+            marksInput.value = submission.obtained_marks != null ? submission.obtained_marks : '';
+            feedbackInput.value = submission.feedback || '';
+        } else {
+            marksInput.value = '';
+            feedbackInput.value = '';
+        }
+    } else {
+        statusBadge.className = 'badge-status badge-warning-custom';
+        statusBadge.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Not Submitted Yet';
+        submittedAtText.innerText = 'Pending Student Upload';
+        fileContainer.innerHTML = '<span style="font-size:12px; color:#ef4444; font-weight:600;"><i class="bi bi-x-circle"></i> No file uploaded</span>';
+        imagePreviewRow.style.display = 'none';
+        notesRow.style.display = 'none';
+        marksInput.value = '';
+        feedbackInput.value = '';
+    }
+}
+
+async function submitGrade(event) {
+    event.preventDefault();
+    const assignmentId = document.getElementById('assignmentSelect').value;
+    const studentId = document.getElementById('studentSelect').value;
+    const marks = document.getElementById('obtainedMarksInput').value;
+    const feedback = document.getElementById('feedbackInput').value;
+    const sendEmail = document.getElementById('sendEmailGrade').checked;
+
+    if (!assignmentId || !studentId || marks === '') {
+        showToast('Please select an assignment, a student and enter marks.', 'error');
+        return false;
+    }
+
+    const maxLabel = (document.getElementById('maxMarksLabel').innerText || '').replace(/[^0-9.]/g, '');
+    const maxMarks = maxLabel ? parseFloat(maxLabel) : 100;
+    const marksVal = parseFloat(marks);
+    if (isNaN(marksVal) || marksVal < 0 || marksVal > maxMarks) {
+        showToast(`Marks must be between 0 and ${maxMarks}.`, 'error');
+        return false;
+    }
+
+    const btn = document.getElementById('gradeSubmitBtn');
+    btn.disabled = true;
+
+    try {
+        const res = await api('/api/teacher/grade', {
+            method: 'POST',
+            body: JSON.stringify({
+                assignment_id: assignmentId,
+                student_id: studentId,
+                obtained_marks: parseFloat(marks),
+                feedback: feedback,
+                send_email: sendEmail
+            })
+        });
+        if (res.success) {
+            showToast(res.message || 'Grade saved successfully!', 'success');
+            await loadAll();
+            onStudentChange();
+        } else {
+            showToast(res.message || 'Failed to save grade.', 'error');
+        }
+    } catch (e) {
+        showToast('Network error while saving grade.', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+    return false;
+}
+
+function selectAssignmentForGrading(assignmentId) {
+    switchTab('grade-content', document.getElementById('tab-btn-grade'));
+    const sel = document.getElementById('assignmentSelect');
+    sel.value = String(assignmentId);
+    onAssignmentChange();
+    const panel = document.getElementById('gradeContextPanel');
+    if (panel && panel.style.display !== 'none') {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        document.getElementById('grade-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function openStudentInGrade(assignmentId, studentId) {
+    switchTab('grade-content', document.getElementById('tab-btn-grade'));
+    loadGradeContext(assignmentId, studentId);
+}
+
+function loadGradeContext(assignmentId, studentId) {
+    const asel = document.getElementById('assignmentSelect');
+    asel.value = String(assignmentId);
+    onAssignmentChange();
+    const ssel = document.getElementById('studentSelect');
+    ssel.value = String(studentId);
+    onStudentChange();
+    const proof = document.getElementById('submissionPreviewArea');
+    if (proof && proof.style.display !== 'none') {
+        proof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function statusBadgeHtml(sub) {
+    if (!sub) return '<span class="badge-status badge-danger-custom"><i class="bi bi-x-circle"></i> Not Submitted</span>';
+    const graded = String(sub.status).toLowerCase() === 'graded';
+    return graded
+        ? `<span class="badge-status badge-success-custom">Graded: ${esc(sub.obtained_marks)}</span>`
+        : '<span class="badge-status badge-info-custom"><i class="bi bi-check-circle"></i> Submitted</span>';
+}
+
+function renderGradePanel() {
+    const panel = document.getElementById('gradeContextPanel');
+    if (!panel) return;
+    const titleEl = document.getElementById('gradePanelTitle');
+    const summaryEl = document.getElementById('gradePanelSummary');
+    const headEl = document.getElementById('gradePanelHead');
+    const bodyEl = document.getElementById('gradePanelBody');
+
+    const assignmentId = document.getElementById('assignmentSelect').value;
+    const studentId = document.getElementById('studentSelect').value;
+
+    if (studentId) {
+        const st = state.students.find(s => String(s.id) === String(studentId));
+        if (!st) { panel.style.display = 'none'; return; }
+
+        let assigns = state.assignments.slice();
+        if (st.batch_id) {
+            const own = assigns.filter(a => String(a.batch_id) === String(st.batch_id));
+            if (own.length) assigns = own;
+        }
+        if (!assigns.length) { panel.style.display = 'none'; return; }
+
+        let submittedCount = 0, gradedCount = 0;
+        let html = '';
+        assigns.forEach(a => {
+            const sub = findSubmission(a.id, studentId);
+            if (sub) {
+                submittedCount++;
+                if (String(sub.status).toLowerCase() === 'graded') gradedCount++;
+            }
+            const marksCell = (sub && sub.obtained_marks != null)
+                ? `<span style="color:#1677FF; font-weight:700;">${esc(sub.obtained_marks)} / ${esc(a.total_marks != null ? a.total_marks : 100)}</span>`
+                : '<span style="color:#9CA3AF;">—</span>';
+            html += `
+                <tr>
+                    <td style="font-weight:600; color:#111827;">${esc(a.title || 'Untitled')}
+                        <span style="display:block; font-size:12px; color:#6B7280; font-weight:400;">${esc(a.batch_name || '')}</span>
+                    </td>
+                    <td style="color:#6B7280;">${esc(a.due_date || 'No Deadline')}</td>
+                    <td>${statusBadgeHtml(sub)}</td>
+                    <td style="color:#6B7280; font-size:13px;">${esc(sub ? (formatDateShort(sub.submitted_at) || 'Recently') : '—')}</td>
+                    <td>${marksCell}</td>
+                    <td style="text-align:right;">
+                        <button type="button" class="btn-custom-outline" style="padding:5px 12px; font-size:12px;"
+                                onclick="loadGradeContext('${esc(a.id)}','${esc(studentId)}')">
+                            <i class="bi bi-eye"></i> ${sub ? 'Open' : 'Grade'}
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        headEl.innerHTML = '<tr><th>Assignment</th><th>Due Date</th><th>Status</th><th>Submitted At</th><th>Marks</th><th style="text-align:right;">Action</th></tr>';
+        titleEl.innerHTML = `<i class="bi bi-person-badge"></i> All Assignments for <span style="color:#1677FF;">${esc(st.name || st.username || ('Student #' + st.id))}</span>`;
+        summaryEl.innerText = `${submittedCount} submitted · ${gradedCount} graded · ${assigns.length} total`;
+        bodyEl.innerHTML = html;
+        panel.style.display = 'block';
+        return;
+    }
+
+    if (assignmentId) {
+        const a = state.assignments.find(x => String(x.id) === String(assignmentId));
+        if (!a) { panel.style.display = 'none'; return; }
+
+        let roster = state.students.slice();
+        if (a.batch_id) roster = roster.filter(st => String(st.batch_id) === String(a.batch_id));
+        if (!roster.length) { panel.style.display = 'none'; return; }
+
+        let submittedCount = 0, gradedCount = 0;
+        let html = '';
+        roster.forEach(st => {
+            const sub = findSubmission(assignmentId, st.id);
+            if (sub) {
+                submittedCount++;
+                if (String(sub.status).toLowerCase() === 'graded') gradedCount++;
+            }
+            const marksCell = (sub && sub.obtained_marks != null)
+                ? `<span style="color:#1677FF; font-weight:700;">${esc(sub.obtained_marks)} / ${esc(a.total_marks != null ? a.total_marks : 100)}</span>`
+                : '<span style="color:#9CA3AF;">—</span>';
+            const attachCell = !sub
+                ? '<span style="color:#9CA3AF;">—</span>'
+                : sub.file_path
+                    ? `<span style="color:#1677FF; font-weight:600; font-size:12px;" title="${esc(baseFileName(sub.file_path))}"><i class="bi bi-paperclip"></i> File</span>`
+                    : (sub.submission_text ? '<span style="color:#374151; font-size:12px;"><i class="bi bi-fonts"></i> Text</span>' : '<span style="color:#9CA3AF;">—</span>');
+            html += `
+                <tr>
+                    <td style="font-weight:700; color:#111827;">${esc(st.name || st.username || ('Student #' + st.id))}
+                        <span style="display:block; font-size:12px; color:#6B7280; font-weight:400;">${esc(st.email || '')}</span>
+                    </td>
+                    <td>${statusBadgeHtml(sub)}</td>
+                    <td style="color:#6B7280; font-size:13px;">${esc(sub ? (formatDateShort(sub.submitted_at) || 'Recently') : '—')}</td>
+                    <td>${marksCell}</td>
+                    <td>${attachCell}</td>
+                    <td style="text-align:right;">
+                        <button type="button" class="btn-custom-primary" style="padding:5px 12px; font-size:12px;"
+                                onclick="loadGradeContext('${esc(assignmentId)}','${esc(st.id)}')">
+                            <i class="bi bi-pencil"></i> ${sub ? 'Review' : 'Grade'}
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        headEl.innerHTML = '<tr><th>Student</th><th>Status</th><th>Submitted At</th><th>Marks</th><th>Deliverable</th><th style="text-align:right;">Action</th></tr>';
+        titleEl.innerHTML = `<i class="bi bi-people"></i> Cohort Roster — <span style="color:#1677FF;">${esc(a.title || ('Assignment #' + a.id))}</span>`;
+        summaryEl.innerText = `${submittedCount} submitted · ${gradedCount} graded · ${roster.length} learners`;
+        bodyEl.innerHTML = html;
+        panel.style.display = 'block';
+        return;
+    }
+
+    panel.style.display = 'none';
+}
+
+/* ---------------- Review modal ---------------- */
+function openReviewModal(submissionId) {
+    const sub = state.submissions.find(s => String(s.id) === String(submissionId));
+    if (!sub) { showToast('Submission not found.', 'error'); return; }
+    activeReviewSubmission = sub;
+
+    const studentName = sub.student_name || ('Student #' + sub.student_id);
+    const initial = String(studentName).trim().charAt(0).toUpperCase() || 'S';
+    const maxMarks = sub.total_marks != null ? sub.total_marks : 100;
+    const isGraded = String(sub.status).toLowerCase() === 'graded';
+
+    document.getElementById('reviewStudentInfo').innerHTML = `
+        <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#0B1F33,#1677FF); color:#fff; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${esc(initial)}</div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-weight:800; font-size:16px; color:#111827;">${esc(studentName)}</div>
+                <div style="font-size:13px; color:#6B7280;">${esc(sub.student_email || '')}</div>
+                <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                    <span class="badge-status badge-info-custom">${esc(sub.batch_name || 'Unassigned')}</span>
+                    <span class="badge-status badge-info-custom">${esc(sub.assignment_title || ('#' + sub.assignment_id))}</span>
+                    <span class="badge-status ${isGraded ? 'badge-success-custom' : 'badge-warning-custom'}">
+                        ${isGraded ? 'Graded' : 'Pending Review'}
+                    </span>
+                </div>
+                <div style="font-size:12px; color:#6B7280; margin-top:8px;">Submitted: ${esc(formatDateShort(sub.submitted_at) || '—')} &bull; <strong style="color:#1677FF;">Max Marks: ${esc(maxMarks)}</strong></div>
+            </div>
+        </div>
+    `;
+
+    const fileBlock = document.getElementById('reviewFileBlock');
+    if (sub.file_path) {
+        const url = formatFileUrl(sub.file_path);
+        let inner = `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <span style="font-size:13px; font-weight:600; color:#111827; display:flex; align-items:center; gap:6px;"><i class="bi bi-paperclip" style="color:#1677FF;"></i> ${esc(baseFileName(sub.file_path))}</span>
+            <a href="${esc(url)}" target="_blank" class="btn-custom-outline" style="color:#1677FF; border-color:#BFDBFE; padding:6px 14px; font-size:12px;"><i class="bi bi-file-earmark-arrow-down"></i> Open / Download</a>
+        </div>`;
+        if (isImageFile(sub.file_path)) {
+            inner += `<div style="margin-top:12px; text-align:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:10px;"><img src="${esc(url)}" style="max-height:220px; max-width:100%; border-radius:6px;"></div>`;
+        }
+        fileBlock.innerHTML = inner;
+        fileBlock.style.display = 'block';
+    } else {
+        fileBlock.style.display = 'none';
+    }
+
+    const notes = sub.submission_text || sub.notes || '';
+    const notesBlock = document.getElementById('reviewNotesBlock');
+    if (notes) {
+        notesBlock.innerHTML = `<div style="background:#ffffff; border:1px solid #E5E7EB; border-radius:12px; padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <small style="color:#6B7280; font-weight:600; display:block; margin-bottom:6px;">Student Notes / Text Submission:</small>
+            <div style="font-size:13px; color:#334155; line-height:1.55;">${esc(notes)}</div>
+        </div>`;
+        notesBlock.style.display = 'block';
+    } else {
+        notesBlock.innerHTML = '';
+        notesBlock.style.display = 'none';
+    }
+
+    const marksInput = document.getElementById('reviewMarksInput');
+    marksInput.value = (sub.obtained_marks != null) ? sub.obtained_marks : '';
+    marksInput.max = maxMarks;
+    marksInput.min = 0;
+    document.getElementById('reviewMaxMarksLabel').innerText = '/ ' + maxMarks;
+    document.getElementById('reviewMarksHint').innerText = `Enter marks between 0 and ${maxMarks}. Values above ${maxMarks} are not allowed.`;
+    document.getElementById('reviewFeedbackInput').value = sub.feedback || '';
+    document.getElementById('reviewModal').classList.add('active');
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').classList.remove('active');
+    activeReviewSubmission = null;
+}
+
+async function submitReview() {
+    if (!activeReviewSubmission) return;
+    const marks = document.getElementById('reviewMarksInput').value;
+    const feedback = document.getElementById('reviewFeedbackInput').value;
+    const sendEmail = document.getElementById('reviewSendEmail').checked;
+
+    if (marks === '') { showToast('Please enter the obtained marks.', 'error'); return; }
+
+    const maxMarks = activeReviewSubmission.total_marks != null ? Number(activeReviewSubmission.total_marks) : 100;
+    const marksVal = parseFloat(marks);
+    if (isNaN(marksVal) || marksVal < 0 || marksVal > maxMarks) {
+        showToast(`Marks must be between 0 and ${maxMarks}.`, 'error');
+        return;
+    }
+
+    const btn = document.getElementById('reviewSubmitBtn');
+    btn.disabled = true;
+
+    try {
+        const res = await api('/api/teacher/review-submission', {
+            method: 'POST',
+            body: JSON.stringify({
+                submission_id: activeReviewSubmission.id,
+                obtained_marks: parseFloat(marks),
+                feedback: feedback,
+                send_email: sendEmail
+            })
+        });
+        if (res.success) {
+            showToast(res.message || 'Submission evaluated!', 'success');
+            closeReviewModal();
+            await loadAll();
+        } else {
+            showToast(res.message || 'Failed to save evaluation.', 'error');
+        }
+    } catch (e) {
+        showToast('Network error while submitting evaluation.', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+/* ---------------- Create assignment ---------------- */
+async function submitAssignment(event) {
+    event.preventDefault();
+    const title = document.getElementById('caTitle').value.trim();
+    const batchId = document.getElementById('caBatch').value;
+    const subject = document.getElementById('caSubject').value.trim();
+    const dueDate = document.getElementById('caDueDate').value;
+    const maxMarks = document.getElementById('caMaxMarks').value;
+    const sendEmail = document.getElementById('caSendEmail').checked;
+
+    if (!title || !batchId) {
+        showToast('Assignment title and target batch are required.', 'error');
+        return false;
+    }
+
+    const btn = document.getElementById('createAssignmentBtn');
+    btn.disabled = true;
+
+    try {
+        const res = await api('/api/teacher/assignments', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: title,
+                subject: subject,
+                batch_id: batchId,
+                total_marks: parseFloat(maxMarks),
+                due_date: dueDate,
+                send_email: sendEmail
+            })
+        });
+        if (res.success) {
+            showToast(res.message || 'Assignment published successfully!', 'success');
+            document.getElementById('createAssignmentForm').reset();
+            await loadAll();
+        } else {
+            showToast(res.message || 'Failed to publish assignment.', 'error');
+        }
+    } catch (e) {
+        showToast('Network error while publishing assignment.', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+    return false;
+}
+
+/* ---------------- Tabs ---------------- */
+function switchTab(contentId, triggerBtn) {
+    document.querySelectorAll('.custom-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.custom-tab-btn').forEach(el => el.classList.remove('active'));
+    const target = document.getElementById(contentId);
+    if (target) target.classList.add('active');
+    if (triggerBtn) triggerBtn.classList.add('active');
+}
+
+/* ---------------- Init ---------------- */
+document.addEventListener('DOMContentLoaded', function () {
+    loadAll();
+    document.getElementById('reviewModal').addEventListener('click', function (e) {
+        if (e.target === this) closeReviewModal();
+    });
+});
+</script>
+{% endblock %}

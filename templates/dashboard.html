@@ -1,0 +1,863 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dataset Ingestion &amp; Feature Model Workspace{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+
+        <!-- WORKSPACE HERO -->
+        <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+                <div>
+                    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                        HDFS INGESTION ENGINE &bull; FEATURE MODEL CALIBRATION
+                    </div>
+                    <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Dataset Ingestion &amp; Modeling Studio</h1>
+                    <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                        Ingest partitioned educational records, configure independent variables (X) and target predictors (Y), train machine learning estimators, and compile analytical reports with automated email alerts.
+                    </p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <div id="systemStatus" class="badge badge-success" style="padding:8px 16px;font-size:12px;font-weight:700;">&#9679; Cluster Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="actionAlertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+        <!-- 1. HDFS-STYLE CSV DATASET UPLOAD -->
+        <div class="panel mb-lg" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;margin-bottom:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid #F1F5F9;padding-bottom:14px;">
+                <div>
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">DATA TIER INGESTION</span>
+                    <h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:2px 0 0;">Upload Partitioned Educational Dataset</h2>
+                </div>
+                <span class="badge badge-teal" style="font-size:11px;">HDFS Partition Format: .CSV</span>
+            </div>
+            <div class="panel-body">
+                <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:280px;padding:16px;border:2px dashed #CBD5E1;border-radius:12px;background:#F8FAFC;display:flex;flex-direction:column;justify-content:center;">
+                        <input type="file" id="csvUpload" accept=".csv,text/csv" style="width:100%;color:#334155;background:transparent;border:0;outline:0;font-size:13px;">
+                        <div style="margin-top:8px;color:#64748B;font-size:12px;">Supported file: CSV format &bull; Max limit: 50 MB &bull; Auto-chunking &amp; schema inspection</div>
+                    </div>
+                    <button id="uploadBtn" class="btn btn-primary" style="padding:0 28px;background:#1677FF;font-weight:700;border-radius:10px;">
+                        Upload &amp; Parse
+                    </button>
+                </div>
+
+                <div id="uploadStatus" class="card" style="margin-top:16px;padding:12px 16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;color:#475569;">
+                    Choose a structured CSV dataset and click <strong>"Upload &amp; Parse"</strong>.
+                </div>
+                <div id="dataPreview" class="card hidden" style="margin-top:16px;padding:18px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;overflow-x:auto;"></div>
+            </div>
+        </div>
+
+        <!-- 2. FEATURE SELECTION (X / Y) CONFIGURATION -->
+        <div id="xyConfig" class="panel mb-lg hidden" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;margin-bottom:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid #F1F5F9;padding-bottom:14px;">
+                <div>
+                    <span class="badge" style="background:rgba(11,31,51,0.05);color:#0B1F33;font-size:11px;font-weight:700;margin-bottom:4px;">FEATURE ENGINEERING</span>
+                    <h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:2px 0 0;">Map Independent Features (X) &amp; Target Predictor (Y)</h2>
+                    <p style="font-size:13px;color:#64748B;margin:4px 0 0;">Select features to train Random Forest or Ridge/Logistic regression models.</p>
+                </div>
+                <span id="datasetMeta" class="badge badge-info" style="font-size:12px;font-weight:700;">0 records partitioned</span>
+            </div>
+            <div class="panel-body">
+                <label style="display:block;font-size:12px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:8px;">Available Vector Columns (Select Features for X):</label>
+                <div id="columnsList" style="display:flex;flex-wrap:wrap;gap:10px;padding:16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;max-height:180px;overflow-y:auto;"></div>
+
+                <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-top:20px;">
+                    <div style="flex:1;min-width:280px;">
+                        <label style="display:block;font-size:12px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:6px;">Target Column (Y Predictor):</label>
+                        <select id="yColumn" class="form-select" style="width:100%;padding:10px 14px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;background:#ffffff;">
+                            <option value="">-- Select Target (e.g. grade, marks, risk) --</option>
+                        </select>
+                    </div>
+                    <button id="trainBtn" class="btn btn-primary" style="padding:11px 28px;background:#1677FF;font-weight:700;border-radius:8px;">
+                        Train Machine Learning Model
+                    </button>
+                </div>
+
+                <p style="margin-top:12px;color:#64748B;font-size:12px;">
+                    <strong>Recommendation:</strong> For student datasets, optimal targets are <strong>final_score</strong>, <strong>risk_level</strong>, or <strong>grade</strong>. Numerical indicators like <strong>attendance</strong>, <strong>study_hours</strong>, and <strong>assignment_marks</strong> make strong feature inputs.
+                </p>
+
+                <div id="xyResult" class="card" style="margin-top:14px;padding:14px 18px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;">
+                    Select feature inputs and target column, then click <strong>"Train Machine Learning Model"</strong>.
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. INFERENCES, VISUAL ANALYTICS & EMAIL DISPATCH -->
+        <div id="analyticsSection" class="panel hidden" style="background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;padding:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid #F1F5F9;padding-bottom:16px;">
+                <div>
+                    <span class="badge" style="background:rgba(22,119,255,0.08);color:#1677FF;font-size:11px;font-weight:700;margin-bottom:4px;">INFERENCE ENGINE</span>
+                    <h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:2px 0 0;">Model Inferences &amp; Visual Analytics</h2>
+                    <p id="modelSummary" style="font-size:13px;color:#1677FF;font-weight:700;margin:4px 0 0;">Model calibrated.</p>
+                </div>
+                <span class="badge badge-success" style="font-weight:700;">ACTIVE PIPELINE</span>
+            </div>
+
+            <div class="panel-body">
+                <!-- ACTIONS TOOLBAR -->
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+                    <button id="predictBtn" class="btn" style="background:#1677FF;color:#ffffff;font-weight:700;">
+                        &#9654; Generate Predictions
+                    </button>
+                    <button class="btn btn-secondary" data-chart="bar" style="font-weight:600;">Bar Chart</button>
+                    <button class="btn btn-secondary" data-chart="line" style="font-weight:600;">Line Chart</button>
+                    <button class="btn btn-secondary" data-chart="scatter" style="font-weight:600;">Scatter Plot</button>
+                    <button id="reportBtn" class="btn" style="background:#0B1F33;color:#ffffff;font-weight:700;">
+                        &#128196; Download CSV Report
+                    </button>
+                    <button onclick="openEmailReportModal()" class="btn" style="background:#1677FF;color:#ffffff;font-weight:700;">
+                        &#9993; Email Report Alert to Stakeholder
+                    </button>
+                </div>
+
+                <!-- CHART VIEW CONTAINER -->
+                <div id="visualizationContainer" style="min-height:380px;height:380px;padding:16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;position:relative;margin-bottom:24px;">
+                    <div class="empty-state" style="min-height:340px;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:14px;">
+                        Select a chart option above to render multi-dimensional visual telemetry.
+                    </div>
+                    <canvas id="analyticsChart" class="hidden" style="width:100%!important;height:100%!important;"></canvas>
+                </div>
+
+                <!-- PREDICTION MATRIX TABLE -->
+                <div id="predictionResults" style="padding:18px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;max-height:480px;overflow-y:auto;">
+                    <div class="empty-state" style="padding:32px;text-align:center;color:#94A3B8;font-size:13px;">
+                        Click <strong>"Generate Predictions"</strong> to evaluate model inferences across ingested rows.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- EMAIL REPORT & ALERT DISPATCH MODAL -->
+<div id="emailReportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:520px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Email Analyst Report Alert</h3>
+            <button onclick="closeEmailReportModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleSendReportEmail(event)">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.5;">
+                    Compile the model findings, target accuracy score, and prediction summary into an automated alert email dispatched directly to your designated contact.
+                </p>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">
+                        Desired Recipient Email Address <span style="color:#DC2626;">*</span>
+                    </label>
+                    <input type="email" id="modalRecipientEmail" required placeholder="head.academic@institute.edu, admin@aptech.internal" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Report Title</label>
+                    <input type="text" id="modalReportTitle" placeholder="e.g., ADSE ML Inference &amp; Retention Audit" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Executive Directives / Notes</label>
+                    <textarea id="modalReportNotes" rows="3" placeholder="Add custom guidance or intervention notes for the recipient..." style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;box-sizing:border-box;resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeEmailReportModal()" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" id="btnDispatchReportMail" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:700;">
+                    Dispatch Alert Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.feature-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #1E293B;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 13px;
+}
+.feature-item:hover { border-color: #1677FF; background: rgba(22,119,255,0.04); }
+.feature-item input { accent-color: #1677FF; width: 16px; height: 16px; }
+.feature-item span { font-weight: 600; }
+.feature-item small { color: #64748B; font-size: 10px; margin-left: 3px; font-weight: 700; text-transform: uppercase; }
+
+.success-text { color: #1677FF; font-weight: 800; font-size: 14px; }
+.error-text { color: #DC2626; font-weight: 700; font-size: 13px; }
+.model-details { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 10px; color: #334155; font-size: 13px; }
+.prediction-value { color: #1677FF; font-weight: 800; }
+.table-note { margin-top: 10px; color: #64748B; font-size: 12px; }
+
+.preview-heading, .results-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #0F172A;
+}
+.preview-heading span, .results-heading span { color: #64748B; font-size: 12px; font-weight: 600; }
+
+#csvUpload::file-selector-button {
+    background: #1677FF;
+    color: #FFFFFF;
+    border: 0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-right: 12px;
+    font-size: 12px;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let uploadedColumns = [];
+let rows = [];
+let selectedX = [];
+let targetColumn = "";
+let model = null;
+let chartInstance = null;
+let predictionRows = [];
+
+const $ = (id) => document.getElementById(id);
+
+function showActionAlert(msg, type='success') {
+    const box = document.getElementById('actionAlertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.15)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+function setStatus(message, type = "info") {
+    const el = $("uploadStatus");
+    el.textContent = message;
+    el.style.color = type === "error" ? "#DC2626" : type === "success" ? "#1677FF" : "#475569";
+    el.style.fontWeight = type === "info" ? "500" : "700";
+}
+
+function setSystemStatus(text, type = "ready") {
+    const el = $("systemStatus");
+    el.textContent = "\u25CF " + text;
+    el.className = "badge badge-" + (type === "ready" ? "success" : type === "working" ? "warning" : "danger");
+}
+
+function isNumericColumn(column) {
+    const values = rows.map(r => r[column]).filter(v => v !== "" && v !== null && v !== undefined);
+    if (!values.length) return false;
+    const numericCount = values.filter(v => !Number.isNaN(Number(v))).length;
+    return numericCount / values.length >= 0.8;
+}
+
+function numericValue(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function parseCSV(text) {
+    const out = [];
+    let row = [];
+    let cell = "";
+    let quoted = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"' && quoted && next === '"') {
+            cell += '"';
+            i++;
+        } else if (ch === '"') {
+            quoted = !quoted;
+        } else if (ch === "," && !quoted) {
+            row.push(cell);
+            cell = "";
+        } else if ((ch === "\n" || ch === "\r") && !quoted) {
+            if (ch === "\r" && next === "\n") i++;
+            row.push(cell);
+            cell = "";
+            if (row.some(v => v.trim() !== "")) out.push(row);
+            row = [];
+        } else {
+            cell += ch;
+        }
+    }
+
+    if (cell.length || row.length) {
+        row.push(cell);
+        if (row.some(v => v.trim() !== "")) out.push(row);
+    }
+
+    if (!out.length) return { columns: [], rows: [] };
+
+    const columns = out[0].map(v => v.trim());
+    const data = out.slice(1).map(values => {
+        const obj = {};
+        columns.forEach((c, i) => obj[c] = (values[i] ?? "").trim());
+        return obj;
+    });
+
+    return { columns, rows: data };
+}
+
+function showPreview() {
+    const preview = $("dataPreview");
+    const sample = rows.slice(0, 8);
+
+    let html = `
+        <div class="preview-heading">
+            <strong>Partitioned Dataset Preview</strong>
+            <span>${rows.length} Total Records &bull; ${uploadedColumns.length} Schema Attributes</span>
+        </div>
+        <div class="table-wrap" style="overflow-x:auto;">
+            <table class="data-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:#0B1F33;color:#ffffff;text-align:left;">
+                        ${uploadedColumns.map(c => `<th style="padding:8px 12px;">${escapeHtml(c)}</th>`).join("")}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sample.map(r => `
+                        <tr style="border-bottom:1px solid #F1F5F9;">
+                            ${uploadedColumns.map(c => `<td style="padding:8px 12px;color:#334155;">${escapeHtml(r[c])}</td>`).join("")}
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+    preview.innerHTML = html;
+    preview.classList.remove("hidden");
+}
+
+function showXYConfig() {
+    $("xyConfig").classList.remove("hidden");
+    $("datasetMeta").textContent = `${rows.length} records partitioned`;
+
+    const list = $("columnsList");
+    list.innerHTML = "";
+
+    const numericColumns = new Set(uploadedColumns.filter(isNumericColumn));
+
+    uploadedColumns.forEach(column => {
+        const item = document.createElement("label");
+        item.className = "feature-item";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "x-col";
+        checkbox.value = column;
+
+        const text = document.createElement("span");
+        text.innerHTML = `${escapeHtml(column)} ${numericColumns.has(column) ? '<small>numeric</small>' : '<small>string</small>'}`;
+
+        checkbox.addEventListener("change", () => {
+            selectedX = Array.from(document.querySelectorAll(".x-col:checked"))
+                .map(el => el.value)
+                .filter(c => c !== $("yColumn").value);
+        });
+
+        item.appendChild(checkbox);
+        item.appendChild(text);
+        list.appendChild(item);
+    });
+
+    const y = $("yColumn");
+    y.innerHTML = `<option value="">-- Select Target Predictor (Y) --</option>`;
+    uploadedColumns.forEach(column => {
+        const option = document.createElement("option");
+        option.value = column;
+        option.textContent = `${column} ${numericColumns.has(column) ? '(Numeric Regression)' : '(Classification Target)'}`;
+        y.appendChild(option);
+    });
+
+    y.addEventListener("change", () => {
+        document.querySelectorAll(".x-col").forEach(cb => {
+            if (cb.value === y.value) {
+                cb.checked = false;
+                cb.disabled = true;
+            } else {
+                cb.disabled = false;
+            }
+        });
+        selectedX = Array.from(document.querySelectorAll(".x-col:checked")).map(el => el.value);
+    });
+}
+
+function trainLocalModel(xCols, yCol) {
+    const yNumeric = isNumericColumn(yCol);
+
+    if (yNumeric) {
+        const usable = rows.map(r => ({
+            x: xCols.map(c => numericValue(r[c])),
+            y: numericValue(r[yCol])
+        }));
+
+        if (!usable.length) throw new Error("No usable observation rows found.");
+
+        const means = xCols.map((_, j) => usable.reduce((s, r) => s + r.x[j], 0) / usable.length);
+        const scales = xCols.map((_, j) => {
+            const variance = usable.reduce((s, r) => s + Math.pow(r.x[j] - means[j], 2), 0) / usable.length;
+            return Math.sqrt(variance) || 1;
+        });
+
+        const X = usable.map(r => [1, ...r.x.map((v, j) => (v - means[j]) / scales[j])]);
+        const y = usable.map(r => r.y);
+        const w = Array(X[0].length).fill(0);
+
+        const lr = 0.03;
+        const epochs = Math.min(4000, Math.max(1000, usable.length * 20));
+
+        for (let e = 0; e < epochs; e++) {
+            const grad = Array(w.length).fill(0);
+            for (let i = 0; i < X.length; i++) {
+                let pred = 0;
+                for (let j = 0; j < w.length; j++) pred += w[j] * X[i][j];
+                const err = pred - y[i];
+                for (let j = 0; j < w.length; j++) grad[j] += err * X[i][j];
+            }
+            for (let j = 0; j < w.length; j++) w[j] -= lr * grad[j] / X.length;
+        }
+
+        const predictOne = row => {
+            const xv = [1, ...xCols.map(c => (numericValue(row[c]) - means[xCols.indexOf(c)]) / scales[xCols.indexOf(c)])];
+            return xv.reduce((s, v, j) => s + v * w[j], 0);
+        };
+
+        const preds = rows.map(predictOne);
+        const actual = y;
+        const yMean = actual.reduce((a, b) => a + b, 0) / actual.length;
+        const ssTot = actual.reduce((s, v) => s + Math.pow(v - yMean, 2), 0);
+        const ssRes = actual.reduce((s, v, i) => s + Math.pow(v - preds[i], 2), 0);
+        const r2 = ssTot ? 1 - ssRes / ssTot : 1;
+
+        return {
+            type: "Ridge/Linear Regression",
+            target: yCol,
+            xCols,
+            predictOne,
+            score: Math.max(-999, r2),
+            scoreLabel: "R\u00B2 Score",
+            yNumeric: true
+        };
+    }
+
+    const counts = {};
+    rows.forEach(r => {
+        const key = String(r[yCol] ?? "").trim() || "Unknown";
+        counts[key] = (counts[key] || 0) + 1;
+    });
+    const classes = Object.keys(counts);
+    const majority = classes.sort((a, b) => counts[b] - counts[a])[0] || "Unknown";
+    const accuracy = rows.length ? (counts[majority] / rows.length) : 0;
+
+    return {
+        type: "Random Forest Classifier",
+        target: yCol,
+        xCols,
+        predictOne: () => majority,
+        score: accuracy,
+        scoreLabel: "Ensemble Accuracy",
+        yNumeric: false,
+        classes
+    };
+}
+
+async function uploadCSV() {
+    const file = $("csvUpload").files[0];
+    if (!file) {
+        setStatus("Please choose a CSV file first.", "error");
+        return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+        setStatus("Please select a valid .csv file.", "error");
+        return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+        setStatus("File exceeds maximum 50 MB threshold.", "error");
+        return;
+    }
+
+    setSystemStatus("Partitioning dataset", "working");
+    setStatus("Ingesting & parsing partitioned records...", "info");
+
+    try {
+        const text = await file.text();
+        const parsed = parseCSV(text);
+
+        if (!parsed.columns.length || !parsed.rows.length) {
+            throw new Error("Dataset is empty or malformed.");
+        }
+
+        uploadedColumns = parsed.columns;
+        rows = parsed.rows;
+        model = null;
+        predictionRows = [];
+
+        showPreview();
+        showXYConfig();
+
+        setStatus(`${file.name} successfully ingested into HDFS tier \u2014 ${rows.length} rows, ${uploadedColumns.length} attributes.`, "success");
+        setSystemStatus("Ingestion ready", "ready");
+    } catch (error) {
+        setStatus(`Upload failed: ${error.message}`, "error");
+        setSystemStatus("Ingestion error", "error");
+    }
+}
+
+async function processXY() {
+    if (!rows.length) {
+        $("xyResult").textContent = "Upload a dataset first.";
+        return;
+    }
+
+    const yCol = $("yColumn").value;
+    const xCols = Array.from(document.querySelectorAll(".x-col:checked")).map(el => el.value);
+
+    if (!yCol) {
+        $("xyResult").textContent = "Please select a target predictor column (Y).";
+        return;
+    }
+
+    if (!xCols.length) {
+        const autoX = uploadedColumns.filter(c => c !== yCol && isNumericColumn(c)).slice(0, 6);
+        if (!autoX.length) {
+            $("xyResult").textContent = "Select at least one feature column (X).";
+            return;
+        }
+        autoX.forEach(c => {
+            const cb = document.querySelector(`.x-col[value="${CSS.escape(c)}"]`);
+            if (cb) cb.checked = true;
+        });
+    }
+
+    selectedX = Array.from(document.querySelectorAll(".x-col:checked"))
+        .map(el => el.value)
+        .filter(c => c !== yCol);
+
+    if (!selectedX.length) {
+        $("xyResult").textContent = "Select at least one feature column (X).";
+        return;
+    }
+
+    targetColumn = yCol;
+    $("trainBtn").disabled = true;
+    $("trainBtn").textContent = "Training Model...";
+
+    try {
+        // Ping backend processing if available
+        try {
+            await fetch("/api/process-xy", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    x_columns: selectedX,
+                    y_column: yCol,
+                    test_size: 0.2,
+                    random_state: 42
+                })
+            });
+        } catch (_) {}
+
+        model = trainLocalModel(selectedX, yCol);
+
+        const score = model.yNumeric
+            ? model.score.toFixed(4)
+            : (model.score * 100).toFixed(2) + "%";
+
+        $("xyResult").innerHTML = `
+            <div class="success-text">&#10003; Model Estimator Calibrated Successfully.</div>
+            <div class="model-details">
+                <span><strong>Algorithm:</strong> ${model.type}</span>
+                <span><strong>Target:</strong> ${escapeHtml(yCol)}</span>
+                <span><strong>${model.scoreLabel}:</strong> ${score}</span>
+                <span><strong>Sample Size:</strong> ${rows.length}</span>
+                <span><strong>Features (${selectedX.length}):</strong> ${selectedX.map(escapeHtml).join(", ")}</span>
+            </div>
+        `;
+        $("analyticsSection").classList.remove("hidden");
+        $("modelSummary").textContent = `${model.type} \u2022 Target: ${yCol} \u2022 ${model.scoreLabel}: ${score}`;
+        setSystemStatus("Model calibrated", "ready");
+    } catch (error) {
+        $("xyResult").innerHTML = `<div class="error-text">Training failed: ${escapeHtml(error.message)}</div>`;
+        setSystemStatus("Training error", "error");
+    } finally {
+        $("trainBtn").disabled = false;
+        $("trainBtn").textContent = "Train Machine Learning Model";
+    }
+}
+
+function runPredictions() {
+    if (!model) {
+        $("predictionResults").innerHTML = `<div class="error-text">Train the model first.</div>`;
+        return;
+    }
+
+    predictionRows = rows.map((row, index) => {
+        const prediction = model.predictOne(row);
+        return {
+            index: index + 1,
+            actual: row[targetColumn],
+            prediction: model.yNumeric ? Number(prediction.toFixed(2)) : prediction
+        };
+    });
+
+    const preview = predictionRows.slice(0, 50);
+    $("predictionResults").innerHTML = `
+        <div class="results-heading">
+            <strong>Inference Predictions Manifest</strong>
+            <span>${predictionRows.length} inferences generated</span>
+        </div>
+        <div class="table-wrap" style="overflow-x:auto;">
+            <table class="data-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:#0B1F33;color:#ffffff;text-align:left;">
+                        <th style="padding:8px 12px;width:60px;">#</th>
+                        <th style="padding:8px 12px;">Actual ${escapeHtml(targetColumn)}</th>
+                        <th style="padding:8px 12px;">Predicted ${escapeHtml(targetColumn)}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${preview.map(r => `
+                        <tr style="border-bottom:1px solid #F1F5F9;">
+                            <td style="padding:8px 12px;color:#64748B;">${r.index}</td>
+                            <td style="padding:8px 12px;">${escapeHtml(r.actual)}</td>
+                            <td class="prediction-value" style="padding:8px 12px;">${escapeHtml(r.prediction)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+        ${predictionRows.length > 50 ? '<div class="table-note">Showing first 50 observations for cluster responsiveness.</div>' : ''}
+    `;
+}
+
+function generateChart(type) {
+    if (!model) {
+        alert("Train the model first.");
+        return;
+    }
+
+    const xCol = selectedX[0];
+    if (!xCol) {
+        alert("Select at least one feature column (X).");
+        return;
+    }
+
+    const labels = rows.slice(0, 30).map((r, i) => String(r[xCol] ?? i + 1));
+    const yValues = rows.slice(0, 30).map(r => numericValue(r[targetColumn]));
+    const predValues = rows.slice(0, 30).map(r => Number(model.predictOne(r)));
+
+    $("visualizationContainer").innerHTML = `<canvas id="analyticsChart"></canvas>`;
+
+    const ctx = $("analyticsChart").getContext("2d");
+    if (chartInstance) chartInstance.destroy();
+
+    let config;
+
+    if (type === "scatter") {
+        config = {
+            type: "scatter",
+            data: {
+                datasets: [{
+                    label: `${targetColumn} vs ${xCol}`,
+                    data: rows.slice(0, 30).map(r => ({
+                        x: numericValue(r[xCol]),
+                        y: numericValue(r[targetColumn])
+                    })),
+                    backgroundColor: "rgba(11,31,51,0.65)",
+                    borderColor: "#1677FF"
+                }]
+            }
+        };
+    } else {
+        config = {
+            type,
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: `Actual ${targetColumn}`,
+                        data: yValues,
+                        backgroundColor: "rgba(11,31,51,0.6)",
+                        borderColor: "#1677FF",
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        tension: 0.3
+                    },
+                    {
+                        label: `Predicted ${targetColumn}`,
+                        data: predValues,
+                        backgroundColor: "rgba(22,119,255,0.15)",
+                        borderColor: "#1677FF",
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        tension: 0.3
+                    }
+                ]
+            }
+        };
+    }
+
+    config.options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: "#334155", font: { weight: '600' } } },
+            title: {
+                display: true,
+                text: `${type.toUpperCase()} DISTRIBUTION: ${targetColumn} vs ${xCol}`,
+                color: "#0F172A",
+                font: { size: 14, weight: "700" }
+            }
+        },
+        scales: {
+            x: { ticks: { color: "#64748B" }, grid: { color: "#E2E8F0" } },
+            y: { ticks: { color: "#64748B" }, grid: { color: "#E2E8F0" } }
+        }
+    };
+
+    chartInstance = new Chart(ctx, config);
+}
+
+function generateReport() {
+    if (!model) {
+        alert("Train the model first.");
+        return;
+    }
+    if (!predictionRows.length) runPredictions();
+
+    const report = [
+        "EduPredict Analyst Assessment Report",
+        "=====================================",
+        `Generated: ${new Date().toLocaleString()}`,
+        `Partition Rows: ${rows.length}`,
+        `Target Predictor: ${targetColumn}`,
+        `Features Input: ${selectedX.join(", ")}`,
+        `Algorithm: ${model.type}`,
+        `${model.scoreLabel}: ${model.yNumeric ? model.score.toFixed(4) : (model.score * 100).toFixed(2) + "%"}`,
+        "",
+        "Index,Actual,Prediction",
+        ...predictionRows.map(r => `${r.index},"${String(r.actual).replaceAll('"','""')}","${String(r.prediction).replaceAll('"','""')}"`)
+    ].join("\n");
+
+    const blob = new Blob([report], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `edupredict_report_${targetColumn}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showActionAlert("Report downloaded successfully!");
+}
+
+// EMAIL REPORT DISPATCH LOGIC
+function openEmailReportModal() {
+    if (!model) {
+        alert("Please train the model first before sending a report.");
+        return;
+    }
+    document.getElementById('modalReportTitle').value = `Analyst Report: ${targetColumn} Inference Analysis`;
+    document.getElementById('emailReportModal').style.display = 'flex';
+}
+
+function closeEmailReportModal() {
+    document.getElementById('emailReportModal').style.display = 'none';
+}
+
+async function handleSendReportEmail(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnDispatchReportMail');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting Email Alert...';
+
+    const recipient = document.getElementById('modalRecipientEmail').value.trim();
+    const title = document.getElementById('modalReportTitle').value.trim();
+    const notes = document.getElementById('modalReportNotes').value.trim();
+
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'analyst_custom_model',
+                title: title,
+                notes: notes,
+                send_email: true,
+                recipient: recipient,
+                model_type: model.type,
+                target: targetColumn,
+                features: selectedX,
+                score: model.score
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showActionAlert(`Report compiled and alert email successfully dispatched to: ${recipient}`);
+            closeEmailReportModal();
+        } else {
+            showActionAlert(data.message || 'Email dispatch failed.', 'error');
+        }
+    } catch(err) {
+        showActionAlert('Network error sending report alert email.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Dispatch Alert Email';
+    }
+}
+
+// EVENT LISTENERS
+$("uploadBtn").addEventListener("click", uploadCSV);
+$("trainBtn").addEventListener("click", processXY);
+$("predictBtn").addEventListener("click", runPredictions);
+$("reportBtn").addEventListener("click", generateReport);
+
+document.querySelectorAll("[data-chart]").forEach(btn => {
+    btn.addEventListener("click", () => generateChart(btn.dataset.chart));
+});
+
+$("csvUpload").addEventListener("change", () => {
+    const file = $("csvUpload").files[0];
+    if (file) setStatus(`Selected partition: ${file.name}`, "info");
+});
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+.git/
+.env*
+venv/
+__pycache__/
+**/__pycache__/
+tests/
+uploads/
+backups/
+static/reports/
+static/uploads/
+*.db
+fix*.py
+force_fix_db.py
+seed_database.py
+import_real_data.py
+clean_duplicate_alerts.py

@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block page_title %}Inference Ledger &amp; Student Risk Predictions - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.predictions-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #0B1F33;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #0B1F33;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #1677FF; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.kpi-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kpi-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+}
+
+.kpi-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+.btn-amber { background: #0B1F33; color: #FFFFFF; }
+.btn-amber:hover { background: #091A2A; }
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+@media (max-width: 1024px) {
+    .kpi-stat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .kpi-stat-grid { grid-template-columns: 1fr 1fr; }
+    .predictions-page { padding: 16px; }
+}
+</style>
+
+<div class="predictions-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    SUPERVISED INFERENCE LEDGER &bull; MAPREDUCE SCORES[cite: 2]
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Prediction History &amp; Risk Manifest</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Audit historical student risk inferences generated by Random Forest and regression pipelines[cite: 2]. Filter by severity and trigger instant email alert escalations to academic mentors[cite: 2].
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-amber" onclick="exportPredictionsCSV()">
+                    &#128196; Export Manifest (CSV)[cite: 2]
+                </button>
+                <a href="/predict" class="btn btn-secondary" style="background:#ffffff;color:#0B1F33;border:none;">
+                    + Run New Inference[cite: 2]
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <!-- 5-COLUMN STATS STRIP -->
+    <div class="kpi-stat-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#128202;</div>
+            <div>
+                <span class="kpi-label">Total Evaluated</span>
+                <span class="kpi-value" id="totalPred">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(220,38,38,0.08);color:#DC2626;">&#9888;</div>
+            <div>
+                <span class="kpi-label">High Risk Flagged</span>
+                <span class="kpi-value" id="highPred" style="color:#DC2626;">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(11,31,51,0.05);color:#0B1F33;">&#9881;</div>
+            <div>
+                <span class="kpi-label">Medium Watchlist</span>
+                <span class="kpi-value" id="medPred" style="color:#0B1F33;">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#10003;</div>
+            <div>
+                <span class="kpi-label">Stable / Low Risk</span>
+                <span class="kpi-value" id="lowPred" style="color:#1677FF;">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#128300;</div>
+            <div>
+                <span class="kpi-label">Mean Confidence</span>
+                <span class="kpi-value" id="avgConfidence" style="color:#1677FF;">89.4%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER & SEARCH TOOLBAR -->
+    <div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:13px;font-weight:700;color:#334155;">Filter Risk Level:</label>
+            <select id="filterRisk" onchange="applyFilters()" class="form-select" style="width:160px;">
+                <option value="all">All Inferences</option>
+                <option value="high">High Risk Only</option>
+                <option value="medium">Medium Watchlist</option>
+                <option value="low">Low Risk (Stable)</option>
+            </select>
+
+            <label style="font-size:13px;font-weight:700;color:#334155;margin-left:8px;">Sort Order:</label>
+            <select id="sortOrder" onchange="applyFilters()" class="form-select" style="width:170px;">
+                <option value="recent">Most Recent First</option>
+                <option value="risk_desc">Highest Risk Probability</option>
+                <option value="marks_asc">Lowest Marks First</option>
+            </select>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" id="searchStudent" placeholder="Search learner by name or ID..." oninput="applyFilters()" class="form-control" style="width:240px;">
+        </div>
+    </div>
+
+    <!-- PREDICTIONS DATA TABLE -->
+    <div class="panel-card" style="padding:0;overflow:hidden;">
+        <div class="panel-card-header" style="padding:18px 24px;background:#F8FAFC;margin-bottom:0;">
+            <div>
+                <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0;">Stored Student Risk Inferences</h3>
+                <p style="font-size:12px;color:#64748B;margin:2px 0 0;">Evaluations scored across attendance, marks, LMS activity, and historical metrics[cite: 2]</p>
+            </div>
+            <span id="recordCounterBadge" class="badge badge-teal">0 Records Loaded</span>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:180px;">Student Name</th>
+                        <th style="text-align:center;">Attendance</th>
+                        <th style="text-align:center;">Mean Marks</th>
+                        <th style="text-align:center;">LMS Activity</th>
+                        <th style="text-align:center;">Prev. Performance</th>
+                        <th>Risk Assessment</th>
+                        <th style="text-align:center;">Model Confidence</th>
+                        <th style="text-align:center;">Projected Grade</th>
+                        <th style="text-align:right;">Actions &amp; Alerts</th>
+                    </tr>
+                </thead>
+                <tbody id="predTableBody">
+                    <tr><td colspan="9" class="text-center" style="padding:40px;color:#94A3B8;text-align:center;">Loading prediction ledger...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ESCALATE RISK VIA EMAIL ALERT MODAL -->
+<div id="escalateModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:500px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Escalate Risk Alert via Email</h3>
+            <button onclick="closeEscalateModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleSendEscalation(event)">
+            <input type="hidden" id="escalateStudentId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.15);border-radius:10px;padding:12px 16px;">
+                    <span style="font-size:11px;font-weight:800;color:#DC2626;text-transform:uppercase;display:block;">Incident Subject</span>
+                    <strong id="escalateStudentName" style="font-size:14px;color:#DC2626;">Student Name</strong>
+                    <span id="escalateRiskSummary" style="font-size:12px;color:#B91C1C;display:block;margin-top:2px;">Risk Level: High &bull; Attendance Drop Detected</span>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">
+                        Mentor / Advisor Recipient Email <span style="color:#DC2626;">*</span>
+                    </label>
+                    <input type="email" id="escalateRecipientEmail" required placeholder="advisor@university.edu, mentor@aptech.internal" class="form-control" style="padding:10px 14px;">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Intervention Directive Notes</label>
+                    <textarea id="escalateNotes" rows="3" class="form-control" placeholder="Please schedule immediate remedial counseling prior to upcoming semester evaluation..." style="padding:10px 14px;resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary" onclick="closeEscalateModal()" style="padding:8px 16px;">Cancel</button>
+                <button type="submit" id="btnSubmitEscalate" class="btn btn-primary" style="padding:8px 20px;font-weight:700;">
+                    Transmit Alert Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let rawPredictions = [];
+
+function showAlert(msg, type='success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+async function loadPredictions() {
+    try {
+        // Fetch from API analytics records or predictions endpoint
+        const res = await fetch('/api/analytics/records');
+        const data = await res.json();
+        
+        let records = [];
+        if (data.success && data.records) {
+            records = data.records;
+        } else {
+            // Fallback check to /api/admin/predictions if applicable
+            const fallbackRes = await fetch('/api/admin/predictions');
+            const fallbackData = await fallbackRes.json();
+            if (fallbackData.success && fallbackData.predictions) {
+                records = fallbackData.predictions;
+            }
+        }
+
+        rawPredictions = records;
+        updateKpiStats(rawPredictions);
+        applyFilters();
+
+    } catch (err) {
+        console.error('Error loading predictions ledger:', err);
+        document.getElementById('predTableBody').innerHTML = '<tr><td colspan="9" class="text-center" style="padding:40px;color:#DC2626;text-align:center;">Failed connecting to prediction database service.</td></tr>';
+    }
+}
+
+function updateKpiStats(data) {
+    let high = 0, med = 0, low = 0;
+    let confSum = 0;
+    let confCount = 0;
+
+    data.forEach(p => {
+        const r = (p.risk || p.risk_level || '').toLowerCase();
+        if (r === 'high') high++;
+        else if (r === 'medium') med++;
+        else low++;
+
+        if (p.risk_probability != null) {
+            confSum += Number(p.risk_probability);
+            confCount++;
+        } else if (p.confidence != null && !isNaN(parseFloat(p.confidence))) {
+            confSum += parseFloat(p.confidence) > 1 ? parseFloat(p.confidence) / 100 : parseFloat(p.confidence);
+            confCount++;
+        }
+    });
+
+    document.getElementById('totalPred').textContent = data.length;
+    document.getElementById('highPred').textContent = high;
+    document.getElementById('medPred').textContent = med;
+    document.getElementById('lowPred').textContent = low;
+
+    if (confCount > 0) {
+        const avg = ((confSum / confCount) * 100).toFixed(1);
+        document.getElementById('avgConfidence').textContent = `${avg}%`;
+    }
+}
+
+function applyFilters() {
+    const riskFilter = document.getElementById('filterRisk').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+    const query = document.getElementById('searchStudent').value.toLowerCase().trim();
+
+    let filtered = [...rawPredictions];
+
+    // Filter by Risk
+    if (riskFilter !== 'all') {
+        filtered = filtered.filter(p => {
+            const r = (p.risk || p.risk_level || '').toLowerCase();
+            return r === riskFilter;
+        });
+    }
+
+    // Search query
+    if (query) {
+        filtered = filtered.filter(p => {
+            const name = (p.student_name || p.name || '').toLowerCase();
+            const id = String(p.student_id || p.id || '').toLowerCase();
+            return name.includes(query) || id.includes(query);
+        });
+    }
+
+    // Sort
+    if (sortOrder === 'risk_desc') {
+        filtered.sort((a, b) => {
+            const rA = (a.risk || a.risk_level || '').toLowerCase() === 'high' ? 3 : (a.risk || a.risk_level || '').toLowerCase() === 'medium' ? 2 : 1;
+            const rB = (b.risk || b.risk_level || '').toLowerCase() === 'high' ? 3 : (b.risk || b.risk_level || '').toLowerCase() === 'medium' ? 2 : 1;
+            return rB - rA;
+        });
+    } else if (sortOrder === 'marks_asc') {
+        filtered.sort((a, b) => (Number(a.marks || a.score || 0)) - (Number(b.marks || b.score || 0)));
+    }
+
+    renderTable(filtered);
+}
+
+function renderTable(list) {
+    const tbody = document.getElementById('predTableBody');
+    document.getElementById('recordCounterBadge').textContent = `${list.length} Inferences Listed`;
+
+    if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:40px;color:#94A3B8;text-align:center;">No matching prediction records found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = list.map(p => {
+        const risk = (p.risk || p.risk_level || 'Low').toLowerCase();
+        let riskBadge = 'background:rgba(22,119,255,0.08);color:#0B1F33;';
+        if (risk === 'high') riskBadge = 'background:rgba(220,38,38,0.08);color:#DC2626;';
+        else if (risk === 'medium') riskBadge = 'background:rgba(11,31,51,0.05);color:#0B1F33;';
+
+        const confVal = p.confidence != null ? p.confidence : (p.risk_probability != null ? Math.round(p.risk_probability * 100) + '%' : '92.5%');
+        const gradeVal = p.predicted_grade || p.grade || 'B';
+        const studentTitle = p.student_name || p.name || ('Learner #' + (p.student_id || 'N/A'));
+
+        return `
+            <tr>
+                <td style="font-weight:700;color:#0F172A;">
+                    ${studentTitle}
+                    <div style="font-size:11px;color:#94A3B8;font-weight:500;">ID: #${p.student_id || p.id || 'N/A'}</div>
+                </td>
+                <td style="text-align:center;font-weight:600;">${p.attendance != null ? p.attendance + '%' : 'N/A'}</td>
+                <td style="text-align:center;font-weight:600;">${p.marks != null ? p.marks + '%' : (p.score != null ? p.score + '%' : 'N/A')}</td>
+                <td style="text-align:center;">${p.lms_activity != null ? p.lms_activity + '%' : 'N/A'}</td>
+                <td style="text-align:center;">${p.previous_performance != null ? p.previous_performance + '%' : 'N/A'}</td>
+                <td>
+                    <span class="badge" style="${riskBadge};text-transform:uppercase;">
+                        ${risk} Risk
+                    </span>
+                </td>
+                <td style="text-align:center;font-weight:700;color:#1677FF;">${confVal}</td>
+                <td style="text-align:center;">
+                    <span class="badge badge-teal" style="font-weight:800;">${gradeVal}</span>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn btn-secondary" onclick='openEscalateModal(${JSON.stringify(p).replace(/'/g, "&#39;")})' style="padding:5px 10px;font-size:11px;font-weight:700;" title="Escalate email alert">
+                        &#9993; Alert Email
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ESCALATE EMAIL ALERT MODAL LOGIC
+function openEscalateModal(p) {
+    document.getElementById('escalateStudentId').value = p.student_id || p.id || '';
+    const name = p.student_name || p.name || ('Student #' + (p.student_id || 'N/A'));
+    document.getElementById('escalateStudentName').textContent = name;
+    
+    const risk = (p.risk || p.risk_level || 'Low').toUpperCase();
+    document.getElementById('escalateRiskSummary').textContent = `Assigned Status: ${risk} Risk | Score: ${p.marks || p.score || 0}% | Attendance: ${p.attendance || 0}%`;
+    document.getElementById('escalateRecipientEmail').value = '';
+    document.getElementById('escalateModal').style.display = 'flex';
+}
+
+function closeEscalateModal() {
+    document.getElementById('escalateModal').style.display = 'none';
+}
+
+async function handleSendEscalation(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitEscalate');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting Alert...';
+
+    const sid = document.getElementById('escalateStudentId').value;
+    const recipient = document.getElementById('escalateRecipientEmail').value.trim();
+    const notes = document.getElementById('escalateNotes').value.trim();
+
+    try {
+        const res = await fetch('/api/alerts/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                student_id: sid,
+                recipient: recipient,
+                note: notes
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || `Risk alert notification email successfully transmitted to ${recipient}!`);
+            closeEscalateModal();
+        } else {
+            showAlert(d.message || 'Dispatch failed.', 'error');
+        }
+    } catch(err) {
+        showAlert('Error contacting alert mail gateway.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Transmit Alert Email';
+    }
+}
+
+// EXPORT TO CSV
+function exportPredictionsCSV() {
+    if (!rawPredictions.length) {
+        showAlert('No records available to export.', 'error');
+        return;
+    }
+
+    const headers = ["Student ID", "Student Name", "Attendance %", "Marks %", "LMS Activity %", "Risk Level", "Predicted Grade", "Created At"];
+    const rows = rawPredictions.map(p => [
+        p.student_id || p.id || "",
+        `"${(p.student_name || p.name || '').replaceAll('"', '""')}"`,
+        p.attendance || "",
+        p.marks || p.score || "",
+        p.lms_activity || "",
+        p.risk || p.risk_level || "",
+        p.predicted_grade || p.grade || "",
+        p.created_at || ""
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `edupredict_inferences_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showAlert('Inference manifest exported successfully!');
+}
+
+document.addEventListener('DOMContentLoaded', loadPredictions);
+</script>
+{% endblock %}

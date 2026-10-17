@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block page_title %}Institutional Support &amp; Feedback Center - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.contact-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.support-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.support-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px rgba(0,0,0,0.06);
+}
+
+.support-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.form-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22,119,255,0.12);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px 24px;
+    background: #1677FF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-submit:hover {
+    background: #0E5FD8;
+}
+
+.btn-submit:disabled {
+    background: #94A3B8;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .contact-layout {
+        grid-template-columns: 1fr;
+    }
+    .contact-page {
+        padding: 16px;
+    }
+}
+</style>
+
+<div class="contact-page">
+
+    <!-- HERO SECTION -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="max-width:720px;">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;"></span>
+                INSTITUTIONAL FEEDBACK &amp; TECHNICAL HELPDESK
+            </div>
+            <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">How can we assist your institution?</h1>
+            <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;line-height:1.6;">
+                Submit diagnostic reports, query predictive models, request data ingestion assistance, or relay feedback directly to the EduPredict engineering team.
+            </p>
+        </div>
+    </div>
+
+    <div id="contactAlertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <div class="contact-layout">
+
+        <!-- LEFT: SUPPORT TIERS & MENTORING DETAILS -->
+        <div>
+            <div class="support-card">
+                <div class="support-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">
+                    &#9881;
+                </div>
+                <div>
+                    <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 4px;">Technical Support &amp; Cluster Health</h3>
+                    <p style="font-size:13px;color:#64748B;line-height:1.5;margin:0 0 8px;">
+                        Assistance with partitioned HDFS storage, MapReduce jobs, and model inference exceptions.
+                    </p>
+                    <span style="font-size:11px;font-weight:700;color:#1677FF;background:rgba(22,119,255,0.08);padding:2px 8px;border-radius:6px;border:1px solid rgba(22,119,255,0.12);">Response: &lt; 24 Hours</span>
+                </div>
+            </div>
+
+            <div class="support-card">
+                <div class="support-icon" style="background:rgba(11,31,51,0.08);color:#0B1F33;">
+                    &#128202;
+                </div>
+                <div>
+                    <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 4px;">Predictive Analytics Feedback</h3>
+                    <p style="font-size:13px;color:#64748B;line-height:1.5;margin:0 0 8px;">
+                        Report model inaccuracies, suggest new educational features, or request retraining cycles.
+                    </p>
+                    <span style="font-size:11px;font-weight:700;color:#0B1F33;background:rgba(11,31,51,0.05);padding:2px 8px;border-radius:6px;border:1px solid rgba(11,31,51,0.1);">Lead Analyst Review</span>
+                </div>
+            </div>
+
+            <div class="support-card">
+                <div class="support-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">
+                    &#127891;
+                </div>
+                <div>
+                    <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0 0 4px;">Aptech Academic Mentoring</h3>
+                    <p style="font-size:13px;color:#64748B;line-height:1.5;margin:0 0 8px;">
+                        Dedicated project support for students, center administrators, and faculty supervisors.
+                    </p>
+                    <span style="font-size:11px;font-weight:700;color:#1677FF;background:rgba(22,119,255,0.08);padding:2px 8px;border-radius:6px;border:1px solid rgba(22,119,255,0.12);">Email Mentoring Gateway</span>
+                </div>
+            </div>
+
+            <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:20px;margin-top:24px;">
+                <h4 style="font-size:14px;font-weight:700;color:#0F172A;margin:0 0 8px;">Direct Project Channel</h4>
+                <p style="font-size:13px;color:#64748B;margin:0 0 6px;">
+                    Email: <strong style="color:#1677FF;">support@edupredict.internal</strong>
+                </p>
+                <p style="font-size:12px;color:#94A3B8;margin:0;">
+                    Monitored by the EduPredict Core Engineering &amp; Operations Team.
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT: CONTACT / SUPPORT DISPATCH FORM -->
+        <div class="form-card">
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #F1F5F9;">
+                <h2 style="font-size:20px;font-weight:800;color:#0F172A;margin:0 0 4px;">Submit Support Inquiry</h2>
+                <p style="font-size:13px;color:#64748B;margin:0;">Please detail your request below; your ticket will be routed to the respective node daemon.</p>
+            </div>
+
+            <form onsubmit="submitContact(event)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label for="contactName">Full Name <span style="color:#DC2626;">*</span></label>
+                        <input type="text" id="contactName" class="form-input" placeholder="e.g., Prof. Sarah Ahmed" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactEmail">Official Institutional Email <span style="color:#DC2626;">*</span></label>
+                        <input type="email" id="contactEmail" class="form-input" placeholder="name@institute.edu" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactCategory">Inquiry Domain / Category <span style="color:#DC2626;">*</span></label>
+                    <select id="contactCategory" class="form-select" required>
+                        <option value="technical">Technical Support (System, Database &amp; Partitions)</option>
+                        <option value="prediction">ML Prediction &amp; Scoring Anomaly</option>
+                        <option value="data_ingestion">Data Ingestion (CSV / Dataset Upload)</option>
+                        <option value="feedback" selected>General System Feedback &amp; Suggestions</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactSubject">Subject <span style="color:#DC2626;">*</span></label>
+                    <input type="text" id="contactSubject" class="form-input" placeholder="Brief summary of your inquiry" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactMessage">Message / Incident Details <span style="color:#DC2626;">*</span></label>
+                    <textarea id="contactMessage" class="form-input" rows="5" placeholder="Provide complete context, error diagnostics, or recommendations..." required style="resize:vertical;"></textarea>
+                </div>
+
+                <button id="btnSubmitContact" class="btn-submit" type="submit">
+                    Send Inquiry &amp; Dispatch Ticket
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function showContactAlert(msg, type='success') {
+    const box = document.getElementById('contactAlertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 5000);
+}
+
+async function submitContact(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitContact');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting to Support Daemon...';
+
+    const payload = {
+        name: document.getElementById('contactName').value.trim(),
+        email: document.getElementById('contactEmail').value.trim(),
+        category: document.getElementById('contactCategory').value,
+        subject: document.getElementById('contactSubject').value.trim(),
+        message: document.getElementById('contactMessage').value.trim()
+    };
+
+    try {
+        const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showContactAlert(data.message || 'Thank you! Your ticket has been logged and dispatched to our engineering team.');
+            document.getElementById('contactName').value = '';
+            document.getElementById('contactEmail').value = '';
+            document.getElementById('contactSubject').value = '';
+            document.getElementById('contactMessage').value = '';
+        } else {
+            showContactAlert(data.message || 'Failed to submit support request. Please try again.', 'error');
+        }
+    } catch(err) {
+        showContactAlert('Support gateway currently unreachable. Please try again later or email us directly.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Inquiry & Dispatch Ticket';
+    }
+}
+</script>
+{% endblock %}

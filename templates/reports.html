@@ -1,0 +1,593 @@
+{% extends "base.html" %}
+
+{% block page_title %}Executive Reports &amp; Stakeholder Dispatch - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.reports-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #0B1F33;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #0B1F33;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #1677FF; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.kpi-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kpi-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+}
+
+.kpi-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+.btn-amber { background: #0B1F33; color: #FFFFFF; }
+.btn-amber:hover { background: #091428; }
+.btn-danger { background: #DC2626; color: #FFFFFF; }
+.btn-danger:hover { background: #B91C1C; }
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22,119,255,0.12);
+}
+
+@media (max-width: 1024px) {
+    .kpi-stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .kpi-stat-grid { grid-template-columns: 1fr; }
+    .reports-page { padding: 16px; }
+}
+</style>
+
+<div class="reports-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    ANALYTICAL REPORT ENGINE &bull; AUTOMATED SMTP DISPATCH
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Institutional Reports &amp; Alerts</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Generate analytical summaries across student retention risks, course demand, and MapReduce anomaly audits[cite: 2]. Automatically deliver email notifications to advisors and department heads[cite: 2].
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="openGenerateReportModal()" class="btn btn-amber">
+                    &#9993; Generate Report &amp; Alert
+                </button>
+                <button onclick="loadReports()" class="btn btn-secondary" style="background:#ffffff;color:#0B1F33;border:none;">
+                    &#8635; Refresh Manifest
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertBox" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-stat-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#128196;</div>
+            <div>
+                <span class="kpi-label">Total Reports</span>
+                <span class="kpi-value" id="statTotalReports">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#9993;</div>
+            <div>
+                <span class="kpi-label">Email Dispatches</span>
+                <span class="kpi-value" id="statDispatches">Active</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(11,31,51,0.05);color:#0B1F33;">&#128202;</div>
+            <div>
+                <span class="kpi-label">Retention Audits</span>
+                <span class="kpi-value" id="statRetentionAudits">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.06);color:#1677FF;">&#128300;</div>
+            <div>
+                <span class="kpi-label">Demand Forecasts</span>
+                <span class="kpi-value" id="statDemandForecasts">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORTS REPOSITORY TABLE -->
+    <div class="panel-card" style="padding:0;overflow:hidden;">
+        <div class="panel-card-header" style="padding:18px 24px;background:#F8FAFC;margin-bottom:0;">
+            <div>
+                <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0;">Archived Analytical Reports Manifest</h3>
+                <p style="font-size:12px;color:#64748B;margin:2px 0 0;">Synthesized data artifacts compiled by analysts and machine learning pipelines[cite: 2]</p>
+            </div>
+            <span id="reportCountBadge" class="badge badge-teal">0 Artifacts</span>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:70px;">ID</th>
+                        <th>Report Title &amp; Scope</th>
+                        <th>Compiled By</th>
+                        <th>Generated Timestamp</th>
+                        <th>Email Dispatch Gateway</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTableBody">
+                    <tr><td colspan="6" class="text-center" style="padding:40px;color:#94A3B8;text-align:center;">Loading analytical repository...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL 1: GENERATE REPORT & TRANSMIT EMAIL ALERT -->
+<div id="generateReportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:540px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Generate Report &amp; Alert Recipients</h3>
+            <button onclick="closeGenerateReportModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleGenerateReportSubmit(event)">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Report Model Focus &amp; Scope</label>
+                    <select id="genReportType" class="form-select">
+                        <option value="student_risk" selected>Student Retention &amp; Dropout Risk Audit[cite: 2]</option>
+                        <option value="course_demand">Academic Course Demand &amp; Elective Capacity Forecast[cite: 2]</option>
+                        <option value="anomaly_summary">MapReduce Anomaly &amp; Threshold Discrepancy Summary[cite: 2]</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Custom Report Title</label>
+                    <input type="text" id="genReportTitle" class="form-control" placeholder="e.g. Q3 Comprehensive Student Risk Audit" required>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Executive Directives / Context</label>
+                    <textarea id="genReportNotes" rows="3" class="form-control" placeholder="Provide executive notes, remedial advice, or context for recipients..." style="resize:vertical;"></textarea>
+                </div>
+
+                <!-- EMAIL DISPATCH OPTIONS -->
+                <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:10px;padding:14px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:13px;color:#1677FF;">
+                        <input type="checkbox" id="genSendEmail" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                        Dispatch Instant Email Alert to Desired Stakeholder[cite: 2]
+                    </label>
+                    <span style="font-size:11px;color:#1677FF;display:block;margin-top:4px;margin-left:26px;">
+                        Sends automated alerts with report metrics, risk indexes, and attachment direct links via SMTP[cite: 2].
+                    </span>
+                </div>
+
+                <div id="recipientEmailGroup">
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">
+                        Target Stakeholder Email Address <span style="color:#DC2626;">*</span>
+                    </label>
+                    <input type="email" id="genRecipientEmail" class="form-control" placeholder="head.mentor@institute.edu, admin@aptech.internal" required>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary" onclick="closeGenerateReportModal()">Cancel</button>
+                <button type="submit" id="btnSubmitGenerate" class="btn btn-primary">
+                    Execute &amp; Dispatch Alert
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 2: FORWARD / RESEND EMAIL FOR EXISTING REPORT -->
+<div id="forwardEmailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:500px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Dispatch Report Alert via Email</h3>
+            <button onclick="closeForwardEmailModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleForwardReportSubmit(event)">
+            <input type="hidden" id="fwdReportId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px 16px;">
+                    <span style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;display:block;">Selected Report</span>
+                    <strong id="fwdReportTitle" style="font-size:14px;color:#0F172A;">Report Name</strong>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">
+                        Desired Recipient Email Address <span style="color:#DC2626;">*</span>
+                    </label>
+                    <input type="email" id="fwdRecipientEmail" required placeholder="recipient@university.edu" class="form-control">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Custom Memo for Recipient</label>
+                    <textarea id="fwdReportNotes" rows="3" class="form-control" placeholder="Please find attached the compiled institutional performance findings..." style="resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary" onclick="closeForwardEmailModal()">Cancel</button>
+                <button type="submit" id="btnSubmitForward" class="btn btn-primary">
+                    Transmit Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let globalReportsList = [];
+
+function showAlert(msg, type = 'success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.15)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+// MODAL CONTROLS
+function openGenerateReportModal() {
+    document.getElementById('genReportTitle').value = 'Institutional Student Risk & Retention Audit';
+    document.getElementById('generateReportModal').style.display = 'flex';
+}
+
+function closeGenerateReportModal() {
+    document.getElementById('generateReportModal').style.display = 'none';
+}
+
+function openForwardEmailModal(id, name) {
+    document.getElementById('fwdReportId').value = id;
+    document.getElementById('fwdReportTitle').textContent = name;
+    document.getElementById('fwdRecipientEmail').value = '';
+    document.getElementById('fwdReportNotes').value = '';
+    document.getElementById('forwardEmailModal').style.display = 'flex';
+}
+
+function closeForwardEmailModal() {
+    document.getElementById('forwardEmailModal').style.display = 'none';
+}
+
+// TOGGLE RECIPIENT EMAIL FIELD IN GENERATE MODAL
+document.getElementById('genSendEmail').addEventListener('change', function() {
+    const grp = document.getElementById('recipientEmailGroup');
+    const input = document.getElementById('genRecipientEmail');
+    if (this.checked) {
+        grp.style.display = 'block';
+        input.required = true;
+    } else {
+        grp.style.display = 'none';
+        input.required = false;
+    }
+});
+
+// LOAD REPORTS FROM BACKEND API
+async function loadReports() {
+    try {
+        const res = await fetch('/api/reports');
+        const data = await res.json();
+        const tbody = document.getElementById('reportsTableBody');
+
+        if (data.success && data.reports && data.reports.length) {
+            globalReportsList = data.reports;
+            document.getElementById('statTotalReports').textContent = globalReportsList.length;
+            document.getElementById('reportCountBadge').textContent = `${globalReportsList.length} Artifacts`;
+
+            // Compute counts
+            let retentionCount = 0;
+            let demandCount = 0;
+            globalReportsList.forEach(r => {
+                const title = (r.name || r.title || '').toLowerCase();
+                if (title.includes('demand') || title.includes('course')) demandCount++;
+                else retentionCount++;
+            });
+            document.getElementById('statRetentionAudits').textContent = retentionCount;
+            document.getElementById('statDemandForecasts').textContent = demandCount;
+
+            tbody.innerHTML = globalReportsList.map(r => {
+                const rid = r.id || r._id;
+                const rname = r.name || r.title || ('Report #' + rid);
+                const isRisk = rname.toLowerCase().includes('risk') || rname.toLowerCase().includes('retention');
+                const badgeClass = isRisk ? 'badge-danger' : 'badge-info';
+                const tagLabel = isRisk ? 'Dropout Risk Audit' : 'Demand Forecast';
+
+                return `
+                    <tr>
+                        <td style="color:#64748B;font-family:monospace;font-weight:600;">#${rid}</td>
+                        <td>
+                            <strong style="color:#0F172A;font-size:14px;display:block;">${rname}</strong>
+                            <span class="badge ${badgeClass}" style="margin-top:4px;">${tagLabel}</span>
+                        </td>
+                        <td style="font-weight:600;color:#334155;">${r.created_by_name || 'Lead Analyst'}</td>
+                        <td style="color:#64748B;font-size:12px;">${r.created_at || 'Just now'}</td>
+                        <td>
+                            <span class="badge badge-teal">&#10003; Alert Gateway Active</span>
+                        </td>
+                        <td style="text-align:right;white-space:nowrap;">
+                            <a href="/static/reports/${r.name || r.filename}" download class="btn btn-secondary" style="padding:6px 12px;font-size:12px;margin-right:6px;">
+                                Download
+                            </a>
+                            <button class="btn btn-amber" onclick="openForwardEmailModal('${rid}', '${rname.replace(/'/g, "\\'")}')" style="padding:6px 12px;font-size:12px;margin-right:6px;" title="Send email alert to user">
+                                &#9993; Email Alert
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteReport('${rid}')" style="padding:6px 12px;font-size:12px;">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            document.getElementById('statTotalReports').textContent = '0';
+            document.getElementById('reportCountBadge').textContent = '0 Artifacts';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:40px;color:#94A3B8;text-align:center;">No generated reports found in manifest. Click "Generate Report &amp; Alert" above.</td></tr>';
+        }
+    } catch(e) {
+        console.error('Error fetching reports:', e);
+        document.getElementById('reportsTableBody').innerHTML = '<tr><td colspan="6" class="text-center" style="padding:40px;color:#DC2626;text-align:center;">Error connecting to report storage daemon.</td></tr>';
+    }
+}
+
+// GENERATE REPORT SUBMIT HANDLER
+async function handleGenerateReportSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitGenerate');
+    btn.disabled = true;
+    btn.textContent = 'Compiling & Transmitting...';
+
+    const reportType = document.getElementById('genReportType').value;
+    const title = document.getElementById('genReportTitle').value.trim();
+    const notes = document.getElementById('genReportNotes').value.trim();
+    const sendEmail = document.getElementById('genSendEmail').checked;
+    const recipient = document.getElementById('genRecipientEmail').value.trim();
+
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: reportType,
+                title: title,
+                notes: notes,
+                send_email: sendEmail,
+                recipient: recipient
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAlert(sendEmail && recipient ? `Report compiled and alert email successfully dispatched to ${recipient}!` : 'Report generated successfully!');
+            closeGenerateReportModal();
+            loadReports();
+        } else {
+            showAlert(data.message || 'Report generation error', 'error');
+        }
+    } catch(err) {
+        showAlert('Error during report generation and email dispatch.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Execute & Dispatch Alert';
+    }
+}
+
+// FORWARD REPORT TO EMAIL HANDLER
+async function handleForwardReportSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitForward');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting...';
+
+    const reportId = document.getElementById('fwdReportId').value;
+    const recipient = document.getElementById('fwdRecipientEmail').value.trim();
+    const notes = document.getElementById('fwdReportNotes').value.trim();
+
+    try {
+        const res = await fetch(`/api/reports/${reportId}/send-mail`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipient: recipient,
+                note: notes
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAlert(`Report alert email successfully dispatched to ${recipient}!`);
+            closeForwardEmailModal();
+        } else {
+            showAlert(data.message || 'Email dispatch failed.', 'error');
+        }
+    } catch(err) {
+        showAlert('Error contacting alert mail gateway.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Transmit Email';
+    }
+}
+
+// DELETE REPORT
+async function deleteReport(id) {
+    if (!confirm('Permanently purge this report from the data tier?')) return;
+    try {
+        const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Report successfully purged from cluster repository.');
+            loadReports();
+        } else {
+            showAlert(d.message || 'Failed deleting report.', 'error');
+        }
+    } catch(e) {
+        showAlert('Network error purging report.', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadReports);
+</script>
+{% endblock %}

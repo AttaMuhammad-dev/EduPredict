@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block page_title %}Verify OTP{% endblock %}
+
+{% block content %}
+<section class="page-section" style="background:var(--bg-body);min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center;">
+    <div class="container" style="width:100%;">
+        <div class="card" style="max-width:440px;margin:0 auto;padding:40px;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);">
+
+            <div class="text-center" style="margin-bottom:32px;">
+                <div style="width:72px;height:72px;margin:0 auto 20px;background:var(--accent-soft);border:1.5px solid var(--brand-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;">&#128274;</div>
+                <h1 style="font-size:24px;font-weight:800;margin-bottom:8px;">Verify OTP</h1>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.6;">
+                    We've sent a 6-digit One-Time Password to your email. Please enter it below to complete your login.
+                </p>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div style="margin-bottom:20px;">
+                        {% for msg in messages %}
+                            <div class="alert alert-error" role="alert" style="margin-bottom:8px;">{{ msg }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('verify_otp') }}">
+                <div class="form-group">
+                    <label style="display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">OTP Code</label>
+                    <input
+                        type="text"
+                        id="otp"
+                        name="otp"
+                        class="form-input"
+                        placeholder="123456"
+                        required
+                        autofocus
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                        title="Please enter the 6-digit code."
+                        style="padding:12px 15px;font-size:20px;text-align:center;letter-spacing:10px;font-weight:700;"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full" style="padding:13px;font-size:15px;margin-top:8px;">
+                    Verify &amp; Login
+                </button>
+            </form>
+
+            <div style="margin-top:24px;text-align:center;font-size:14px;color:var(--text-muted);">
+                <a href="{{ url_for('login') }}" class="text-accent font-semibold" style="text-decoration:none;">
+                    &larr; Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

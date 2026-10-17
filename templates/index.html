@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block page_title %}Home &bull; Distributed Educational Intelligence Platform{% endblock %}
+
+{% block content %}
+<style>
+.home-page {
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+}
+
+.hero-container {
+    background: linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 56px 48px;
+    margin-bottom: 36px;
+    box-shadow: 0 15px 35px -5px rgba(18, 60, 54, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-container::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    bottom: -60px;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    margin-bottom: 18px;
+}
+
+.hero-headline {
+    font-size: 44px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.15;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.5px;
+}
+
+.hero-subtext {
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.65;
+    max-width: 720px;
+    margin: 0 0 28px 0;
+}
+
+.hero-cta-group {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.hero-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.hero-stat-item strong {
+    display: block;
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.hero-stat-item span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-title-wrap {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 36px;
+}
+
+.section-title-wrap h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 6px 0 0 0;
+}
+
+.section-title-wrap p {
+    font-size: 15px;
+    color: #64748B;
+    margin: 6px 0 0 0;
+}
+
+.capability-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.capability-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.capability-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -6px rgba(0,0,0,0.08);
+}
+
+.cap-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #1677FF;
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 14px;
+}
+
+.cap-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+}
+
+.cap-desc {
+    font-size: 13px;
+    color: #64748B;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.cap-tag {
+    margin-top: 16px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1677FF;
+    background: rgba(22,119,255,0.04);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(22,119,255,0.12);
+}
+
+.persona-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 48px;
+}
+
+.persona-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.persona-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.persona-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 6px 0;
+}
+
+.persona-desc {
+    font-size: 12px;
+    color: #64748B;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+}
+
+.bottom-banner {
+    background: linear-gradient(135deg, #0B1F33 0%, #122B47 100%);
+    color: #ffffff;
+    border-radius: 18px;
+    padding: 36px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #1677FF;
+    color: #FFFFFF;
+}
+
+.btn-primary:hover {
+    background: #0E5FD8;
+}
+
+.btn-light {
+    background: #FFFFFF;
+    color: #0B1F33;
+}
+
+.btn-light:hover {
+    background: #F1F5F9;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.12);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 1024px) {
+    .capability-grid { grid-template-columns: repeat(2, 1fr); }
+    .persona-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats-strip { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+    .hero-headline { font-size: 32px; }
+    .capability-grid { grid-template-columns: 1fr; }
+    .persona-grid { grid-template-columns: 1fr; }
+    .hero-container { padding: 32px 24px; }
+    .home-page { padding: 16px; }
+}
+</style>
+
+<div class="home-page">
+
+    <!-- HERO COMPONENT -->
+    <div class="hero-container">
+        <div class="hero-pill">
+            <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+            APTECH ePROJECT &bull; HADOOP BIG DATA REPLICATION IN PYTHON[cite: 2]
+        </div>
+
+        <h1 class="hero-headline">
+            Transform Educational Big Data<br>into Smarter Interventions.
+        </h1>
+
+        <p class="hero-subtext">
+            EduPredict replicates distributed Hadoop infrastructure in Python to solve institutional student retention challenges[cite: 2]. By combining HDFS-style partitioned data storage, multi-core MapReduce anomaly screening, and predictive ML models, EduPredict identifies academic risks and dispatches automated email alerts to educators in real time[cite: 2].
+        </p>
+
+        <div class="hero-cta-group">
+            <a href="/login" class="btn btn-light">
+                Sign In to Platform &rarr;
+            </a>
+            <a href="/architecture" class="btn btn-secondary">
+                Hadoop Architecture &bull; HDFS &rarr;
+            </a>
+            <a href="/features" class="btn btn-secondary">
+                Core Capabilities
+            </a>
+        </div>
+
+        <div class="hero-stats-strip">
+            <div class="hero-stat-item">
+                <strong>HDFS Ready</strong>
+                <span>Partitioned Storage[cite: 2]</span>
+            </div>
+            <div class="hero-stat-item">
+                <strong>MapReduce</strong>
+                <span>Parallel Reduction[cite: 2]</span>
+            </div>
+            <div class="hero-stat-item">
+                <strong>3 ML Models</strong>
+                <span>Risk, Grades &amp; Demand[cite: 2]</span>
+            </div>
+            <div class="hero-stat-item">
+                <strong>Instant Alerts</strong>
+                <span>Automated Email Dispatch[cite: 2]</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORE BIG DATA CAPABILITIES GRID -->
+    <div class="section-title-wrap">
+        <span style="font-size:12px;font-weight:800;color:#1677FF;letter-spacing:1px;text-transform:uppercase;">ENTERPRISE ARCHITECTURE</span>
+        <h2>End-to-End Big Data &amp; Predictive Analytics</h2>
+        <p>Built to meet the comprehensive functional and non-functional specifications of the Aptech Big Data eProject[cite: 2].</p>
+    </div>
+
+    <div class="capability-grid">
+
+        <!-- 01: HDFS STORAGE REPLICATION -->
+        <div class="capability-card">
+            <div>
+                <div class="cap-num">01</div>
+                <h3 class="cap-title">HDFS Distributed Storage Emulation</h3>
+                <p class="cap-desc">
+                    Emulates Hadoop Distributed File System through partitioned, fault-tolerant block storage[cite: 2]. Educational records, demographics, and LMS telemetry are organized into chunked Parquet and database collections for high-throughput parallel queries[cite: 2].
+                </p>
+            </div>
+            <div>
+                <span class="cap-tag">HDFS Partitioning &bull; MongoDB Integration[cite: 2]</span>
+            </div>
+        </div>
+
+        <!-- 02: MAPREDUCE PARALLEL REDUCTION -->
+        <div class="capability-card">
+            <div>
+                <div class="cap-num">02</div>
+                <h3 class="cap-title">MapReduce Parallel Reduction</h3>
+                <p class="cap-desc">
+                    Executes multi-core parallel data processing to scale across massive institutional datasets[cite: 2]. Mapper workers split learner cohorts concurrently, while reducers compute attendance anomalies, continuous grade degradation, and correlation indices[cite: 2].
+                </p>
+            </div>
+            <div>
+                <span class="cap-tag">Python Multiprocessing &bull; Parallel Mappers[cite: 2]</span>
+            </div>
+        </div>
+
+        <!-- 03: PREDICTIVE TRIAD -->
+        <div class="capability-card">
+            <div>
+                <div class="cap-num">03</div>
+                <h3 class="cap-title">Supervised Predictive ML Triad</h3>
+                <p class="cap-desc">
+                    Machine learning models trained to project student retention probabilities[cite: 2], continuous semester grades, and future course capacity demand[cite: 2]. Features are scrubbed with statistical mean/mode imputation to prevent inference failures[cite: 2].
+                </p>
+            </div>
+            <div>
+                <span class="cap-tag">Random Forest &bull; Course Demand Models[cite: 2]</span>
+            </div>
+        </div>
+
+        <!-- 04: AUTOMATED EMAIL ALERT GATEWAY -->
+        <div class="capability-card" >
+            <div>
+                <div class="cap-num">04</div>
+                <h3 class="cap-title">Automated Email Alert Dispatcher</h3>
+                <p class="cap-desc">
+                    Whenever an analyst compiles a report or MapReduce detects critical drop-offs[cite: 2], automated alert emails are instantly dispatched via SMTP to designated stakeholder inboxes[cite: 2].
+                </p>
+            </div>
+            <div>
+                <span class="cap-tag" style="background:rgba(22,119,255,0.08);color:#1677FF;border-color:rgba(22,119,255,0.2);">SMTP Alert Daemon &bull; Report Mailer</span>
+            </div>
+        </div>
+
+        <!-- 05: ACADEMIC ANOMALY DETECTION -->
+        <div class="capability-card">
+            <div>
+                <div class="cap-num">05</div>
+                <h3 class="cap-title">Real-Time Anomaly Detection</h3>
+                <p class="cap-desc">
+                    Automated surveillance detects statistical outliers in student attendance (&lt; 75%), rapid grade drops (&gt; 25%), and LMS disengagement, giving advisors actionable warning flags before semester exams[cite: 2].
+                </p>
+            </div>
+            <div>
+                <span class="cap-tag">Z-Score Filtering &bull; Multi-Variable Triggers[cite: 2]</span>
+            </div>
+        </div>
+
+        <!-- 06: MULTI-SOURCE INGESTION -->
+        <div class="capability-card">
+            <div>
+                <div class="cap-num">06</div>
+                <h3 class="cap-title">Historical &amp; Stream Ingestion</h3>
+                <p class="cap-desc">
+                    Unified data ingestion engine supporting historical CSV datasets, demographic records, biometric attendance registers, and real-time LMS platform event streams[cite: 2].
+                </p>
+            </div>
+            <div>
+                <span class="cap-tag">Batch CSV &bull; Event Streaming[cite: 2]</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ROLE-BASED PORTALS SHOWCASE -->
+    <div class="section-title-wrap">
+        <span style="font-size:12px;font-weight:800;color:#1677FF;letter-spacing:1px;text-transform:uppercase;">GRANULAR RBAC ACCESS[cite: 2]</span>
+        <h2>Dedicated Stakeholder Workspaces</h2>
+        <p>Four specialized operational portals tailored to institutional responsibilities[cite: 2].</p>
+    </div>
+
+    <div class="persona-grid">
+
+        <div class="persona-card">
+            <div class="persona-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">
+                &#128101;
+            </div>
+            <h3 class="persona-name">Administrator</h3>
+            <p class="persona-desc">
+                Cluster infrastructure controls, role-based identity provisioning, batch partitioning, and global system uptime monitoring[cite: 2].
+            </p>
+            <a href="/login" class="btn btn-secondary" style="background:#F8FAFC;color:#1677FF;border-color:#E2E8F0;font-size:12px;width:100%;box-sizing:border-box;">
+                Admin Portal &rarr;
+            </a>
+        </div>
+
+        <div class="persona-card">
+            <div class="persona-icon" style="background:rgba(11,31,51,0.07);color:#0B1F33;">
+                &#128195;
+            </div>
+            <h3 class="persona-name">Instructor / Teacher</h3>
+            <p class="persona-desc">
+                Cohort management, course assignment grading, student performance ledgers, and early warning student risk tracking[cite: 2].
+            </p>
+            <a href="/login" class="btn btn-secondary" style="background:#F8FAFC;color:#1677FF;border-color:#E2E8F0;font-size:12px;width:100%;box-sizing:border-box;">
+                Faculty Portal &rarr;
+            </a>
+        </div>
+
+        <div class="persona-card">
+            <div class="persona-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">
+                &#128300;
+            </div>
+            <h3 class="persona-name">Data Analyst</h3>
+            <p class="persona-desc">
+                Model training, feature engineering (X/Y), MapReduce risk analysis, and report generation with automated email alerts[cite: 2].
+            </p>
+            <a href="/login" class="btn btn-secondary" style="background:#F8FAFC;color:#1677FF;border-color:#E2E8F0;font-size:12px;width:100%;box-sizing:border-box;">
+                Analyst Studio &rarr;
+            </a>
+        </div>
+
+        <div class="persona-card">
+            <div class="persona-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">
+                &#127891;
+            </div>
+            <h3 class="persona-name">Student Learner</h3>
+            <p class="persona-desc">
+                Personal academic performance tracking, projected grade insights, attendance health diagnostics, and advisor guidance[cite: 2].
+            </p>
+            <a href="/login" class="btn btn-secondary" style="background:#F8FAFC;color:#1677FF;border-color:#E2E8F0;font-size:12px;width:100%;box-sizing:border-box;">
+                Learner Portal &rarr;
+            </a>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM CALLOUT BANNER -->
+    <div class="bottom-banner">
+        <div>
+            <h3 style="font-size:20px;font-weight:800;color:#ffffff;margin:0 0 6px 0;">Experience the Big Data Pipeline in Action</h3>
+            <p style="font-size:14px;color:rgba(255,255,255,0.85);margin:0;max-width:640px;line-height:1.5;">
+                Log into your dashboard to ingest datasets, execute MapReduce reductions, inspect risk models, or dispatch analyst report email alerts.
+            </p>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <a href="/login" class="btn btn-light">
+                Sign In Now
+            </a>
+            <a href="/register" class="btn btn-secondary">
+                Create Account
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

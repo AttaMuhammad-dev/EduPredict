@@ -1,0 +1,746 @@
+{% extends "base.html" %}
+{% block page_title %}Student Registry &amp; Cohort Management - EduPredict{% endblock %}
+
+{% block content %}
+<style>
+.students-page {
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.panel-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.panel-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.panel-card-header p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #0B1F33;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #0B1F33;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-teal { background: rgba(22,119,255,0.08); color: #1677FF; }
+.badge-success { background: rgba(22,119,255,0.08); color: #0B1F33; }
+.badge-info { background: rgba(22,119,255,0.06); color: #1677FF; }
+.badge-warning { background: rgba(11,31,51,0.05); color: #0B1F33; }
+.badge-danger { background: rgba(220,38,38,0.08); color: #DC2626; }
+
+.kpi-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kpi-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+}
+
+.kpi-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary { background: #1677FF; color: #FFFFFF; }
+.btn-primary:hover { background: #0E5FD8; }
+.btn-secondary { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+.btn-secondary:hover { background: #F1F5F9; }
+.btn-amber { background: #0B1F33; color: #FFFFFF; }
+.btn-amber:hover { background: #091A2A; }
+.btn-danger { background: #DC2626; color: #FFFFFF; }
+.btn-danger:hover { background: #B91C1C; }
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1E293B;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+@media (max-width: 1024px) {
+    .kpi-stat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .kpi-stat-grid { grid-template-columns: 1fr 1fr; }
+    .students-page { padding: 16px; }
+}
+</style>
+
+<div class="students-page">
+
+    <!-- HERO HEADER -->
+    <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:28px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+            <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                    HDFS STUDENT PARTITIONS &bull; PERFORMANCE REGISTRY[cite: 2]
+                </div>
+                <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Student Intelligence Registry</h1>
+                <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:680px;line-height:1.6;">
+                    Monitor student academic performance, attendance anomalies, and predicted dropout risk levels[cite: 2]. Escalate critical flags directly to mentors via automated email alerts[cite: 2].
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-amber" onclick="exportStudentsCSV()">
+                    &#128196; Export Roster (CSV)[cite: 2]
+                </button>
+                {% if session.get('role') == 'administrator' %}
+                <button class="btn btn-primary" onclick="openAddStudentModal()" style="background:#1677FF;">
+                    + Register Student
+                </button>
+                {% endif %}
+                <button class="btn btn-secondary" onclick="loadStudents()" style="background:#ffffff;color:#0B1F33;border:none;">
+                    &#8635; Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertBox" class="alert" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+    <!-- 5-COLUMN KPI STRIP -->
+    <div class="kpi-stat-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#127891;</div>
+            <div>
+                <span class="kpi-label">Total Learners</span>
+                <span class="kpi-value" id="totalCount">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.08);color:#1677FF;">&#10003;</div>
+            <div>
+                <span class="kpi-label">Active Profiles</span>
+                <span class="kpi-value" id="activeCount">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(220,38,38,0.08);color:#DC2626;">&#9888;</div>
+            <div>
+                <span class="kpi-label">High Risk Outliers[cite: 2]</span>
+                <span class="kpi-value" id="highRisk" style="color:#DC2626;">0</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(22,119,255,0.06);color:#1677FF;">&#128197;</div>
+            <div>
+                <span class="kpi-label">Mean Attendance[cite: 2]</span>
+                <span class="kpi-value" id="avgAtt">0%</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(11,31,51,0.05);color:#0B1F33;">&#11088;</div>
+            <div>
+                <span class="kpi-label">Mean Marks[cite: 2]</span>
+                <span class="kpi-value" id="avgMarks">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER & SEARCH TOOLBAR -->
+    <div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:13px;font-weight:700;color:#334155;">Filter Risk Level:</label>
+            <select id="filterRisk" onchange="filterStudents()" class="form-select" style="width:160px;">
+                <option value="all">All Risk Levels</option>
+                <option value="High">High Risk Only[cite: 2]</option>
+                <option value="Medium">Medium Risk</option>
+                <option value="Low">Low Risk (Stable)</option>
+            </select>
+
+            <label style="font-size:13px;font-weight:700;color:#334155;margin-left:8px;">Cohort / Batch:</label>
+            <select id="filterBatch" onchange="filterStudents()" class="form-select" style="width:180px;">
+                <option value="all">All Cohorts</option>
+            </select>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, or ID..." style="width:260px;" oninput="filterStudents()">
+        </div>
+    </div>
+
+    <!-- STUDENT DATA TABLE -->
+    <div class="panel-card" style="padding:0;overflow:hidden;">
+        <div class="panel-card-header" style="padding:18px 24px;background:#F8FAFC;margin-bottom:0;">
+            <div>
+                <h3 style="font-size:16px;font-weight:700;color:#0F172A;margin:0;">Enrolled Learner Directory</h3>
+                <p style="font-size:12px;color:#64748B;margin:2px 0 0;">Synchronized against HDFS partitions, attendance logs, and predictive risk engines[cite: 2]</p>
+            </div>
+            <span id="studentCountBadge" class="badge badge-teal">0 Students</span>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:80px;">ID</th>
+                        <th>Student Identity</th>
+                        <th>Assigned Cohort</th>
+                        <th style="text-align:center;">Attendance Rate[cite: 2]</th>
+                        <th style="text-align:center;">Mean Marks[cite: 2]</th>
+                        <th style="text-align:center;">LMS Engagement[cite: 2]</th>
+                        <th>Risk Assessment[cite: 2]</th>
+                        <th style="text-align:center;">Last Inferred</th>
+                        <th style="text-align:right;">Actions &amp; Alerts[cite: 2]</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr><td colspan="9" class="text-center" style="padding:40px;color:#94A3B8;text-align:center;">Loading student records from data tier...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL 1: DISPATCH ADVISOR EMAIL ALERT -->
+<div id="studentAlertModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:500px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Escalate Student Risk Alert</h3>
+            <button onclick="closeStudentAlertModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleSendStudentAlert(event)">
+            <input type="hidden" id="alertStudentId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.15);border-radius:10px;padding:12px 16px;">
+                    <span style="font-size:11px;font-weight:800;color:#DC2626;text-transform:uppercase;display:block;">Flagged Learner</span>
+                    <strong id="alertStudentName" style="font-size:14px;color:#DC2626;">Student Name</strong>
+                    <span id="alertStudentSummary" style="font-size:12px;color:#B91C1C;display:block;margin-top:2px;">Attendance: 0% &bull; Score: 0%</span>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">
+                        Advisor / Faculty Recipient Email <span style="color:#DC2626;">*</span>
+                    </label>
+                    <input type="email" id="alertRecipientEmail" required placeholder="mentor@university.edu, dean@aptech.internal" class="form-control" style="padding:10px 14px;">
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Directives / Remedial Counseling Note</label>
+                    <textarea id="alertCustomNote" rows="3" class="form-control" placeholder="Please schedule an academic counseling session to review recent attendance and assignment performance..." style="padding:10px 14px;resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary" onclick="closeStudentAlertModal()">Cancel</button>
+                <button type="submit" id="btnSubmitAlertMail" class="btn btn-primary" style="padding:8px 20px;font-weight:700;">
+                    Transmit Alert Email[cite: 2]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 2: REGISTER STUDENT DIRECTLY (ADMIN ONLY) -->
+{% if session.get('role') == 'administrator' %}
+<div id="addStudentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#ffffff;width:100%;max-width:480px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Register New Student</h3>
+            <button onclick="closeAddStudentModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form onsubmit="handleAddStudentSubmit(event)">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Full Name</label>
+                    <input type="text" id="newStudentName" required placeholder="e.g. Bilal Ahmed" class="form-control">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Email Address</label>
+                    <input type="email" id="newStudentEmail" required placeholder="bilal@student.edupredict.internal" class="form-control">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Default Password</label>
+                    <input type="password" id="newStudentPassword" required placeholder="Minimum 6 characters" class="form-control">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;">Assign Cohort / Batch</label>
+                    <select id="newStudentBatch" class="form-select">
+                        <option value="">-- Select Batch Partition (Optional) --</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary" onclick="closeAddStudentModal()">Cancel</button>
+                <button type="submit" id="btnAddStudentSubmit" class="btn btn-primary" style="padding:8px 20px;">Provision Student</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+let allStudents = [];
+const isAdmin = {{ 'true' if session.get('role') == 'administrator' else 'false' }};
+
+function showAlert(msg, type='success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.12)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+// 1. FETCH STUDENTS & TELEMETRY
+async function loadStudents() {
+    try {
+        let students = [];
+        const [studentsRes, recordsRes, batchesRes] = await Promise.all([
+            fetch('/api/admin/students').catch(() => null),
+            fetch('/api/analytics/records').catch(() => null),
+            fetch('/api/admin/batches').catch(() => null)
+        ]);
+
+        if (studentsRes && studentsRes.ok) {
+            const sd = await studentsRes.json();
+            students = sd.students || [];
+        } else {
+            const teacherRes = await fetch('/api/teacher/data').catch(() => null);
+            if (teacherRes && teacherRes.ok) {
+                const td = await teacherRes.json();
+                students = td.students || [];
+            }
+        }
+
+        // Batches map for filter & assignment
+        if (batchesRes && batchesRes.ok) {
+            const bd = await batchesRes.json();
+            if (bd.success && bd.batches) {
+                populateBatchOptions(bd.batches);
+            }
+        }
+
+        const records = recordsRes && recordsRes.ok ? (await recordsRes.json()).records || [] : [];
+        const recordsMap = {};
+        records.forEach(r => {
+            const k = String(r.student_id);
+            if (!recordsMap[k]) recordsMap[k] = r; // keep latest (API sorts desc)
+        });
+
+        let highCount = 0, activeCount = 0, totalAtt = 0, attCount = 0, totalMarks = 0, marksCount = 0;
+
+        allStudents = students.map(s => {
+            const sid = String(s.id || s._id);
+            const rec = recordsMap[sid] || {};
+            // Prefer enriched risk from /api/admin/students (prediction-based),
+            // then fall back to educational observation records — same as teacher dashboard.
+            const risk = s.risk || s.risk_level || rec.risk || rec.risk_level || 'Low';
+            const att = s.attendance != null && s.attendance !== 'N/A' ? Number(s.attendance)
+                : (rec.attendance != null ? Number(rec.attendance) : 85);
+            const mks = s.marks != null && s.marks !== 'N/A' ? Number(s.marks)
+                : (rec.marks != null ? Number(rec.marks) : (rec.score != null ? Number(rec.score) : 75));
+            const lms = s.lms_activity != null && s.lms_activity !== 'N/A' ? Number(s.lms_activity)
+                : (rec.lms_activity != null ? Number(rec.lms_activity) : 80);
+            const batchName = s.batch_name || s.batch || rec.batch || rec.batch_name || 'Cohort-A';
+
+            // Same high-risk test as teacher dashboard (high|critical)
+            if (/high|critical/i.test(String(risk))) highCount++;
+            if (s.is_active !== false) activeCount++;
+            if (att > 0) { totalAtt += att; attCount++; }
+            if (mks > 0) { totalMarks += mks; marksCount++; }
+
+            return {
+                ...s,
+                id: sid,
+                attendance: att,
+                marks: mks,
+                lms_activity: lms,
+                risk: risk,
+                batch: batchName,
+                predicted_at: s.predicted_at || rec.created_at || s.created_at
+            };
+        });
+
+        document.getElementById('totalCount').textContent = students.length;
+        document.getElementById('activeCount').textContent = activeCount;
+        document.getElementById('highRisk').textContent = highCount;
+        document.getElementById('avgAtt').textContent = attCount ? Math.round(totalAtt / attCount) + '%' : '0%';
+        document.getElementById('avgMarks').textContent = marksCount ? Math.round(totalMarks / marksCount) + '%' : '0%';
+
+        filterStudents();
+
+    } catch(e) {
+        console.error('Error loading student records:', e);
+        document.getElementById('studentsTableBody').innerHTML = '<tr><td colspan="9" class="text-center" style="padding:40px;color:#DC2626;text-align:center;">Failed connecting to student database.</td></tr>';
+    }
+}
+
+function populateBatchOptions(batches) {
+    const filterSelect = document.getElementById('filterBatch');
+    const modalSelect = document.getElementById('newStudentBatch');
+
+    filterSelect.innerHTML = '<option value="all">All Cohorts</option>';
+    if (modalSelect) modalSelect.innerHTML = '<option value="">-- Select Batch Partition (Optional) --</option>';
+
+    batches.forEach(b => {
+        filterSelect.innerHTML += `<option value="${b.name}">${b.name}</option>`;
+        if (modalSelect) modalSelect.innerHTML += `<option value="${b.id || b._id}">${b.name}</option>`;
+    });
+}
+
+// 2. FILTER & RENDER
+function filterStudents() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const riskFilter = document.getElementById('filterRisk').value;
+    const batchFilter = document.getElementById('filterBatch').value;
+
+    let filtered = allStudents.filter(s => {
+        const name = (s.name || '').toLowerCase();
+        const email = (s.email || '').toLowerCase();
+        const sid = String(s.id).toLowerCase();
+        const sRisk = (s.risk || 'low').toLowerCase();
+        const sBatch = s.batch || '';
+
+        // Query check
+        if (q && !name.includes(q) && !email.includes(q) && !sid.includes(q)) return false;
+
+        // Risk check
+        if (riskFilter !== 'all' && sRisk !== riskFilter.toLowerCase()) return false;
+
+        // Batch check
+        if (batchFilter !== 'all' && sBatch !== batchFilter) return false;
+
+        return true;
+    });
+
+    renderStudents(filtered);
+}
+
+function renderStudents(students) {
+    const tbody = document.getElementById('studentsTableBody');
+    document.getElementById('studentCountBadge').textContent = `${students.length} Students Listed`;
+
+    if (!students.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:40px;color:#94A3B8;text-align:center;">No matching student records found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = students.map(s => {
+        const risk = (s.risk || 'Low').toLowerCase();
+        const riskClass = risk === 'high' ? 'badge-danger' : risk === 'medium' ? 'badge-warning' : 'badge-success';
+
+        let deleteBtn = '';
+        if (isAdmin) {
+            deleteBtn = `<button class="btn btn-sm" style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;padding:4px 8px;font-size:11px;" onclick="deleteStudent('${s.id}')">Delete</button>`;
+        }
+
+        return `
+            <tr>
+                <td style="color:#64748B;font-family:monospace;font-weight:600;">#${s.id}</td>
+                <td>
+                    <strong style="color:#0F172A;font-size:14px;display:block;">${s.name}</strong>
+                    <span style="color:#64748B;font-size:12px;">${s.email}</span>
+                </td>
+                <td>
+                    <span class="badge badge-teal">${s.batch || 'Cohort-A'}</span>
+                </td>
+                <td style="text-align:center;font-weight:700;color:${s.attendance < 75 ? '#DC2626' : '#0F172A'};">
+                    ${s.attendance}%
+                </td>
+                <td style="text-align:center;font-weight:700;color:${s.marks < 50 ? '#DC2626' : '#1677FF'};">
+                    ${s.marks}%
+                </td>
+                <td style="text-align:center;">
+                    ${s.lms_activity != null ? s.lms_activity + '%' : '85%'}
+                </td>
+                <td>
+                    <span class="badge ${riskClass}" style="text-transform:uppercase;">${s.risk} Risk</span>
+                </td>
+                <td style="text-align:center;color:#64748B;font-size:12px;">
+                    ${s.predicted_at ? new Date(s.predicted_at).toLocaleDateString() : 'Synchronized'}
+                </td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <button class="btn btn-amber" onclick='openStudentAlertModal(${JSON.stringify(s).replace(/'/g, "&#39;")})' style="padding:4px 10px;font-size:11px;margin-right:4px;" title="Send alert notification">
+                        &#9993; Alert
+                    </button>
+                    ${deleteBtn}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// 3. EMAIL ALERT MODAL LOGIC
+function openStudentAlertModal(s) {
+    document.getElementById('alertStudentId').value = s.id;
+    document.getElementById('alertStudentName').textContent = `${s.name} (#${s.id})`;
+    document.getElementById('alertStudentSummary').textContent = `Attendance: ${s.attendance}% | Mean Marks: ${s.marks}% | Assigned Status: ${(s.risk || 'Low').toUpperCase()} RISK`;
+    document.getElementById('alertRecipientEmail').value = '';
+    document.getElementById('alertCustomNote').value = s.risk.toLowerCase() === 'high' 
+        ? `Warning: Student has breached risk threshold (Score: ${s.marks}%, Attendance: ${s.attendance}%). Immediate mentor intervention required.` 
+        : '';
+    document.getElementById('studentAlertModal').style.display = 'flex';
+}
+
+function closeStudentAlertModal() {
+    document.getElementById('studentAlertModal').style.display = 'none';
+}
+
+async function handleSendStudentAlert(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitAlertMail');
+    btn.disabled = true;
+    btn.textContent = 'Transmitting Alert...';
+
+    const sid = document.getElementById('alertStudentId').value;
+    const recipient = document.getElementById('alertRecipientEmail').value.trim();
+    const note = document.getElementById('alertCustomNote').value.trim();
+
+    try {
+        const res = await fetch('/api/alerts/send-email', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                student_id: sid,
+                recipient: recipient,
+                note: note
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || `Student risk alert notification successfully transmitted to ${recipient}!`);
+            closeStudentAlertModal();
+        } else {
+            showAlert(d.message || 'Transmission failed.', 'error');
+        }
+    } catch(err) {
+        showAlert('Error contacting alert mail gateway.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Transmit Alert Email';
+    }
+}
+
+// 4. ADD STUDENT MODAL LOGIC (ADMIN)
+function openAddStudentModal() {
+    const modal = document.getElementById('addStudentModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeAddStudentModal() {
+    const modal = document.getElementById('addStudentModal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function handleAddStudentSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnAddStudentSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Provisioning...';
+
+    const name = document.getElementById('newStudentName').value.trim();
+    const email = document.getElementById('newStudentEmail').value.trim();
+    const password = document.getElementById('newStudentPassword').value;
+    const batchId = document.getElementById('newStudentBatch').value;
+
+    try {
+        const res = await fetch('/api/admin/users', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password,
+                role: 'student',
+                batch_id: batchId || null
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Student provisioned successfully into platform!');
+            closeAddStudentModal();
+            loadStudents();
+        } else {
+            showAlert(d.message || 'Failed provisioning student.', 'error');
+        }
+    } catch(err) {
+        showAlert('Error provisioning student identity.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Provision Student';
+    }
+}
+
+// 5. DELETE STUDENT (ADMIN)
+async function deleteStudent(id) {
+    if (!confirm('Permanently purge this student identity from the cluster?')) return;
+    try {
+        const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Student record purged from data tier');
+            loadStudents();
+        } else {
+            showAlert(d.message || 'Error deleting student', 'error');
+        }
+    } catch(e) {
+        showAlert('Network error deleting student', 'error');
+    }
+}
+
+// 6. EXPORT ROSTER TO CSV
+function exportStudentsCSV() {
+    if (!allStudents.length) {
+        showAlert('No student records available to export.', 'error');
+        return;
+    }
+
+    const headers = ["Student ID", "Full Name", "Email Address", "Assigned Cohort", "Attendance %", "Mean Marks %", "LMS Engagement %", "Risk Status"];
+    const rows = allStudents.map(s => [
+        s.id,
+        `"${(s.name || '').replaceAll('"', '""')}"`,
+        s.email || "",
+        `"${s.batch || ''}"`,
+        s.attendance || 0,
+        s.marks || 0,
+        s.lms_activity || 0,
+        s.risk || "Low"
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `edupredict_student_roster_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showAlert('Student roster exported successfully!');
+}
+
+document.addEventListener('DOMContentLoaded', loadStudents);
+</script>
+{% endblock %}

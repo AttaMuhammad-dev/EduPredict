@@ -1,0 +1,1569 @@
+{% extends "base.html" %}
+
+{% block page_title %}Cluster Administration & System Operations - EduPredict{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="container">
+
+        <!-- DASHBOARD HERO -->
+        <div class="page-hero" style="background:linear-gradient(135deg, #0B1F33 0%, #1677FF 100%);color:#ffffff;border-radius:18px;padding:32px 36px;margin-bottom:24px;box-shadow:0 10px 25px -5px rgba(18,60,54,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+                <div>
+                    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.2);">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;display:inline-block;animation:pulse 2s infinite;"></span>
+                        HADOOP REPLICATION CLUSTER &bull; NODE MANAGER ACTIVE
+                    </div>
+                    <h1 style="font-size:32px;font-weight:800;color:#ffffff;margin:0 0 8px;line-height:1.2;">Enterprise Admin Console</h1>
+                    <p style="color:rgba(255,255,255,0.85);font-size:15px;margin:0;max-width:620px;line-height:1.6;">
+                        Orchestrate distributed data partitions, role permissions, automated email notification daemons, and machine learning inference pipelines.
+                    </p>
+                </div>
+                <div class="hero-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-light" onclick="loadOverview()" style="background:#ffffff;color:#0B1F33;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        &#8635; Sync Cluster
+                    </button>
+                    <button class="btn btn-sm" onclick="openReportModal()" style="background:#0B1F33;color:#ffffff;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        &#9993; Report &amp; Alert Mailer
+                    </button>
+                    <button class="btn btn-sm" onclick="openUserModal()" style="background:#1677FF;color:#ffffff;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        + Add User
+                    </button>
+                    <button class="btn btn-sm" onclick="openBatchModal()" style="background:#1677FF;color:#ffffff;font-weight:700;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;">
+                        + New Batch
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertBox" class="alert" style="display:none;margin-bottom:20px;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;"></div>
+
+        <!-- PRIMARY CLUSTER STATS -->
+        <div class="stats-grid" id="overviewStats" style="display:grid;grid-template-columns:repeat(5, 1fr);gap:16px;margin-bottom:16px;">
+            <div class="stat-card clickable" onclick="goToTab('users')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.02);transition:transform 0.2s;">
+                <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(22,119,255,0.08);color:#1677FF;">👥</div>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Total Users</span>
+                    <span class="stat-value" id="sUsers" style="display:block;font-size:24px;font-weight:800;color:#111827;line-height:1.2;">0</span>
+                    <span class="stat-trend" style="color:#9CA3AF;font-size:11px;">RBAC Identities</span>
+                </div>
+            </div>
+
+            <div class="stat-card clickable" onclick="goToTab('batches')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.02);transition:transform 0.2s;">
+                <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(22,119,255,0.06);color:#1677FF;">📚</div>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Batches</span>
+                    <span class="stat-value" id="sBatches" style="display:block;font-size:24px;font-weight:800;color:#111827;line-height:1.2;">0</span>
+                    <span class="stat-trend" style="color:#9CA3AF;font-size:11px;">Active Partitions</span>
+                </div>
+            </div>
+
+            <div class="stat-card clickable" onclick="goToTab('assignments')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.02);transition:transform 0.2s;">
+                <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(22,119,255,0.08);color:#1677FF;">📝</div>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Assignments</span>
+                    <span class="stat-value" id="sAssignments" style="display:block;font-size:24px;font-weight:800;color:#111827;line-height:1.2;">0</span>
+                    <span class="stat-trend" style="color:#9CA3AF;font-size:11px;">Course Units</span>
+                </div>
+            </div>
+
+            <div class="stat-card clickable" onclick="goToTab('predictions')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.02);transition:transform 0.2s;">
+                <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(22,119,255,0.08);color:#1677FF;">🔮</div>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">ML Inferences</span>
+                    <span class="stat-value" id="sPredictions" style="display:block;font-size:24px;font-weight:800;color:#111827;line-height:1.2;">0</span>
+                    <span class="stat-trend" style="color:#9CA3AF;font-size:11px;">Dropout Risk Models</span>
+                </div>
+            </div>
+
+            <div class="stat-card clickable" onclick="goToTab('alerts')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.02);transition:transform 0.2s;">
+                <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(220,38,38,0.08);color:#DC2626;">🚨</div>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;">Alert Pipeline</span>
+                    <span class="stat-value" id="sAlerts" style="display:block;font-size:24px;font-weight:800;color:#DC2626;line-height:1.2;">0</span>
+                    <span class="stat-trend" style="color:#DC2626;font-size:11px;">Anomalies Detected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECONDARY STATS (BIG DATA & COMM METRICS) -->
+        <div class="stats-grid" id="overviewStats2" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+            <div class="stat-card clickable" onclick="goToTab('records')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;">
+                <span class="stat-icon" style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(11,31,51,0.05);color:#0B1F33;">💾</span>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;">Ingested HDFS Records</span>
+                    <span class="stat-value" id="sRecords" style="display:block;font-size:20px;font-weight:800;color:#111827;">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card clickable" onclick="goToTab('marks')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;">
+                <span class="stat-icon" style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(22,119,255,0.08);color:#1677FF;">📊</span>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;">Grade Records Scored</span>
+                    <span class="stat-value" id="sMarks" style="display:block;font-size:20px;font-weight:800;color:#111827;">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card clickable" onclick="goToTab('reports')" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;">
+                <span class="stat-icon" style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:#F1F5F9;color:#475569;">📑</span>
+                <div style="flex:1;min-width:0;">
+                    <span class="stat-label" style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;">Analyst Reports &amp; Dispatches</span>
+                    <span class="stat-value" id="sReports" style="display:block;font-size:20px;font-weight:800;color:#111827;">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TWO COLUMN DIAGNOSTIC LAYOUT -->
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-bottom:28px;">
+            <!-- LEFT: Big Data Execution Insights -->
+            <div style="background:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+                <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">MapReduce &amp; Anomaly Matrix</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Simulated parallel reduction across learner batches</p>
+                    </div>
+                    <span style="font-size:11px;font-weight:700;background:rgba(22,119,255,0.08);color:#1677FF;padding:4px 10px;border-radius:12px;">CLUSTER SYNCHRONIZED</span>
+                </div>
+                <div style="padding:24px;">
+                    <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;margin-bottom:20px;text-align:center;">
+                        <div style="padding:14px;background:#F9FAFB;border-radius:10px;border:1px solid #F3F4F6;">
+                            <span style="display:block;font-size:11px;color:#6B7280;font-weight:600;">HIGH RISK DROP-OFF</span>
+                            <strong style="font-size:20px;color:#DC2626;" id="metricHighRisk">0</strong>
+                        </div>
+                        <div style="padding:14px;background:#F9FAFB;border-radius:10px;border:1px solid #F3F4F6;">
+                            <span style="display:block;font-size:11px;color:#6B7280;font-weight:600;">STABLE LEARNERS</span>
+                            <strong style="font-size:20px;color:#1677FF;" id="metricStable">0</strong>
+                        </div>
+                        <div style="padding:14px;background:#F9FAFB;border-radius:10px;border:1px solid #F3F4F6;">
+                            <span style="display:block;font-size:11px;color:#6B7280;font-weight:600;">DISPATCH QUEUE</span>
+                            <strong style="font-size:20px;color:#1677FF;" id="metricEmailQueued">Active</strong>
+                        </div>
+                    </div>
+                    <div style="background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <strong style="font-size:13px;color:#334155;display:block;">Automated SMTP Alert Gateway</strong>
+                            <span style="font-size:12px;color:#64748B;">Dispatches executive analytical summaries when risks spike above threshold.</span>
+                        </div>
+                        <button class="btn btn-sm" onclick="testEmailAlertService()" style="background:#1677FF;color:#ffffff;border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+                            Send Test Alert
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Event Stream -->
+            <div style="background:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+                <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Cluster Stream Log</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Recent transactional node events</p>
+                    </div>
+                    <span style="font-size:11px;color:#1677FF;font-weight:700;">Live Feed</span>
+                </div>
+                <div style="padding:16px 24px;max-height:260px;overflow-y:auto;" id="clusterAuditLogs">
+                    <div style="padding:10px 0;border-bottom:1px solid #F3F4F6;display:flex;gap:12px;align-items:flex-start;">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;margin-top:6px;flex-shrink:0;"></span>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827;margin:0;">HDFS Ingestion Node Online</p>
+                            <span style="font-size:11px;color:#9CA3AF;">Storage partitions mounted into schema</span>
+                        </div>
+                    </div>
+                    <div style="padding:10px 0;border-bottom:1px solid #F3F4F6;display:flex;gap:12px;align-items:flex-start;">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#1677FF;margin-top:6px;flex-shrink:0;"></span>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827;margin:0;">Mail Alert Daemon Synchronized</p>
+                            <span style="font-size:11px;color:#9CA3AF;">Notification hooks bound to Report Generator</span>
+                        </div>
+                    </div>
+                    <div style="padding:10px 0;display:flex;gap:12px;align-items:flex-start;">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#0B1F33;margin-top:6px;flex-shrink:0;"></span>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827;margin:0;">Model Inferences Ready</p>
+                            <span style="font-size:11px;color:#9CA3AF;">Classification models deployed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WORKSPACE TABS CONTAINER -->
+        <div class="panel" style="background:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
+            <div class="tabs" style="display:flex;border-bottom:1px solid #E5E7EB;background:#F8FAFC;overflow-x:auto;">
+                <button class="tab-btn active" data-tab="users" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Users</button>
+                <button class="tab-btn" data-tab="students" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Students</button>
+                <button class="tab-btn" data-tab="batches" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Batches</button>
+                <button class="tab-btn" data-tab="assignments" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Assignments</button>
+                <button class="tab-btn" data-tab="marks" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Marks</button>
+                <button class="tab-btn" data-tab="predictions" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Predictions</button>
+                <button class="tab-btn" data-tab="alerts" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Alerts</button>
+                <button class="tab-btn" data-tab="records" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">HDFS Records</button>
+                <button class="tab-btn" data-tab="reports" onclick="switchTab(this)" style="padding:14px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;">Reports &amp; Mail Dispatch</button>
+            </div>
+
+            <!-- USERS TAB -->
+            <div id="tab-users" class="tab-content active" style="padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">RBAC User Identity Matrix</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Provision and regulate role permissions</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="openUserModal()" style="background:#1677FF;color:#ffffff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">+ Add User</button>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">ID</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Name</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Email</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Role</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Status</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbUsers">
+                            <tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">Loading user partition...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- STUDENTS TAB -->
+            <div id="tab-students" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Enrolled Student Repository</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Primary subjects mapped to predictive scoring</p>
+                    </div>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">ID</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Student Name</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Email</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Status</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbStudents">
+                            <tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">Loading students...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- BATCHES TAB -->
+            <div id="tab-batches" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Batch Clusters</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Partition allocations for instructor cohorts</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="openBatchModal()" style="background:#1677FF;color:#ffffff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">+ Create Batch</button>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">ID</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Batch Identifier</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Lead Instructor</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Assigned Students</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbBatches">
+                            <tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">Loading batches...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ASSIGNMENTS TAB -->
+            <div id="tab-assignments" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Course Work &amp; Assignment Evaluations</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Benchmark metrics fed to feature engineering</p>
+                    </div>
+                    <!-- REMOVED: + Create Assignment button for Admin -->
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">ID</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Title</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Subject</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Batch</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Max Points</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Deadline</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbAssignments">
+                            <tr><td colspan="7" class="text-center" style="padding:32px;color:#9CA3AF;">Loading assignments...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MARKS TAB -->
+            <div id="tab-marks" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Performance Ledger</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Evaluations scored across curriculum nodes</p>
+                    </div>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Student</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Assignment Unit</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Score</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Max</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Percentage</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbMarks">
+                            <tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">Loading marks ledger...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PREDICTIONS TAB -->
+            <div id="tab-predictions" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Machine Learning Risk Estimations</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Classification probabilities generated by random forest/logistic pipelines</p>
+                    </div>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Student</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Risk Classification</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Probability</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Projected Grade</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbPredictions">
+                            <tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">Loading predictive inferences...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ALERTS TAB -->
+            <div id="tab-alerts" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">System Anomalies &amp; Early Warnings</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Threshold violations requiring immediate advisor outreach</p>
+                    </div>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Type</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Severity</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Diagnostics</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Learner</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Timestamp</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbAlerts">
+                            <tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">Scanning alerts queue...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RECORDS TAB (HDFS REPLICATION) -->
+            <div id="tab-records" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Distributed Educational Records</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Ingested attendance, historical marks, and LMS activity telemetry</p>
+                    </div>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Student</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Assigned Batch</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">Attendance %</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">GPA Index</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:center;">LMS Score</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbRecords">
+                            <tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">Reading distributed blocks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REPORTS TAB & EMAIL NOTIFICATION WORKFLOW -->
+            <div id="tab-reports" class="tab-content" style="display:none;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Analyst Reports &amp; Automated Email Notifications</h3>
+                        <p style="font-size:12px;color:#6B7280;margin:2px 0 0;">Compile synthesized summaries and dispatch instant alerts to institutional stakeholders</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="openReportModal()" style="background:#1677FF;color:#ffffff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-weight:600;">
+                        &#9993; Generate &amp; Dispatch Alert
+                    </button>
+                </div>
+                <div class="table-wrap" style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#F8FAFC;border-bottom:1px solid #E5E7EB;text-align:left;">
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">ID</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Report Title</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Analyst Origin</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;">Timestamp</th>
+                                <th style="padding:12px 14px;color:#475569;font-weight:600;text-align:right;">Distribution &amp; Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbReports">
+                            <tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">Loading compiled reports catalog...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- USER MODAL -->
+<div id="userModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:480px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="userModalTitle" style="font-size:17px;font-weight:700;color:#111827;margin:0;">Register User</h3>
+            <button class="modal-close" onclick="closeModal('userModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form id="userForm">
+            <input type="hidden" id="editUserId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Full Name</label>
+                    <input class="form-input" id="userName" required style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Email Address</label>
+                    <input class="form-input" type="email" id="userEmail" required style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div id="passwordFieldGroup">
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Access Password</label>
+                    <input class="form-input" type="password" id="userPassword" placeholder="Default: password123" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">RBAC System Role</label>
+                    <select class="form-select" id="userRole" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;background:#ffffff;box-sizing:border-box;">
+                        <option value="student">Student (End-Learner)</option>
+                        <option value="teacher">Teacher (Instructor)</option>
+                        <option value="analyst">Analyst (Data Scientist / ML Ops)</option>
+                        <option value="administrator">Administrator (Cluster Controller)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('userModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Save Credentials</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BATCH MODAL -->
+<div id="batchModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:480px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="batchModalTitle" style="font-size:17px;font-weight:700;color:#111827;margin:0;">Configure Batch Cluster</h3>
+            <button class="modal-close" onclick="closeModal('batchModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form id="batchForm">
+            <input type="hidden" id="editBatchId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Cohort / Batch Name</label>
+                    <input class="form-input" id="batchName" required placeholder="e.g., ADSE-2509-BigData" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Assigned Instructor</label>
+                    <select class="form-select" id="batchTeacher" required style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;background:#ffffff;box-sizing:border-box;">
+                        <option value="">-- Select Instructor --</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('batchModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Confirm Batch</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ASSIGNMENT MODAL (Note: This modal is still here for potential future use but the button is removed from Admin UI) -->
+<div id="assignmentModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:520px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="assignmentModalTitle" style="font-size:17px;font-weight:700;color:#111827;margin:0;">Schedule Course Assignment</h3>
+            <button class="modal-close" onclick="closeModal('assignmentModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form id="assignmentForm">
+            <input type="hidden" id="editAssignmentId">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Assignment Title</label>
+                    <input class="form-input" id="asgTitle" required placeholder="e.g., MapReduce Implementation in Python" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Subject Domain</label>
+                    <input class="form-input" id="asgSubject" required placeholder="e.g., Big Data Analytics" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div>
+                        <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Target Batch</label>
+                        <select class="form-select" id="asgBatch" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;background:#ffffff;box-sizing:border-box;">
+                            <option value="">-- Select Batch --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Maximum Score</label>
+                        <input class="form-input" type="number" id="asgTotal" required value="100" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Due Date</label>
+                    <input class="form-input" type="date" id="asgDue" required style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('assignmentModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Publish Assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BATCH STUDENTS MODAL -->
+<div id="batchStudentsModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:560px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="batchStudentsTitle" style="font-size:17px;font-weight:700;color:#111827;margin:0;">Cohort Allocation</h3>
+            <button class="modal-close" onclick="closeModal('batchStudentsModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <div style="padding:16px 24px 0;">
+            <input type="text" class="form-input" id="searchStudents" placeholder="Search learner by legal name or institutional email..." oninput="filterStudentsForBatch()" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;box-sizing:border-box;">
+        </div>
+        <div id="batchStudentChecklist" style="max-height:280px;overflow-y:auto;margin:16px 24px;border:1px solid #E5E7EB;border-radius:8px;"></div>
+        <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('batchStudentsModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveBatchStudents()" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Save Allocations</button>
+        </div>
+    </div>
+</div>
+
+<!-- GENERATE REPORT & EMAIL NOTIFICATION MODAL -->
+<div id="reportModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-box" style="background:#ffffff;width:100%;max-width:520px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="padding:18px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Synthesize Report &amp; Alert Recipients</h3>
+            <button class="modal-close" onclick="closeModal('reportModal')" style="border:none;background:none;font-size:22px;cursor:pointer;color:#6B7280;">&times;</button>
+        </div>
+        <form id="reportDispatchForm" onsubmit="handleGenerateReport(event)">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Analytical Report Scope</label>
+                    <select class="form-select" id="reportTypeSelect" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;background:#ffffff;box-sizing:border-box;">
+                        <option value="student_risk">Retention &amp; Student Dropout Risk Audit</option>
+                        <option value="course_demand">Academic Course Demand Projection</option>
+                        <option value="anomaly_summary">MapReduce Anomaly &amp; Threshold Detection</option>
+                    </select>
+                </div>
+
+                <div style="background:rgba(22,119,255,0.08);border:1px solid rgba(22,119,255,0.12);border-radius:10px;padding:14px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:13px;color:#1677FF;">
+                        <input type="checkbox" id="sendEmailCheckbox" checked style="width:16px;height:16px;accent-color:#1677FF;">
+                        Trigger Automated Email Alert to Desired Stakeholder
+                    </label>
+                    <p style="font-size:12px;color:#1677FF;margin:6px 0 0 26px;">
+                        Sends formatted report insights &amp; anomaly alerts via Flask SMTP gateway.
+                    </p>
+                </div>
+
+                <div id="emailTargetContainer">
+                    <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Recipient Destination Email</label>
+                    <input class="form-input" type="email" id="targetRecipientEmail" placeholder="admin@edupredict.internal, dean@institute.edu" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                    <span style="font-size:11px;color:#6B7280;margin-top:4px;display:block;">Leave blank to broadcast to default cluster administrator.</span>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;background:#F9FAFB;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('reportModal')" style="padding:8px 16px;border:1px solid #D1D5DB;background:#ffffff;border-radius:6px;cursor:pointer;">Cancel</button>
+                <button type="submit" id="btnRunReport" class="btn btn-primary btn-sm" style="padding:8px 20px;background:#1677FF;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+                    Execute &amp; Dispatch
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= JAVASCRIPT LOGIC ================= -->
+<script>
+const API = '/api/admin';
+let allTeachers = [];
+let windowBatches = [];
+
+function setDropdownValue(selectId, value) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const strVal = String(value || '');
+    let found = false;
+    for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === strVal) {
+            sel.selectedIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if (!found) sel.selectedIndex = 0;
+}
+
+function showAlert(msg, type='success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    if (type === 'success') {
+        box.style.background = 'rgba(22,119,255,0.08)';
+        box.style.color = '#0B1F33';
+        box.style.border = '1px solid rgba(22,119,255,0.15)';
+    } else {
+        box.style.background = '#FEF2F2';
+        box.style.color = '#DC2626';
+        box.style.border = '1px solid rgba(220,38,38,0.15)';
+    }
+    setTimeout(() => { box.style.display = 'none'; }, 4500);
+}
+
+function closeModal(id) { 
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none'; 
+}
+
+function openModal(id) { 
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'flex'; 
+}
+
+function switchTab(btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderBottom = '2px solid transparent';
+        b.style.color = '#475569';
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    
+    btn.classList.add('active');
+    btn.style.borderBottom = '2px solid #1677FF';
+    btn.style.color = '#1677FF';
+    
+    const target = document.getElementById('tab-' + btn.dataset.tab);
+    if (target) target.style.display = 'block';
+
+    const tabName = btn.dataset.tab;
+    if (tabName === 'students') loadStudents();
+    else if (tabName === 'batches') loadBatches();
+    else if (tabName === 'users') loadUsers && loadUsers();
+    else if (tabName === 'assignments') loadAssignments && loadAssignments();
+}
+
+function goToTab(tabName) {
+    const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+    if (btn) {
+        switchTab(btn);
+        btn.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+}
+
+// ================= OVERVIEW & CLUSTER STATS =================
+async function loadOverview() {
+    try {
+        const res = await fetch(API + '/overview', { cache: 'no-store' });
+        const d = await res.json();
+        if (d.success) {
+            document.getElementById('sUsers').textContent = d.users || 0;
+            document.getElementById('sBatches').textContent = d.batches || 0;
+            document.getElementById('sAssignments').textContent = d.assignments || 0;
+            document.getElementById('sMarks').textContent = d.marks || 0;
+            document.getElementById('sPredictions').textContent = d.predictions || 0;
+            document.getElementById('sAlerts').textContent = d.alerts || 0;
+            document.getElementById('sRecords').textContent = d.records || 0;
+            document.getElementById('sReports').textContent = d.reports || 0;
+
+            if (d.high_risk_count !== undefined) {
+                document.getElementById('metricHighRisk').textContent = d.high_risk_count;
+            }
+            if (d.stable_count !== undefined) {
+                document.getElementById('metricStable').textContent = d.stable_count;
+            }
+        }
+    } catch(e) {
+        console.warn('Overview synchronization delayed:', e);
+    }
+}
+
+// ================= USERS CRUD =================
+async function loadUsers() {
+    try {
+        const res = await fetch(API + '/users', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbUsers');
+        if (!d.success || !d.users || !d.users.length) {
+            tb.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">No users registered in repository.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.users.map(u => `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+                <td style="padding:12px 14px;color:#6B7280;font-family:monospace;">#${u.id || u._id}</td>
+                <td style="padding:12px 14px;font-weight:600;color:#111827;">${u.name}</td>
+                <td style="padding:12px 14px;color:#4B5563;">${u.email}</td>
+                <td style="padding:12px 14px;">
+                    <span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;
+                        background:${u.role === 'administrator' ? 'rgba(22,119,255,0.08);color:#1677FF' : u.role === 'analyst' ? 'rgba(22,119,255,0.06);color:#1677FF' : u.role === 'teacher' ? 'rgba(11,31,51,0.05);color:#0B1F33' : 'rgba(22,119,255,0.08);color:#1677FF'}">
+                        ${u.role}
+                    </span>
+                </td>
+                <td style="padding:12px 14px;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:${u.is_active !== false ? '#1677FF' : '#9CA3AF'}">
+                        <span style="width:7px;height:7px;border-radius:50%;background:${u.is_active !== false ? '#1677FF' : '#9CA3AF'}"></span>
+                        ${u.is_active !== false ? 'Active' : 'Suspended'}
+                    </span>
+                </td>
+                <td style="padding:12px 14px;text-align:right;">
+                    <button class="btn btn-sm" onclick='openUserModal(${JSON.stringify(u).replace(/'/g, "&#39;")})' style="margin-right:6px;padding:4px 10px;border:1px solid #D1D5DB;background:#ffffff;border-radius:4px;cursor:pointer;">Edit</button>
+                    <button class="btn btn-sm" onclick="deleteUser('${u.id || u._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Users load error:', e);
+    }
+}
+
+function openUserModal(u=null) {
+    document.getElementById('editUserId').value = u ? (u.id || u._id) : '';
+    document.getElementById('userName').value = u ? u.name : '';
+    document.getElementById('userEmail').value = u ? u.email : '';
+    setDropdownValue('userRole', u ? u.role : 'student');
+    document.getElementById('userPassword').value = '';
+    
+    const pwdGroup = document.getElementById('passwordFieldGroup');
+    if (pwdGroup) {
+        pwdGroup.style.display = u ? 'none' : 'block';
+    }
+
+    document.getElementById('userModalTitle').textContent = u ? 'Modify User Identity' : 'Register Cluster User';
+    openModal('userModal');
+}
+
+async function deleteUser(id) {
+    if (!confirm('Revoke and delete this user profile?')) return;
+    try {
+        const res = await fetch(`${API}/users?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || 'User deleted successfully');
+            loadUsers();
+            loadOverview();
+        } else {
+            showAlert(d.message || 'Action failed', 'error');
+        }
+    } catch(e) {
+        showAlert('Network error deleting user', 'error');
+    }
+}
+
+document.getElementById('userForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('editUserId').value;
+    const payload = {
+        name: document.getElementById('userName').value,
+        email: document.getElementById('userEmail').value,
+        role: document.getElementById('userRole').value
+    };
+    const pwd = document.getElementById('userPassword').value;
+    if (!id && pwd) payload.password = pwd;
+    if (id) payload.id = id;
+
+    try {
+        const res = await fetch(API + '/users', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || 'Identity saved successfully');
+            closeModal('userModal');
+            loadUsers();
+            loadOverview();
+            loadTeachers();
+        } else {
+            showAlert(d.message || 'Unable to store user', 'error');
+        }
+    } catch(e) {
+        showAlert('Error contacting user daemon', 'error');
+    }
+});
+
+// ================= STUDENTS =================
+async function loadStudents() {
+    try {
+        const res = await fetch(API + '/students', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbStudents');
+        if (!d.success || !d.students || !d.students.length) {
+            tb.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">No students registered yet.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.students.map(s => `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+                <td style="padding:12px 14px;color:#6B7280;font-family:monospace;">#${s.id || s._id}</td>
+                <td style="padding:12px 14px;font-weight:600;color:#111827;">${s.name}</td>
+                <td style="padding:12px 14px;color:#4B5563;">${s.email}</td>
+                <td style="padding:12px 14px;">
+                    ${s.enrollment_status === 'Assigned'
+                        ? `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#1677FF;">
+                               <span style="width:7px;height:7px;border-radius:50%;background:#1677FF;"></span> Enrolled
+                           </span>`
+                        : `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#9CA3AF;">
+                               <span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;"></span> Not Enrolled
+                           </span>`}
+                </td>
+                <td style="padding:12px 14px;text-align:right;">
+                    <button class="btn btn-sm" onclick="deleteUser('${s.id || s._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Remove</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Students load error:', e);
+    }
+}
+
+// ================= BATCHES & INSTRUCTORS FIX =================
+async function loadTeachers() {
+    try {
+        const res = await fetch(API + '/teachers', { cache: 'no-store' });
+        const d = await res.json();
+        if (d.success && d.teachers && d.teachers.length > 0) {
+            allTeachers = d.teachers;
+        } else {
+            // Robust Fallback: Agar teachers route empty ho toh users se filter karein
+            const uRes = await fetch(API + '/users', { cache: 'no-store' });
+            const uData = await uRes.json();
+            if (uData.success && uData.users) {
+                allTeachers = uData.users.filter(u => String(u.role).toLowerCase() === 'teacher');
+            }
+        }
+        populateTeacherDropdown();
+    } catch(e) {
+        console.warn('Teacher loading warning:', e);
+    }
+}
+
+function populateTeacherDropdown() {
+    const sel = document.getElementById('batchTeacher');
+    if (!sel) return;
+    const currentVal = sel.value;
+    let htmlOptions = '<option value="">-- Select Instructor --</option>';
+    allTeachers.forEach(t => {
+        const tid = t.id || t._id;
+        htmlOptions += `<option value="${tid}">${t.name}</option>`;
+    });
+    sel.innerHTML = htmlOptions;
+    if (currentVal) {
+        setDropdownValue('batchTeacher', currentVal);
+    }
+}
+
+async function ensureTeachersLoaded() {
+    if (!allTeachers || allTeachers.length === 0) {
+        await loadTeachers();
+    } else {
+        populateTeacherDropdown();
+    }
+}
+
+async function loadBatches() {
+    try {
+        const res = await fetch(API + '/batches', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbBatches');
+        if (!d.success || !d.batches || !d.batches.length) {
+            tb.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">No cohorts initialized.</td></tr>';
+            return;
+        }
+        windowBatches = d.batches;
+        tb.innerHTML = d.batches.map(b => `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+                <td style="padding:12px 14px;color:#6B7280;font-family:monospace;">#${b.id || b._id}</td>
+                <td style="padding:12px 14px;font-weight:600;color:#111827;">${b.name}</td>
+                <td style="padding:12px 14px;color:#4B5563;">${b.teacher_name || 'Unassigned'}</td>
+                <td style="padding:12px 14px;text-align:center;">
+                    <span style="background:#F3F4F6;color:#374151;padding:3px 10px;border-radius:10px;font-weight:700;font-size:12px;">${b.student_count || 0}</span>
+                </td>
+                <td style="padding:12px 14px;text-align:right;">
+                    <button class="btn btn-sm" onclick="editBatch('${b.id || b._id}')" style="margin-right:6px;padding:4px 10px;border:1px solid #D1D5DB;background:#ffffff;border-radius:4px;cursor:pointer;">Edit</button>
+                    <button class="btn btn-sm" onclick="openBatchStudentsModal('${b.id || b._id}', '${b.name.replace(/'/g, "\\'")}')" style="margin-right:6px;padding:4px 10px;border:1px solid #1677FF;background:#1677FF;color:#ffffff;border-radius:4px;cursor:pointer;">Assign</button>
+                    <button class="btn btn-sm" onclick="deleteBatch('${b.id || b._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Batches load error:', e);
+    }
+}
+
+function editBatch(batchId) {
+    const b = (windowBatches || []).find(x => String(x.id || x._id) === String(batchId));
+    openBatchModal(b);
+}
+
+async function openBatchModal(b=null) {
+    await ensureTeachersLoaded();
+    const idField = document.getElementById('editBatchId');
+    const nameField = document.getElementById('batchName');
+    const teacherSelect = document.getElementById('batchTeacher');
+    
+    if (b) {
+        idField.value = b.id || b._id || '';
+        nameField.value = b.name || '';
+        document.getElementById('batchModalTitle').textContent = 'Modify Batch Configuration';
+        
+        // Match both ID and Teacher Name to prevent wrong fallback selection
+        const targetTid = String(b.teacher_id || '');
+        const targetName = String(b.teacher_name || '').trim().toLowerCase();
+        let matched = false;
+        
+        for (let i = 0; i < teacherSelect.options.length; i++) {
+            const opt = teacherSelect.options[i];
+            if (opt.value && (String(opt.value) === targetTid || opt.text.trim().toLowerCase() === targetName)) {
+                teacherSelect.selectedIndex = i;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) teacherSelect.selectedIndex = 0;
+    } else {
+        idField.value = '';
+        nameField.value = '';
+        teacherSelect.selectedIndex = 0; // Default remains "-- Select Instructor --"
+        document.getElementById('batchModalTitle').textContent = 'Create Batch Cohort';
+    }
+    openModal('batchModal');
+}
+
+async function deleteBatch(id) {
+    if (!confirm('Dismantle this batch partition?')) return;
+    try {
+        const res = await fetch(`${API}/batches?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || 'Batch removed');
+            loadBatches();
+            loadAssignmentsSelect();
+            loadOverview();
+        } else {
+            showAlert(d.message || 'Failed', 'error');
+        }
+    } catch(e) {
+        showAlert('Network error deleting batch', 'error');
+    }
+}
+
+document.getElementById('batchForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('editBatchId').value.trim();
+    const name = document.getElementById('batchName').value.trim();
+    const teacher_id = document.getElementById('batchTeacher').value.trim();
+
+    if (!name) {
+        showAlert('Batch Name likhna zaroori hai.', 'error');
+        return;
+    }
+    if (!teacher_id) {
+        showAlert('Barah-e-karam koi Instructor zaroor select karein.', 'error');
+        return;
+    }
+
+    const payload = {
+        name: name,
+        batch_name: name,
+        cohort_name: name,
+        teacher_id: teacher_id,
+        instructor_id: teacher_id,
+        assigned_instructor: teacher_id
+    };
+    if (id) {
+        payload.id = id;
+        payload.batch_id = id;
+    }
+
+    try {
+        const res = await fetch(API + '/batches', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || (id ? 'Batch configuration updated successfully!' : 'Batch cohort created!'));
+            closeModal('batchModal');
+            loadBatches();
+            loadAssignmentsSelect();
+            loadOverview();
+        } else {
+            showAlert(d.message || 'Failed to update cohort mapping', 'error');
+        }
+    } catch(e) {
+        showAlert('Error updating batch', 'error');
+    }
+});
+
+let currentBatchId = null;
+let allStudentsList = [];
+let batchAssignedIds = [];
+
+async function openBatchStudentsModal(batchId, batchName) {
+    currentBatchId = batchId;
+    document.getElementById('batchStudentsTitle').textContent = 'Assign Learners to: ' + batchName;
+    document.getElementById('searchStudents').value = '';
+    try {
+        const [studentsRes, batchStudentsRes] = await Promise.all([
+            fetch(API + '/students', { cache: 'no-store' }),
+            fetch(API + '/batch-students/' + batchId, { cache: 'no-store' })
+        ]);
+        const studentsData = await studentsRes.json();
+        const batchData = await batchStudentsRes.json();
+        allStudentsList = studentsData.students || [];
+        batchAssignedIds = (batchData.students || []).map(s => String(s.id || s._id));
+        renderStudentChecklist();
+        openModal('batchStudentsModal');
+    } catch(e) {
+        console.error('Error fetching batch students:', e);
+    }
+}
+
+function renderStudentChecklist() {
+    const search = document.getElementById('searchStudents').value.toLowerCase();
+    const filtered = allStudentsList.filter(s => s.name.toLowerCase().includes(search) || s.email.toLowerCase().includes(search));
+    const div = document.getElementById('batchStudentChecklist');
+    if (!filtered.length) {
+        div.innerHTML = '<p style="text-align:center;color:#9CA3AF;padding:24px;font-size:13px;">No students match query</p>';
+        return;
+    }
+    div.innerHTML = filtered.map(s => {
+        const sid = String(s.id || s._id);
+        const checked = batchAssignedIds.includes(sid) ? 'checked' : '';
+        return `
+            <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #F3F4F6;cursor:pointer;">
+                <input type="checkbox" value="${sid}" ${checked} onchange="toggleBatchStudent('${sid}', this.checked)" style="width:16px;height:16px;accent-color:#1677FF;">
+                <span style="flex:1;font-size:13px;font-weight:600;color:#111827;">${s.name}</span>
+                <span style="color:#6B7280;font-size:12px;">${s.email}</span>
+            </label>
+        `;
+    }).join('');
+}
+
+function toggleBatchStudent(studentId, isChecked) {
+    studentId = String(studentId);
+    if (isChecked && !batchAssignedIds.includes(studentId)) {
+        batchAssignedIds.push(studentId);
+    } else if (!isChecked) {
+        batchAssignedIds = batchAssignedIds.filter(id => id !== studentId);
+    }
+}
+
+function filterStudentsForBatch() {
+    renderStudentChecklist();
+}
+
+async function saveBatchStudents() {
+    try {
+        const res = await fetch(API + '/batch-students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ batch_id: currentBatchId, student_ids: batchAssignedIds })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Students successfully partitioned to batch!');
+            closeModal('batchStudentsModal');
+            loadBatches();
+            loadStudents();
+            loadOverview();
+        } else {
+            showAlert(d.message || 'Error updating batch assignments', 'error');
+        }
+    } catch(e) {
+        showAlert('Error updating batch assignments', 'error');
+    }
+}
+
+// ================= ASSIGNMENTS =================
+async function loadAssignmentsSelect() {
+    try {
+        const res = await fetch(API + '/batches', { cache: 'no-store' });
+        const d = await res.json();
+        if (d.success && d.batches) {
+            const sel = document.getElementById('asgBatch');
+            const currentVal = sel.value;
+            let htmlOptions = '<option value="">-- Select Batch --</option>';
+            d.batches.forEach(b => {
+                const bid = b.id || b._id;
+                htmlOptions += `<option value="${bid}">${b.name}</option>`;
+            });
+            sel.innerHTML = htmlOptions;
+            if (currentVal) {
+                setDropdownValue('asgBatch', currentVal);
+            }
+        }
+    } catch(e) {}
+}
+
+async function loadAssignments() {
+    try {
+        const res = await fetch(API + '/assignments', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbAssignments');
+        if (!d.success || !d.assignments || !d.assignments.length) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:32px;color:#9CA3AF;">No assignments scheduled.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.assignments.map(a => `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+                <td style="padding:12px 14px;color:#6B7280;font-family:monospace;">#${a.id || a._id}</td>
+                <td style="padding:12px 14px;font-weight:600;color:#111827;">${a.title}</td>
+                <td style="padding:12px 14px;color:#4B5563;">${a.subject}</td>
+                <td style="padding:12px 14px;"><span style="background:rgba(22,119,255,0.08);color:#1677FF;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;">${a.batch_name || 'All'}</span></td>
+                <td style="padding:12px 14px;text-align:center;font-weight:600;">${a.total_marks}</td>
+                <td style="padding:12px 14px;color:#6B7280;">${a.due_date || 'N/A'}</td>
+                <td style="padding:12px 14px;text-align:right;">
+                    <button class="btn btn-sm" onclick='openAssignmentModal(${JSON.stringify(a).replace(/'/g, "&#39;")})' style="margin-right:6px;padding:4px 10px;border:1px solid #D1D5DB;background:#ffffff;border-radius:4px;cursor:pointer;">Edit</button>
+                    <button class="btn btn-sm" onclick="deleteAssignment('${a.id || a._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Assignments load error:', e);
+    }
+}
+
+function openAssignmentModal(a=null) {
+    document.getElementById('editAssignmentId').value = a ? (a.id || a._id) : '';
+    document.getElementById('asgTitle').value = a ? a.title : '';
+    document.getElementById('asgSubject').value = a ? a.subject : '';
+    setDropdownValue('asgBatch', a ? (a.batch_id || '') : '');
+    document.getElementById('asgTotal').value = a ? a.total_marks : '100';
+    document.getElementById('asgDue').value = a ? a.due_date : '';
+    document.getElementById('assignmentModalTitle').textContent = a ? 'Edit Assignment' : 'Create Course Assignment';
+    openModal('assignmentModal');
+}
+
+async function deleteAssignment(id) {
+    if (!confirm('Delete this assignment node?')) return;
+    try {
+        const res = await fetch(`${API}/assignments?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || 'Assignment deleted');
+            loadAssignments();
+            loadOverview();
+        }
+    } catch(e) {
+        showAlert('Network error deleting assignment', 'error');
+    }
+}
+
+document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('editAssignmentId').value;
+    const payload = {
+        title: document.getElementById('asgTitle').value,
+        subject: document.getElementById('asgSubject').value,
+        batch_id: document.getElementById('asgBatch').value || null,
+        total_marks: parseInt(document.getElementById('asgTotal').value),
+        due_date: document.getElementById('asgDue').value
+    };
+    if (id) payload.id = id;
+
+    try {
+        const res = await fetch(API + '/assignments', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || 'Assignment saved');
+            closeModal('assignmentModal');
+            loadAssignments();
+            loadOverview();
+        }
+    } catch(e) {
+        showAlert('Error updating assignment', 'error');
+    }
+});
+
+// ================= MARKS =================
+async function loadMarks() {
+    try {
+        const res = await fetch(API + '/marks', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbMarks');
+        if (!d.success || !d.marks || !d.marks.length) {
+            tb.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">No marks ingested.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.marks.map(m => {
+            const pct = m.total_marks ? Math.round((m.obtained_marks / m.total_marks) * 100) : 0;
+            return `
+                <tr style="border-bottom:1px solid #F3F4F6;">
+                    <td style="padding:12px 14px;font-weight:600;color:#111827;">${m.student_name || 'ID #' + m.student_id}</td>
+                    <td style="padding:12px 14px;color:#4B5563;">${m.assignment_title || 'General Assessment'}</td>
+                    <td style="padding:12px 14px;text-align:center;font-weight:700;">${m.obtained_marks}</td>
+                    <td style="padding:12px 14px;text-align:center;color:#6B7280;">${m.total_marks || 100}</td>
+                    <td style="padding:12px 14px;text-align:center;">
+                        <span style="font-weight:700;color:${pct >= 50 ? '#1677FF' : '#DC2626'}">${pct}%</span>
+                    </td>
+                    <td style="padding:12px 14px;text-align:right;">
+                        <button class="btn btn-sm" onclick="deleteMark('${m.id || m._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Delete</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch(e) {
+        console.error('Marks load error:', e);
+    }
+}
+
+async function deleteMark(id) {
+    if (!confirm('Remove score record?')) return;
+    try {
+        const res = await fetch(`${API}/marks?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Mark record purged');
+            loadMarks();
+            loadOverview();
+        }
+    } catch(e) {
+        showAlert('Network error deleting mark', 'error');
+    }
+}
+
+// ================= PREDICTIONS =================
+async function loadPredictions() {
+    try {
+        const res = await fetch(API + '/predictions', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbPredictions');
+        if (!d.success || !d.predictions || !d.predictions.length) {
+            tb.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">No inferences evaluated.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.predictions.map(p => {
+            const risk = (p.risk_level || p.risk || 'low').toLowerCase();
+            const color = risk === 'high' ? '#DC2626' : risk === 'medium' ? '#0B1F33' : '#1677FF';
+            const bg = risk === 'high' ? 'rgba(220,38,38,0.08)' : risk === 'medium' ? 'rgba(11,31,51,0.05)' : 'rgba(22,119,255,0.08)';
+            return `
+                <tr style="border-bottom:1px solid #F3F4F6;">
+                    <td style="padding:12px 14px;font-weight:600;color:#111827;">${p.student_name || p.name || 'Student #' + p.student_id}</td>
+                    <td style="padding:12px 14px;">
+                        <span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:${bg};color:${color};text-transform:uppercase;">
+                            ${risk}
+                        </span>
+                    </td>
+                    <td style="padding:12px 14px;text-align:center;font-weight:600;">
+                        ${p.probability || (p.confidence ? Math.round(p.confidence * 100) + '%' : 'N/A')}
+                    </td>
+                    <td style="padding:12px 14px;text-align:center;">
+                        <span style="background:rgba(22,119,255,0.08);color:#1677FF;padding:3px 10px;border-radius:8px;font-weight:700;">${p.predicted_grade || p.grade || 'N/A'}</span>
+                    </td>
+                    <td style="padding:12px 14px;text-align:right;">
+                        <button class="btn btn-sm" onclick="deletePrediction('${p.id || p._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Purge</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch(e) {
+        console.error('Predictions load error:', e);
+    }
+}
+
+async function deletePrediction(id) {
+    if (!confirm('Purge cached inference data?')) return;
+    try {
+        const res = await fetch(`${API}/predictions?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Prediction record removed');
+            loadPredictions();
+            loadOverview();
+        }
+    } catch(e) {
+        showAlert('Network error deleting prediction', 'error');
+    }
+}
+
+// ================= ALERTS =================
+async function loadAlerts() {
+    try {
+        const res = await fetch(API + '/alerts', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbAlerts');
+        if (!d.success || !d.alerts || !d.alerts.length) {
+            tb.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">Zero threshold violations detected.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.alerts.map(a => {
+            const sev = (a.severity || 'low').toLowerCase();
+            const color = sev === 'critical' ? '#DC2626' : sev === 'high' ? '#0B1F33' : '#1677FF';
+            return `
+                <tr style="border-bottom:1px solid #F3F4F6;">
+                    <td style="padding:12px 14px;font-weight:700;color:#111827;">${a.alert_type || a.type || 'Anomaly'}</td>
+                    <td style="padding:12px 14px;">
+                        <span style="font-weight:700;color:${color};text-transform:uppercase;font-size:11px;">${sev}</span>
+                    </td>
+                    <td style="padding:12px 14px;color:#4B5563;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.message || ''}</td>
+                    <td style="padding:12px 14px;font-weight:600;">${a.student_name || a.student_id || 'Global'}</td>
+                    <td style="padding:12px 14px;color:#9CA3AF;font-size:12px;">${a.created_at ? new Date(a.created_at).toLocaleDateString() : 'Active'}</td>
+                    <td style="padding:12px 14px;text-align:right;">
+                        <button class="btn btn-sm" onclick="dismissAlert('${a.id || a._id}')" style="padding:4px 10px;border:1px solid #D1D5DB;background:#ffffff;border-radius:4px;cursor:pointer;">Dismiss</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch(e) {
+        console.error('Alerts load error:', e);
+    }
+}
+
+async function dismissAlert(id) {
+    try {
+        const res = await fetch(`${API}/alerts?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Alert acknowledged');
+            loadAlerts();
+            loadOverview();
+        }
+    } catch(e) {
+        showAlert('Error dismissing alert', 'error');
+    }
+}
+
+// ================= DISTRIBUTED RECORDS =================
+async function loadRecords() {
+    try {
+        const res = await fetch(API + '/records', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbRecords');
+        if (!d.success || !d.records || !d.records.length) {
+            tb.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:32px;color:#9CA3AF;">No partitioned records found in store.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.records.map(r => `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+                <td style="padding:12px 14px;font-weight:600;color:#111827;">${r.student_name || r.name || 'ID #' + r.student_id}</td>
+                <td style="padding:12px 14px;"><span style="background:#F1F5F9;padding:2px 8px;border-radius:6px;font-size:12px;">${r.batch || r.batch_name || 'N/A'}</span></td>
+                <td style="padding:12px 14px;text-align:center;font-weight:600;">${r.attendance != null ? r.attendance + '%' : 'N/A'}</td>
+                <td style="padding:12px 14px;text-align:center;font-weight:700;color:#1677FF;">${r.gpa != null ? r.gpa : (r.gpa_index || 'N/A')}</td>
+                <td style="padding:12px 14px;text-align:center;">${r.score != null ? r.score : (r.lms_score || 'N/A')}</td>
+                <td style="padding:12px 14px;text-align:right;">
+                    <button class="btn btn-sm" onclick="deleteRecord('${r.id || r._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Purge</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Records load error:', e);
+    }
+}
+
+async function deleteRecord(id) {
+    if (!confirm('Purge raw educational record block?')) return;
+    try {
+        const res = await fetch(`${API}/records?id=${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Record purged from data tier');
+            loadRecords();
+            loadOverview();
+        }
+    } catch(e) {
+        showAlert('Network error deleting record', 'error');
+    }
+}
+
+// ================= REPORTS & EMAIL ALERT PIPELINE =================
+function openReportModal() {
+    openModal('reportModal');
+}
+
+async function handleGenerateReport(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnRunReport');
+    btn.disabled = true;
+    btn.textContent = 'Synthesizing & Dispatching...';
+
+    const reportType = document.getElementById('reportTypeSelect').value;
+    const sendEmail = document.getElementById('sendEmailCheckbox').checked;
+    const recipientEmail = document.getElementById('targetRecipientEmail').value.trim();
+
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: reportType,
+                send_email: sendEmail,
+                recipient: recipientEmail || null
+            })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert(d.message || (sendEmail ? 'Report synthesized and email alerts dispatched!' : 'Report synthesized!'));
+            closeModal('reportModal');
+            loadReports();
+            loadOverview();
+        } else {
+            showAlert(d.message || 'Report generation error', 'error');
+        }
+    } catch(err) {
+        showAlert('Error processing analytical mail dispatch', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Execute & Dispatch';
+    }
+}
+
+async function loadReports() {
+    try {
+        const res = await fetch('/api/reports', { cache: 'no-store' });
+        const d = await res.json();
+        const tb = document.getElementById('tbReports');
+        if (!d.success || !d.reports || !d.reports.length) {
+            tb.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:32px;color:#9CA3AF;">No compiled reports cataloged.</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.reports.map(r => `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+                <td style="padding:12px 14px;color:#6B7280;font-family:monospace;">#${r.id || r._id}</td>
+                <td style="padding:12px 14px;font-weight:600;color:#111827;">${r.name || r.title || 'Analytical Report'}</td>
+                <td style="padding:12px 14px;color:#4B5563;">${r.created_by_name || 'Lead Analyst'}</td>
+                <td style="padding:12px 14px;color:#6B7280;font-size:12px;">${r.created_at || 'Just now'}</td>
+                <td style="padding:12px 14px;text-align:right;">
+                    <a href="/static/reports/${r.name || r.filename}" download class="btn btn-sm" style="display:inline-block;padding:4px 10px;border:1px solid #1677FF;background:#ffffff;color:#1677FF;text-decoration:none;border-radius:4px;margin-right:6px;font-weight:600;">Download</a>
+                    <button class="btn btn-sm" onclick="resendReportMail('${r.id || r._id}')" style="padding:4px 10px;border:1px solid #0B1F33;background:rgba(11,31,51,0.05);color:#0B1F33;border-radius:4px;cursor:pointer;margin-right:6px;" title="Resend alert email">&#9993; Resend</button>
+                    <button class="btn btn-sm" onclick="deleteReport('${r.id || r._id}')" style="padding:4px 10px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:4px;cursor:pointer;">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Reports load error:', e);
+    }
+}
+
+async function resendReportMail(reportId) {
+    const target = prompt('Enter recipient email to dispatch this report alert to:');
+    if (!target) return;
+    try {
+        const res = await fetch(`/api/reports/${reportId}/send-mail`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipient: target })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Report notification dispatched to: ' + target);
+        } else {
+            showAlert(d.message || 'Dispatch failed', 'error');
+        }
+    } catch(e) {
+        showAlert('Failed triggering email gateway', 'error');
+    }
+}
+
+async function deleteReport(id) {
+    if (!confirm('Delete this generated analytical report?')) return;
+    try {
+        const res = await fetch(`/api/reports/${id}`, { method:'DELETE' });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Report archived');
+            loadReports();
+            loadOverview();
+        } else {
+            showAlert(d.message || 'Action failed', 'error');
+        }
+    } catch(e) {
+        showAlert('Network error deleting report', 'error');
+    }
+}
+
+async function testEmailAlertService() {
+    const email = prompt('Enter recipient email address to test the SMTP notification daemon:');
+    if (!email) return;
+    try {
+        showAlert('Dispatching test alert packet...');
+        const res = await fetch('/api/alerts/test-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showAlert('Test alert email successfully transmitted to ' + email);
+        } else {
+            showAlert(d.message || 'Transmission failed', 'error');
+        }
+    } catch(e) {
+        showAlert('Error contacting alert mailer endpoint', 'error');
+    }
+}
+
+// ================= BOOTSTRAP =================
+document.addEventListener('DOMContentLoaded', () => {
+    loadOverview();
+    loadUsers();
+    loadStudents();
+    loadTeachers();
+    loadBatches();
+    loadAssignmentsSelect();
+    loadAssignments();
+    loadMarks();
+    loadPredictions();
+    loadAlerts();
+    loadRecords();
+    loadReports();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{
+  "risk_model_accuracy": 0.8557,
+  "grade_model_r2": 0.7701,
+  "demand_model_r2": 0.9901,
+  "features": [
+    "attendance",
+    "marks",
+    "lms_activity",
+    "previous_performance"
+  ],
+  "classes": [
+    "Low",
+    "Medium",
+    "High"
+  ],
+  "trained_at": "2026-10-16T23:10:46.054682"
+}

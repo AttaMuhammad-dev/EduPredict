@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block page_title %}404 Not Found - Data Node Unreachable{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="empty-state animate-up" style="max-width:560px;margin:0 auto;text-align:center;padding:70px 24px;">
+            <div style="width:84px;height:84px;border-radius:24px;background:rgba(22,119,255,0.06);border:1.5px solid rgba(22,119,255,0.15);display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 10px 15px -3px rgba(22,119,255,0.1);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1677FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </div>
+            
+            <h1 style="font-size:72px;font-weight:900;color:#0B1F33;margin-bottom:6px;line-height:1;letter-spacing:-2px;">404</h1>
+            <h2 style="font-size:24px;font-weight:800;color:#111827;margin-bottom:12px;">Data Node Block Not Found</h2>
+            <p style="color:#4b5563;font-size:15px;margin:0 auto 28px;line-height:1.6;">
+                The analytical endpoint or partition path you requested does not exist within the metadata catalog. The route may have shifted or completed its lifecycle.
+            </p>
+            
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <a href="{{ url_for('index') }}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:#1677FF;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 4px 6px -1px rgba(22,119,255,0.2);">
+                    &larr; Primary Portal
+                </a>
+                <a href="{{ url_for('dashboard') if session.get('user_id') else url_for('login') }}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:#ffffff;color:#374151;font-weight:600;font-size:14px;text-decoration:none;border:1.5px solid #d1d5db;">
+                    System Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
