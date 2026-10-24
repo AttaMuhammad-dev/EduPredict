@@ -285,61 +285,15 @@ def get_target_email(user_id=None, role=None):
 
 
 def send_email(to_email, subject, body, html_body=None, attachment=None, attachment_name=None):
-    if not config.EMAIL_ENABLED:
-        return False
-
-    if not to_email:
-        print("[SMTP ERROR] No recipient email provided")
-        return False
-
-    dummy_domains = ["@student.com", "@edupredict.com", "@example.com", "test", "demo"]
-    if any(d in to_email.lower() for d in dummy_domains):
-        print(f"[SMTP BYPASS] Dummy email detected ({to_email}). Skipping actual dispatch.")
-        return True
-
-    try:
-        msg = MIMEMultipart('alternative')
-        sender = getattr(config, 'EMAIL_USER', EMAIL_USER)
-        msg['From'] = f"EduPredict Alerts <{sender}>"
-        msg['To'] = to_email
-        msg['Subject'] = subject
-
-        msg.attach(MIMEText(body, 'plain'))
-        if html_body:
-            msg.attach(MIMEText(html_body, 'html'))
-
-        if attachment:
-            part = MIMEBase('application', 'octet-stream')
-            if isinstance(attachment, str):
-                part.set_payload(attachment.encode('utf-8'))
-            else:
-                part.set_payload(attachment)
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f'attachment; filename="{attachment_name or "EduPredict_Report.csv"}"')
-            msg.attach(part)
-
-        host = getattr(config, 'EMAIL_HOST', EMAIL_HOST)
-        port = int(getattr(config, 'EMAIL_PORT', EMAIL_PORT))
-        user = getattr(config, 'EMAIL_USER', EMAIL_USER)
-        password = getattr(config, 'EMAIL_PASSWORD', EMAIL_PASSWORD)
-
-        if user and password and password != "your-app-password":
-            server = smtplib.SMTP(host, port, timeout=15)
-            server.starttls()
-            server.login(user, password)
-            server.send_message(msg)
-            server.quit()
-            print(f"[SMTP SUCCESS] Email delivered to {to_email}")
-            return True
-        else:
-            print(f"[SMTP SKIPPED] Credentials missing. Email NOT sent to {to_email}")
-            return False
-    except Exception as e:
-        print(f"[SMTP FATAL ERROR] {type(e).__name__}: {e}")
-        return False
+    from email_service import deliver
+    return deliver(config, to_email, subject, body, html_body, attachment, attachment_name)
 
 
 def build_html_email_template(title, headline, message, metrics=None, action_url=None):
+    from html import escape
+    title, headline, message = [escape(str(value)) for value in (title, headline, message)]
+    if metrics:
+        metrics = {escape(str(key)): escape(str(value)) for key, value in metrics.items()}
     metrics_html = ""
     if metrics and isinstance(metrics, dict):
         metrics_html = "<div style='background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin:18px 0;'>"
@@ -2174,6 +2128,7 @@ def generate_report():
 
         log_event("Report Compiled", f"Compiled {report_type} report: {report_filename}")
 
+        email_sent = False
         if send_email_alert and recipient:
             email_subject = f"[EduPredict Alert &bull; {urgency.upper()}] {custom_title}"
             plain_body = f"Hello,\n\nAn analytical assessment '{custom_title}' has been compiled by {session.get('name', 'Lead Analyst')}.\n\nExecutive Directives:\n{notes or 'Please inspect the attached CSV artifact.'}\n\nGenerated At: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\nEduPredict Analytics Gateway"
@@ -2183,7 +2138,7 @@ def generate_report():
                 message=notes or "Analytical findings have been processed across cluster models. Review the attached CSV summary.",
                 metrics={"Report Type": report_type.replace('_', ' ').title(), "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "Analyst Origin": session.get('name', 'Lead Analyst')}
             )
-            send_email(
+            email_sent = send_email(
                 to_email=recipient,
                 subject=email_subject,
                 body=plain_body,
@@ -2195,6 +2150,7 @@ def generate_report():
         return jsonify({
             "success": True,
             "message": f"Report '{custom_title}' synthesized successfully!",
+            "email_sent": email_sent,
             "report_id": report_id,
             "report_filename": report_filename
         })
@@ -2274,6 +2230,8 @@ def resend_report_mail(report_id):
 def send_alert_email_endpoint():
     data = request.get_json() or {}
     student_id = data.get("student_id")
+    if session.get('role') == 'teacher' and str(student_id) not in {str(value) for value in teacher_student_ids()}:
+        return jsonify(success=False, message='Student is outside your assigned cohort.'), 403
     recipient = data.get("recipient") or get_target_email(user_id=student_id)
     note = data.get("note", "")
 
@@ -2309,10 +2267,13 @@ def broadcast_alert_digest():
 
     high_risk_list = []
     if _db_ok():
-        recent_alerts = list(alerts_col.find({
+        alert_query = {
             "status": {"$ne": "acknowledged"},
             "severity": {"$in": ["critical", "high", "CRITICAL", "HIGH"]}
-        }).sort("_id", -1).limit(10))
+        }
+        if session.get('role') == 'teacher':
+            alert_query['student_id'] = {'$in': teacher_student_ids()}
+        recent_alerts = list(alerts_col.find(alert_query).sort("_id", -1).limit(10))
 
         for a in recent_alerts:
             sid = a.get("student_id")
@@ -2329,9 +2290,11 @@ def broadcast_alert_digest():
             })
 
     if not high_risk_list:
-        high_risk_list = [
-            {"name": "Hamza Tariq", "attendance": "45", "marks": "40", "lms": "30", "risk": "HIGH RISK", "action": "Urgent academic counselor intervention required"}
-        ]
+        return jsonify(success=False, message='No high-risk records are available for this digest.'), 400
+
+    from html import escape
+    notes = escape(str(notes))
+    high_risk_list = [{key: escape(str(value)) for key, value in row.items()} for row in high_risk_list]
 
     table_rows = ""
     plain_text_items = ""
@@ -2419,7 +2382,7 @@ def test_email_endpoint():
     sent = send_email(target, "EduPredict SMTP Alert Test", "The automated notification daemon is operational.")
     if not sent:
         return jsonify({"success": False, "message": f"Test email could not be delivered to {target}. Please verify SMTP credentials in config.py (EMAIL_USER / EMAIL_PASSWORD)."}), 500
-    return jsonify({"success": True, "message": f"Test packet routed to {target}."})
+    return jsonify({"success": True, "message": f"Test message accepted by the sending service for {target}."})
 
 
 # ============================================================
@@ -2427,7 +2390,7 @@ def test_email_endpoint():
 # ============================================================
 
 @app.route("/api/email/send", methods=["POST"])
-@login_required
+@role_required(["administrator"])
 def universal_email_send():
     data = request.get_json() or {}
     recipient = (data.get("recipient") or "").strip()
@@ -2459,7 +2422,7 @@ def universal_email_send():
         return jsonify({"success": False, "message": f"Email could not be delivered to {recipient}. Please verify the recipient address and SMTP settings."}), 500
 
     log_event("Email Dispatch", f"{sender_email} dispatched email to {recipient}")
-    return jsonify({"success": True, "message": f"Email successfully delivered to {recipient}!"})
+    return jsonify({"success": True, "message": f"Email accepted by the sending service for {recipient}."})
 
 
 # ============================================================
@@ -2475,13 +2438,18 @@ def contact_endpoint():
     subject = data.get("subject", "Inquiry")
     message = data.get("message", "")
 
-    log_event("Support Ticket", f"Ticket from {email} - {subject}")
-
+    from email_service import valid_address
+    if not valid_address(email) or not all(isinstance(value, str) for value in [name, subject, message, category]):
+        return jsonify(success=False, message="Enter a valid name, email, subject and message."), 400
+    if not 1 <= len(name.strip()) <= 100 or not 1 <= len(subject.strip()) <= 120 or not 10 <= len(message.strip()) <= 3000 or len(category) > 80:
+        return jsonify(success=False, message="Use a name up to 100 characters, subject up to 120 and message of 10–3,000 characters."), 400
     admin_mail = get_target_email(role="administrator")
-    ticket_body = f"New Support Ticket Received:\nFrom: {name} <{email}>\nCategory: {category}\nSubject: {subject}\n\nMessage:\n{message}"
-    send_email(admin_mail, f"[Support Desk] {subject}", ticket_body)
+    ticket_body = f"New demo support inquiry\nFrom: {name} <{email}>\nCategory: {category}\nSubject: {subject}\n\n{message}"
+    if not send_email(admin_mail, f"[Support Desk] {subject}", ticket_body):
+        return jsonify(success=False, message="Email service is unavailable or its demo sending limit has been reached. Please try again later."), 503
+    log_event("Support Ticket", "Support inquiry accepted by the configured email service.")
+    return jsonify(success=True, message="Your inquiry was accepted by the email service. Thank you.")
 
-    return jsonify({"success": True, "message": "Inquiry submitted! Our engineering team will respond within 24 hours."})
 
 
 @app.route("/api/profile", methods=["GET", "PUT"])
@@ -2924,7 +2892,10 @@ def support_users_page():
 
 @app.route("/api/health")
 def health():
-    return jsonify({"status": "ok", "database_configured": bool(os.environ.get("MONGO_URI"))})
+    return jsonify({"status": "ok", "database_configured": bool(os.environ.get("MONGO_URI")),
+        "email_enabled": config.EMAIL_ENABLED,
+        "email_configured": bool(config.EMAIL_USER and config.EMAIL_PASSWORD and config.ADMIN_EMAIL),
+        "email_recipient_policy": "owner-configured-only"})
 
 
 @app.route("/static/reports/<path:filename>")

@@ -34,6 +34,7 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 EMAIL_USER = os.environ.get("EMAIL_USER", "")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
 EMAIL_ENABLED = os.environ.get("EMAIL_ENABLED", "false").lower() == "true"
+EMAIL_ALLOWED_RECIPIENTS = os.environ.get("EMAIL_ALLOWED_RECIPIENTS", "")
 
 # NAYA ARCHITECTURE: Desired Mails for Direct Routing
 ROLE_EMAILS = {

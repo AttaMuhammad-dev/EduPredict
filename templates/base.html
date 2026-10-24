@@ -184,10 +184,11 @@
                         &#128276;<span class="notif-dot" id="headerNotifBadge" style="display:none;"></span>
                     </button>
 
-                    <!-- UNIVERSAL EMAIL DISPATCH BUTTON (ALL ROLES) -->
-                    <button class="header-icon-btn" id="composeEmailBtn" onclick="openComposeEmail('')" title="Send Email">
+                    {% if session.get('role') == 'administrator' %}
+                    <button class="header-icon-btn" id="openComposeEmailBtn" onclick="openComposeEmail('')" title="Send Email">
                         &#9993;
                     </button>
+                    {% endif %}
 
                     <!-- LIVE NOTIFICATION POPUP -->
                     <div class="notif-dropdown" id="notifDropdown">
@@ -295,6 +296,7 @@
             <button type="button" onclick="closeComposeEmail()" style="border:none;background:none;color:#ffffff;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
         </div>
         <form id="composeEmailForm" onsubmit="handleComposeEmailSend(event)" style="padding:20px;">
+            <p style="font-size:13px;color:#475569;">Demo email can be sent only to inboxes configured by the owner.</p>
             <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Recipient Email *</label>
             <input class="form-input" type="email" id="composeRecipient" required placeholder="recipient@gmail.com" style="width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;margin-bottom:14px;">
 
