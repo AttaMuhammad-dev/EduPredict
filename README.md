@@ -25,7 +25,7 @@ Copy `.env.example` to `.env`. Set a random `SECRET_KEY` of at least 32 characte
 python app.py
 ```
 
-The six included model/scaler artifacts were regenerated using the synthetic generator in `model.py` and the pinned scikit-learn version. Keep those versions aligned. Runtime uploads and reports use temporary private folders and are not durable across instances or restarts.
+The six included model/scaler artifacts were regenerated using the synthetic generator in `model.py` and the pinned scikit-learn version. Keep those versions aligned. New normalized CSV uploads, generated CSV reports and student attachment bytes are stored in MongoDB, so those records survive serverless restarts. Legacy local-file records still require migration or re-upload. See [RELEASE-20261024.md](RELEASE-20261024.md) for data limits and access rules.
 
 ## Deploy and verify
 
@@ -36,7 +36,7 @@ pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
 ```
 
-Five isolated checks cover public pages, absence of predictable default accounts, student restrictions on staff analytics/reports, disabled email, and synthetic predictions. Separate live checks covered student registration, sign-in/out and profile save/read. A complete review of staff, upload, reporting and storage workflows remains pending.
+Twenty-two isolated checks cover public/student access, staff ownership, durable uploads/reports/attachments, assigned-cohort submission and grading, revoked roles, password-session invalidation, malformed requests, cross-origin changes and synthetic predictions. Each test uses a new in-memory database. Live checks on 24 October also passed student registration, sign-in/out, profile save/read and denial of staff prediction access. Elevated staff workflows were exercised with synthetic fixtures in isolation; this does not establish real-world prediction accuracy or email delivery.
 
 ## Source and attribution
 

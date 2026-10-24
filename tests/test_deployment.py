@@ -20,6 +20,7 @@ import app as application
 
 class DeploymentChecks(unittest.TestCase):
     def setUp(self):
+        db.client = mongomock.MongoClient()
         self.client = application.app.test_client()
 
     def test_no_predictable_accounts_created_at_startup(self):
@@ -31,6 +32,8 @@ class DeploymentChecks(unittest.TestCase):
             self.assertEqual(self.client.get(path).status_code, 200, path)
 
     def test_student_cannot_read_staff_analytics_or_report_files(self):
+        with application.app.app_context():
+            db.users_col.insert_one({'id':1001,'role':'student','name':'Synthetic student'})
         with self.client.session_transaction() as session:
             session.update(user_id=1001, role='student', name='Synthetic student')
         for path in ['/api/analytics/records', '/api/analytics/alerts', '/api/reports',
@@ -42,6 +45,8 @@ class DeploymentChecks(unittest.TestCase):
             self.assertFalse(application.send_email('recipient@example.org', 'Demo', 'Demo'))
 
     def test_analyst_can_run_model_on_synthetic_input(self):
+        with application.app.app_context():
+            db.users_col.insert_one({'id':1002,'role':'analyst','name':'Synthetic analyst'})
         with self.client.session_transaction() as session:
             session.update(user_id=1002, role='analyst', name='Synthetic analyst')
         response = self.client.post('/api/predict', json={

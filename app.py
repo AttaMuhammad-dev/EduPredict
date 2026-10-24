@@ -13,6 +13,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 
+from release_safety import install as install_release_safety, dataset_frame, safe_csv, scoped_query, owns, MAX_FILE_BYTES, teacher_student_ids
 import bcrypt
 import numpy as np
 import pandas as pd
@@ -23,6 +24,7 @@ from flask import (
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 
 # Import project configurations and modules
 import config
@@ -45,6 +47,7 @@ from db import (
 )
 
 app = Flask(__name__)
+install_release_safety(app)
 app.secret_key = SECRET_KEY
 app.config["MONGO_URI"] = MONGO_URI
 app.config["DB_NAME"] = DB_NAME
@@ -109,7 +112,10 @@ def _next_id(collection):
         except (ValueError, TypeError):
             start_seq = 1000
             
-        counter.insert_one({"_id": collection.name, "seq": start_seq})
+        try:
+            counter.update_one({"_id": collection.name}, {"$setOnInsert": {"seq": start_seq}}, upsert=True)
+        except DuplicateKeyError:
+            pass
 
     result = counter.find_one_and_update(
         {"_id": collection.name},
@@ -142,6 +148,9 @@ def _to_dict(doc):
         else:
             d.pop("_id")
     d.pop("password", None)
+    d.pop("file_data", None)
+    d.pop("csv_data", None)
+    d.pop("file_path_internal", None)
     
     for k, v in list(d.items()):
         if isinstance(v, ObjectId):
@@ -225,11 +234,21 @@ except Exception as e:
 # RBAC SECURITY DECORATORS
 # ============================================================
 
+def _valid_session():
+    if 'user_id' not in session:
+        return False
+    user = _find_user_by_id(session['user_id'])
+    if not user or not user.get('is_active', 1) or session.get('auth_version', 0) != user.get('auth_version', 0):
+        session.clear()
+        return False
+    session['role'] = user.get('role', 'student')
+    return True
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "user_id" not in session:
-            return redirect(url_for("login"))
+        if not _valid_session():
+            return (jsonify(success=False, message="Sign in to continue."), 401) if request.path.startswith("/api/") else redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -238,8 +257,8 @@ def role_required(allowed_roles):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if "user_id" not in session:
-                return redirect(url_for("login"))
+            if not _valid_session():
+                return (jsonify(success=False, message="Sign in to continue."), 401) if request.path.startswith("/api/") else redirect(url_for("login"))
             if session.get("role") not in allowed_roles:
                 return jsonify({"success": False, "message": "Unauthorized role clearance"}), 403
             return f(*args, **kwargs)
@@ -364,8 +383,9 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
-        password = request.form.get("password", "")
+        credentials = request.get_json() if request.is_json else request.form
+        email = credentials.get("email", "").strip().lower()
+        password = credentials.get("password", "")
 
         if _db_ok():
             try:
@@ -402,6 +422,7 @@ def login():
                         session["user_email"] = user_doc['email']
                         session["role"] = user_doc['role']
                         session["name"] = user_doc['name']
+                        session['auth_version'] = user_doc.get('auth_version', 0)
 
                         log_event("User Login", f"{email} authenticated with role clearance: {user_doc['role']}")
                         return redirect(url_for("dashboard"))
@@ -667,31 +688,19 @@ def upload_dataset():
         if df.empty:
             return jsonify({"success": False, "message": "CSV file is empty", "error": "CSV file is empty"}), 400
 
-        upload_folder = _writable_dir(os.path.join(app.root_path, "uploads"))
-        filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{secure_filename(file.filename)}"
-        filepath = os.path.join(upload_folder, filename)
-        file.seek(0)
-        file.save(filepath)
-
-        dataset_id = 1
-        if _db_ok():
-            try:
-                dataset_id = _next_id(datasets_col)
-                datasets_col.insert_one({
-                    "id": dataset_id,
-                    "name": file.filename,
-                    "filename": file.filename,
-                    "file_path": filepath,
-                    "uploaded_by": session.get("user_id"),
-                    "row_count": len(df),
-                    "total_records": len(df),
-                    "column_count": len(df.columns),
-                    "columns": list(df.columns),
-                    "uploaded_at": datetime.now().isoformat()
-                })
-                log_event("Dataset Uploaded", f"Uploaded {file.filename} with {len(df)} records")
-            except Exception as e:
-                print(f"Dataset insert warning: {e}")
+        csv_data = df.to_csv(index=False)
+        if len(csv_data.encode('utf-8')) > MAX_FILE_BYTES or len(df) > 10000 or len(df.columns) > 100:
+            return jsonify(success=False, message='Use a CSV under 2 MB, 10,000 rows and 100 columns.'), 400
+        if datasets_col.count_documents({'uploaded_by': session.get('user_id')}) >= 20:
+            return jsonify(success=False, message='Demo upload limit reached. Contact the project owner to clear old datasets.'), 429
+        dataset_id = _next_id(datasets_col)
+        datasets_col.insert_one({
+            'id': dataset_id, 'name': secure_filename(file.filename), 'filename': secure_filename(file.filename),
+            'csv_data': csv_data, 'uploaded_by': session.get('user_id'),
+            'row_count': len(df), 'total_records': len(df), 'column_count': len(df.columns),
+            'columns': list(df.columns), 'uploaded_at': datetime.now().isoformat()
+        })
+        log_event('Dataset Uploaded', f'Dataset #{dataset_id} stored durably ({len(df)} rows)')
 
         send_alert = request.form.get("send_alert") == "true" or request.form.get("send_alert") is True
         alert_email = request.form.get("alert_email") or get_target_email(role="administrator")
@@ -730,14 +739,14 @@ def process_dataset():
 
         dataset = None
         if _db_ok():
-            dataset = datasets_col.find_one({
+            dataset = datasets_col.find_one(scoped_query({
                 "$or": [{"id": _normalize_id(dataset_id)}, {"id": str(dataset_id)}, {"_id": _safe_object_id(dataset_id)}]
-            })
+            }, "uploaded_by"))
 
-        if not dataset or not os.path.exists(dataset.get("file_path", "")):
-            return jsonify({"success": False, "message": "Dataset partition not found on disk"}), 404
+        if not dataset:
+            return jsonify({"success": False, "message": "Dataset not found or access denied"}), 404
 
-        df = pd.read_csv(dataset['file_path'])
+        df = dataset_frame(dataset)
         for col in x_columns + [y_column]:
             if col not in df.columns:
                 return jsonify({"success": False, "message": f"Column '{col}' not found"}), 400
@@ -748,10 +757,10 @@ def process_dataset():
         X_clean = X[valid_mask]
         y_clean = y[valid_mask]
 
-        if len(X_clean) == 0:
-            return jsonify({"success": False, "message": "No valid numeric rows after cleaning"}), 400
+        if len(X_clean) < 10 or len(x_columns) > 20:
+            return jsonify({"success": False, "message": "Use at least 10 valid numeric rows and at most 20 features"}), 400
 
-        is_classification = 2 < len(set(y_clean)) <= 10
+        is_classification = 2 <= len(set(y_clean)) <= 10
         from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
         from sklearn.model_selection import train_test_split
         from sklearn.metrics import accuracy_score, r2_score
@@ -804,14 +813,14 @@ def get_chart_data():
 
         dataset = None
         if _db_ok():
-            dataset = datasets_col.find_one({
+            dataset = datasets_col.find_one(scoped_query({
                 "$or": [{"id": _normalize_id(dataset_id)}, {"id": str(dataset_id)}, {"_id": _safe_object_id(dataset_id)}]
-            })
+            }, "uploaded_by"))
 
-        if not dataset or not os.path.exists(dataset.get("file_path", "")):
+        if not dataset:
             return jsonify({"success": False, "message": "Dataset not found"}), 404
 
-        df = pd.read_csv(dataset['file_path'])
+        df = dataset_frame(dataset)
         if x_column not in df.columns or y_column not in df.columns:
             return jsonify({"success": False, "message": "Columns not found"}), 400
 
@@ -1431,7 +1440,18 @@ def teacher_assignments():
 
         if _db_ok():
             assignment_id = _next_id(assignments_col)
-            tid = _normalize_id(data.get("teacher_id", user_id))
+            batch=batches_col.find_one({'id':{'$in':[batch_id,str(batch_id)]}})
+            if not batch or (role != 'administrator' and str(batch.get('teacher_id')) != str(user_id)):
+                return jsonify(success=False,message='Choose one of your assigned cohorts.'),403
+            if not isinstance(title,str) or not title.strip() or len(title)>160:
+                return jsonify(success=False,message='Enter a title up to 160 characters.'),400
+            try:
+                total_marks=float(total_marks)
+                if not 0 < total_marks <= 1000:raise ValueError()
+                datetime.fromisoformat(due_date)
+            except (TypeError,ValueError):
+                return jsonify(success=False,message='Enter a valid due date and total marks from 1 to 1000.'),400
+            tid = batch.get('teacher_id')
             assignments_col.insert_one({
                 "id": assignment_id, "batch_id": batch_id,
                 "teacher_id": tid, "title": title,
@@ -1470,12 +1490,19 @@ def grade_student():
     if _db_ok():
         try:
             assignment_for_limit = assignments_col.find_one({"$or": [{"id": assignment_id}, {"id": str(assignment_id)}, {"_id": _safe_object_id(assignment_id)}]})
+            if not assignment_for_limit:
+                return jsonify(success=False,message='Assignment not found.'),404
+            if session.get('role')=='teacher' and not owns(assignment_for_limit,'teacher_id'):
+                return jsonify(success=False,message='Assignment is not assigned to you.'),403
+            cohort=assignment_for_limit.get('batch_id')
+            if not student_batches_col.find_one({'student_id':{'$in':[student_id,str(student_id)]},'batch_id':{'$in':[cohort,str(cohort)]}}):
+                return jsonify(success=False,message='Student is not enrolled in this assignment cohort.'),403
             total_marks = int(assignment_for_limit.get("total_marks", 100)) if assignment_for_limit else 100
             try:
                 marks_val = float(obtained_marks)
             except (TypeError, ValueError):
                 return jsonify({"success": False, "message": "Invalid marks value."}), 400
-            if marks_val < 0 or marks_val > total_marks:
+            if not np.isfinite(marks_val) or marks_val < 0 or marks_val > total_marks:
                 return jsonify({"success": False, "message": f"Marks must be between 0 and {total_marks}."}), 400
             obtained_marks = marks_val
 
@@ -1721,12 +1748,24 @@ def submit_assignment():
             aid = _normalize_id(assignment_id)
             sid = _normalize_id(student_id)
 
+            assignment = assignments_col.find_one({'id': {'$in': [aid, str(aid)]}})
+            membership = student_batches_col.find_one({'student_id': {'$in': [sid, str(sid)]}, 'batch_id': {'$in': [assignment.get('batch_id'), str(assignment.get('batch_id'))]}}) if assignment else None
+            if not assignment or not membership:
+                return jsonify(success=False, message='Assignment not assigned to your cohort.'), 403
+            if not submission_text.strip() and not file_obj:
+                return jsonify(success=False, message='Enter a submission or attach a file.'), 400
+            if len(submission_text) > 20000:
+                return jsonify(success=False, message='Submission text is too long.'), 400
+            file_bytes = None
             saved_file_name = None
             if file_obj and file_obj.filename != "":
                 filename = secure_filename(file_obj.filename)
                 saved_file_name = f"{sid}_{aid}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-                file_path = os.path.join(SUBMISSIONS_UPLOAD_DIR, saved_file_name)
-                file_obj.save(file_path)
+                if '.' not in filename or filename.rsplit('.', 1)[1].lower() not in ALLOWED_SUBMISSION_EXTENSIONS:
+                    return jsonify(success=False, message='Unsupported attachment type.'), 400
+                file_bytes = file_obj.read(MAX_FILE_BYTES + 1)
+                if not file_bytes or len(file_bytes) > MAX_FILE_BYTES:
+                    return jsonify(success=False, message='Use a non-empty attachment under 2 MB.'), 400
 
             now_iso = datetime.now().isoformat()
             existing = student_marks_col.find_one({
@@ -1745,6 +1784,7 @@ def submit_assignment():
             }
             if saved_file_name:
                 payload["file_path"] = saved_file_name
+                payload["file_data"] = file_bytes
 
             if existing:
                 if existing.get("status") == "graded":
@@ -2056,6 +2096,8 @@ def generate_report():
     try:
         data = request.get_json() or {}
         report_type = data.get("type", "student_risk")
+        if report_type not in ("student_risk", "anomaly_summary", "course_demand"):
+            return jsonify(success=False, message="Choose a supported report type."), 400
         custom_title = data.get("title", "").strip() or f"EduPredict {report_type.replace('_', ' ').title()} Report"
         notes = data.get("notes", "")
         send_email_alert = data.get("send_email", False)
@@ -2074,7 +2116,8 @@ def generate_report():
             writer.writerow(['Cybersecurity Operations', '90', '150', '82%', 'Growing Demand'])
         elif report_type == "anomaly_summary":
             writer.writerow(['Alert ID', 'Anomaly Type', 'Severity', 'Student Name', 'Diagnostic Message', 'Timestamp'])
-            alerts = list(alerts_col.find().sort("_id", -1).limit(50))
+            query={'student_id':{'$in':teacher_student_ids()}} if session.get('role')=='teacher' else {}
+            alerts = list(alerts_col.find(query).sort("_id", -1).limit(50))
             for a in alerts:
                 writer.writerow([
                     a.get("id") or str(a.get("_id")),
@@ -2086,7 +2129,9 @@ def generate_report():
                 ])
         else:
             writer.writerow(['Student ID', 'Legal Name', 'Email', 'Assigned Cohort', 'Attendance %', 'Marks %', 'Risk Level', 'Projected Grade', 'Confidence'])
-            students = list(users_col.find({"role": "student"}))
+            query={"role":"student"}
+            if session.get('role')=='teacher':query['id']={'$in':teacher_student_ids()}
+            students = list(users_col.find(query))
             for s in students:
                 sid = s.get("id")
                 pred = predictions_col.find_one({"student_id": {"$in": [str(sid), sid]}}, sort=[("_id", -1)])
@@ -2097,16 +2142,16 @@ def generate_report():
                     s.get("batch_name", "Cohort-A"),
                     pred.get("attendance", "N/A") if pred else "N/A",
                     pred.get("marks", "N/A") if pred else "N/A",
-                    pred.get("risk", "Low") if pred else "Low",
-                    pred.get("predicted_grade", "B") if pred else "B",
-                    f"{round(pred.get('confidence', 0.85)*100, 1)}%" if pred else "85.0%"
+                    pred.get("risk", "N/A") if pred else "N/A",
+                    pred.get("predicted_grade", "N/A") if pred else "N/A",
+                    f"{round(pred.get('confidence', 0)*100, 1)}%" if pred else "N/A"
                 ])
 
-        csv_content = output.getvalue()
+        csv_content = safe_csv(output.getvalue())
         output.close()
 
         timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
-        report_filename = f"report_{report_type}_{timestamp_str}.csv"
+        report_filename = f"report_{report_type}_{timestamp_str}_{secrets.token_hex(4)}.csv"
         report_path = os.path.join(REPORTS_DIR, report_filename)
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(csv_content)
@@ -2159,7 +2204,7 @@ def generate_report():
 @role_required(["administrator", "analyst", "teacher"])
 def get_reports():
     if _db_ok():
-        reports = list(reports_col.find().sort("_id", -1))
+        reports = list(reports_col.find(scoped_query({}, "created_by"), {"csv_data": 0}).sort("_id", -1))
         return jsonify({"success": True, "reports": _to_dicts(reports)})
     return jsonify({"success": True, "reports": []})
 
@@ -2168,7 +2213,7 @@ def get_reports():
 @role_required(["administrator", "analyst"])
 def delete_report(report_id):
     if _db_ok():
-        report = reports_col.find_one({"id": report_id})
+        report = reports_col.find_one(scoped_query({"id": report_id}, "created_by"))
         if report:
             if os.path.exists(report.get("file_path", "")):
                 try: os.remove(report["file_path"])
@@ -2188,7 +2233,7 @@ def resend_report_mail(report_id):
     report = None
     if _db_ok():
         oid = _safe_object_id(report_id)
-        report = reports_col.find_one({"$or": [{"_id": oid}, {"id": _normalize_id(report_id)}]})
+        report = reports_col.find_one(scoped_query({"$or": [{"_id": oid}, {"id": _normalize_id(report_id)}]}, "created_by"))
 
     if not report:
         return jsonify({"success": False, "message": "Report artifact not found."}), 404
@@ -2471,6 +2516,8 @@ def profile():
                         return jsonify({"success": False, "message": "Current password is incorrect"}), 400
                     hashed = bcrypt.hashpw(new_pw.encode('utf-8'), bcrypt.gensalt())
                     users_col.update_one({"$or": [{"id": _normalize_id(user_id)}, {"id": str(user_id)}, {"_id": _safe_object_id(user_id)}]}, {"$set": {"password": hashed}})
+                    users_col.update_one({'_id': user['_id']}, {'$inc': {'auth_version': 1}})
+                    session['auth_version'] = user.get('auth_version', 0) + 1
 
                 if name:
                     users_col.update_one({"$or": [{"id": _normalize_id(user_id)}, {"id": str(user_id)}, {"_id": _safe_object_id(user_id)}]}, {"$set": {"name": name}})
@@ -2881,12 +2928,26 @@ def health():
 @app.route("/static/reports/<path:filename>")
 @role_required(["administrator", "analyst", "teacher"])
 def protected_report_download(filename):
+    report = reports_col.find_one(scoped_query({'name': filename}, 'created_by'))
+    if not report:
+        return jsonify(success=False, message='Report not found.'), 404
+    if report.get('csv_data') is not None:
+        return send_file(io.BytesIO(report['csv_data'].encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name=report['name'])
     return send_from_directory(REPORTS_DIR, filename, as_attachment=True)
 
 
 @app.route("/static/uploads/submissions/<path:filename>")
 @role_required(["administrator", "teacher"])
 def protected_submission_download(filename):
+    mark = student_marks_col.find_one({'file_path': filename})
+    if not mark:
+        return jsonify(success=False, message='Submission not found.'), 404
+    if session.get('role') != 'administrator':
+        assignment = assignments_col.find_one({'id': {'$in': [mark.get('assignment_id'), str(mark.get('assignment_id'))]}})
+        if not assignment or not owns(assignment, 'teacher_id'):
+            return jsonify(success=False, message='Submission not found.'), 404
+    if mark.get('file_data') is not None:
+        return send_file(io.BytesIO(bytes(mark['file_data'])), mimetype='application/octet-stream', as_attachment=True, download_name=secure_filename(filename))
     return send_from_directory(SUBMISSIONS_UPLOAD_DIR, filename, as_attachment=True)
 
 
