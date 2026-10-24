@@ -6,6 +6,21 @@ import mongomock
 from test_deployment import application, db
 
 class ReleaseWorkflows(unittest.TestCase):
+    def test_public_showcase_never_reads_account_data(self):
+        with patch('db.get_db',side_effect=AssertionError('Showcase must not read the database')):
+            response=application.app.test_client().get('/showcase')
+        self.assertEqual(response.status_code,200)
+        self.assertIn(b'6 synthetic profiles',response.data)
+        self.assertIn(b'grants no staff access',response.data)
+
+    def test_public_sample_csv_contains_only_fixed_fixtures(self):
+        with patch('db.get_db',side_effect=AssertionError('Sample CSV must not read the database')):
+            response=application.app.test_client().get('/showcase/sample.csv')
+        self.assertEqual(response.status_code,200)
+        self.assertIn('attachment',response.headers['Content-Disposition'])
+        self.assertIn(b'demo_001',response.data)
+        self.assertEqual(len(response.data.decode().strip().splitlines()),7)
+
     def setUp(self):
         db.client=mongomock.MongoClient()
         self.client=application.app.test_client()

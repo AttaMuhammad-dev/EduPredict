@@ -9,6 +9,8 @@ A Python/Flask educational analytics portfolio application with role-based dashb
 
 Public registration creates a student account. Student profile and dashboard flows are available; staff analytics and reports require the corresponding role. No default administrator accounts are created. Email delivery is disabled. Use invented sample information only.
 
+The public [synthetic showcase](https://edupredict-demo.vercel.app/showcase) demonstrates the analyst/teacher/student workflow with six fixed fixtures and a sample CSV download. It does not connect to account data or grant staff access. The homepage describes the actual Flask/MongoDB demo rather than claiming a live distributed Hadoop service.
+
 The prediction models use generated data, and the risk score is a heuristic. These examples do not establish real-world predictive accuracy and must not be used to determine student outcomes.
 
 ## Run locally
@@ -36,7 +38,7 @@ pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
 ```
 
-Twenty-two isolated checks cover public/student access, staff ownership, durable uploads/reports/attachments, assigned-cohort submission and grading, revoked roles, password-session invalidation, malformed requests, cross-origin changes and synthetic predictions. Each test uses a new in-memory database. Live checks on 24 October also passed student registration, sign-in/out, profile save/read and denial of staff prediction access. Elevated staff workflows were exercised with synthetic fixtures in isolation; this does not establish real-world prediction accuracy or email delivery.
+Twenty-four isolated checks cover public/student access, staff ownership, durable uploads/reports/attachments, assigned-cohort submission and grading, revoked roles, password-session invalidation, malformed requests, cross-origin changes and synthetic predictions. Each test uses a new in-memory database. Live checks on 24 October also passed student registration, sign-in/out, profile save/read and denial of staff prediction access. Elevated staff workflows were exercised with synthetic fixtures in isolation; this does not establish real-world prediction accuracy or email delivery.
 
 ## Source and attribution
 

@@ -47,6 +47,8 @@ from db import (
 )
 
 app = Flask(__name__)
+from showcase import showcase
+app.register_blueprint(showcase)
 install_release_safety(app)
 app.secret_key = SECRET_KEY
 app.config["MONGO_URI"] = MONGO_URI
